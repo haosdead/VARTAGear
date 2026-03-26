@@ -30,25 +30,24 @@ function loadCSV() {
         header: true,
         skipEmptyLines: true,
         complete: function(res) {
-            // Очищення та підготовка даних
             allProducts = res.data.filter(p => p.Name).map((p, i) => ({
                 ...p,
                 myUniqueId: i,
-                Price: parseFloat(p.Price) || 0
+                Price: parseFloat(p.Price) || 0,
+                // Додаємо захист: якщо Badge порожній, робимо його порожнім рядком
+                Badge: p.Badge ? p.Badge.trim().toUpperCase() : "" 
             }));
 
-            // Сортування: Товари з Badge 'SALE' завжди зверху
+            // Сортування: SALE завжди зверху
             allProducts.sort((a, b) => {
-                const aSale = a.Badge?.toUpperCase() === 'SALE' ? 1 : 0;
-                const bSale = b.Badge?.toUpperCase() === 'SALE' ? 1 : 0;
-                return bSale - aSale;
+                if (a.Badge === 'SALE' && b.Badge !== 'SALE') return -1;
+                if (a.Badge !== 'SALE' && b.Badge === 'SALE') return 1;
+                return 0;
             });
 
             filteredProducts = [...allProducts];
-            
-            generateCategoryFilters(); // Створюємо список категорій у меню
-            renderCatalog();           // Малюємо товари
-            checkUrlHash();            // Перевіряємо, чи немає посилання на конкретний товар
+            renderCatalog();
+            generateCategoryFilters();
         }
     });
 }

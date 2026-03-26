@@ -3,186 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VARTA GEAR | Магазин тактичного спорядження</title>
-    
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="VARTA GEAR — Твій надійний тил">
-    <meta property="og:description" content="Якісне екіпірування, взуття та амуніція. Швидка відправка по Україні.">
-    <meta property="og:image" content="1000020364.webp">
-
+    <title>VARTA GEAR | Магазин спорядження</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=1.1">
+    <link rel="stylesheet" href="style.css?v=2.0">
 </head>
 <body>
 
 <div id="body-overlay"></div>
 
-<header>
-    <div class="nav-container">
-        <div class="nav-left">
-            <button onclick="toggleMobileMenu(true)" class="menu-toggle"><i class="fas fa-bars"></i></button>
-        </div>
-        <a href="/" class="logo">
-            <img src="1000020364.webp" alt="VARTA GEAR" class="logo-img">
+<header class="main-header">
+    <div class="header-container">
+        <button onclick="toggleMobileMenu(true)" class="icon-btn"><i class="fas fa-bars"></i></button>
+        <a href="/" class="brand-logo">
+            <img src="1000020364.webp" alt="VARTA GEAR">
         </a>
-        <div class="nav-right">
-            <div onclick="toggleCart(true)" class="cart-trigger">
-                <i class="fas fa-shopping-cart"></i> <span id="cart-count">0</span>
-            </div>
-        </div>
+        <button onclick="toggleCart(true)" class="icon-btn cart-btn">
+            <i class="fas fa-shopping-bag"></i>
+            <span id="cart-count">0</span>
+        </button>
     </div>
 </header>
 
-<div id="mobile-menu">
-    <div class="menu-header">
-        <img src="1000020364.webp" alt="VARTA GEAR" style="height:30px;">
-        <span onclick="toggleMobileMenu(false)" class="close-menu">✕</span>
-    </div>
-    <div class="filters-panel">
-        <h3>Пошук та фільтри</h3>
-        <input type="text" id="search" placeholder="Назва або артикул..." oninput="resetPageAndFilter()">
-        <select id="filter-cat"><option value="">Усі категорії</option></select>
-        <select id="filter-subcat" onchange="resetPageAndFilter()" disabled><option value="">Усі підкатегорії</option></select>
-        <button onclick="resetFilters(); toggleMobileMenu(false);" class="btn-buy" style="background:#333; box-shadow: 0 4px 0 #1a1a1a;">Скинути все</button>
-    </div>
-</div>
-
-<main class="main-content">
-    <div class="fast-filters">
-        <button class="f-btn active" onclick="filterByBadge('all', this)">Всі товари</button>
-        <button class="f-btn sale" onclick="filterByBadge('sale', this)"><i class="fas fa-percentage"></i> Акції</button>
-        <button class="f-btn top" onclick="filterByBadge('top', this)"><i class="fas fa-fire"></i> ТОП</button>
-    </div>
-
-    <div class="catalog" id="catalog">
-        <div style="grid-column: 1/-1; text-align: center; padding: 50px;">Завантаження товарів...</div>
-    </div>
-
-    <div class="pagination" id="pagination"></div>
-
-    <section class="trust-features">
-        <div class="feature-item">
-            <i class="fas fa-shield-alt"></i>
-            <div class="feature-text"><h4>Без ризику</h4><p>Післяплата (накладний платіж)</p></div>
+<main>
+    <section class="hero-banner">
+        <div class="hero-content">
+            <h1>VARTA GEAR</h1>
+            <p>Твій надійний тил та професійне спорядження</p>
         </div>
-        <div class="feature-item">
-            <i class="fas fa-exchange-alt"></i>
-            <div class="feature-text"><h4>Легкий обмін</h4><p>Обміняємо розмір за 2 дні</p></div>
-        </div>
-        <div class="feature-item">
-            <i class="fas fa-check-circle"></i>
-            <div class="feature-text"><h4>Якість VARTA</h4><p>Перевірка перед відправкою</p></div>
-        </div>
+    </section>
+
+    <div class="filter-bar">
+        <button class="f-tag active" onclick="filterByBadge('all', this)">Все</button>
+        <button class="f-tag" onclick="filterByBadge('sale', this)">🔥 Акції</button>
+        <button class="f-tag" onclick="filterByBadge('top', this)">⭐ ТОП</button>
+    </div>
+
+    <div class="catalog-grid" id="catalog"></div>
+    <div id="pagination" class="pagination-container"></div>
+
+    <section class="benefits-row">
+        <div class="benefit-item"><i class="fas fa-shield-alt"></i> <span>Післяплата</span></div>
+        <div class="benefit-item"><i class="fas fa-sync"></i> <span>Обмін 2 дні</span></div>
+        <div class="benefit-item"><i class="fas fa-check-double"></i> <span>Якість VARTA</span></div>
     </section>
 
     <section class="reviews-section">
-        <h2 class="section-title">Відгуки в <span class="accent-text">Social Media</span></h2>
-        <div class="reviews-grid">
-            <div class="review-card"><div class="review-platform"><i class="fab fa-instagram"></i></div><img src="review1.jpg" alt="Review"></div>
-            <div class="review-card"><div class="review-platform"><i class="fab fa-tiktok"></i></div><img src="review2.jpg" alt="Review"></div>
-            <div class="review-card"><div class="review-platform"><i class="fab fa-instagram"></i></div><img src="review3.jpg" alt="Review"></div>
-        </div>
-        <div style="text-align: center; margin-top: 30px;">
-            <a href="https://instagram.com/vartagear" target="_blank" class="btn-inst-main"><i class="fab fa-instagram"></i> Більше в Instagram</a>
-        </div>
-    </section>
-
-    <section class="faq-section">
-        <h2 class="section-title">Часті <span class="accent-text">запитання</span></h2>
-        <div class="faq-container">
-            <div class="faq-item">
-                <div class="faq-question">Як підібрати розмір? <i class="fas fa-chevron-down"></i></div>
-                <div class="faq-answer">Поміряйте довжину вашої устілки в см. Це найнадійніший спосіб. Ми допоможемо звіритись із сіткою постачальника.</div>
+        <h2 class="section-title">Відгуки клієнтів</h2>
+        <div class="reviews-slider">
+            <div class="review-card">
+                <div class="rev-header"><i class="fab fa-instagram"></i> <span>@andriy_soldier</span></div>
+                <img src="review1.jpg" alt="Відгук">
             </div>
-            <div class="faq-item">
-                <div class="faq-question">Чи є повернення? <i class="fas fa-chevron-down"></i></div>
-                <div class="faq-answer">Так, ви можете обміняти або повернути товар протягом 14 днів, якщо він не був у використанні.</div>
+            <div class="review-card">
+                <div class="rev-header"><i class="fab fa-tiktok"></i> <span>@varta_user</span></div>
+                <img src="review2.jpg" alt="Відгук">
+            </div>
+            <div class="review-card">
+                <div class="rev-header"><i class="fab fa-instagram"></i> <span>@military_gear</span></div>
+                <img src="review3.jpg" alt="Відгук">
             </div>
         </div>
     </section>
 </main>
 
-<div id="cart-sidebar">
-    <div class="cart-header"><h3>Кошик</h3><span onclick="toggleCart(false)" class="close-cart">✕</span></div>
-    <div id="cart-content">Порожньо</div>
-    <div class="cart-footer" id="cart-footer" style="display:none;">
-        <div class="cart-total">Разом: <span id="cart-total-price">0</span> грн</div>
-        <div class="order-form">
-            <input type="text" id="cust-name" placeholder="ПІБ отримувача">
-            <input type="tel" id="cust-phone" placeholder="Номер телефону">
+<div id="mobile-menu" class="side-panel">
+    <div class="panel-header">
+        <h3>Пошук</h3>
+        <span onclick="toggleMobileMenu(false)">✕</span>
+    </div>
+    <div class="search-box">
+        <input type="text" id="search" placeholder="Назва або артикул..." oninput="resetPageAndFilter()">
+    </div>
+    <div id="categories-list" class="cat-menu"></div>
+    <button class="reset-btn" onclick="resetFilters()">Скинути все</button>
+</div>
+
+<div id="cart-sidebar" class="side-panel right">
+    <div class="panel-header">
+        <h3>Кошик</h3>
+        <span onclick="toggleCart(false)">✕</span>
+    </div>
+    <div id="cart-content" class="cart-list"></div>
+    <div id="cart-footer" class="cart-footer" style="display:none;">
+        <div class="total">Разом: <span id="cart-total-price">0</span> грн</div>
+        <div class="checkout-form">
+            <input type="text" id="cust-name" placeholder="ПІБ">
+            <input type="tel" id="cust-phone" placeholder="Телефон">
             <input type="text" id="cust-city" placeholder="Місто">
-            <input type="text" id="cust-post" placeholder="№ відділення / Поштомат">
-            <div class="payment-methods">
-                <label class="pay-option"><input type="radio" name="pay-method" value="Післяоплата НП" checked><span>Післяоплата</span></label>
-                <label class="pay-option"><input type="radio" name="pay-method" value="Повна оплата (Безкоштовна доставка)"><span>Повна оплата (Доставка 0 грн)</span></label>
+            <input type="text" id="cust-post" placeholder="Відділення Нової Пошти">
+            <div class="pay-methods">
+                <label><input type="radio" name="pay-method" value="Післяоплата" checked> Післяоплата</label>
+                <label><input type="radio" name="pay-method" value="Повна оплата"> Повна оплата</label>
             </div>
         </div>
-        <div class="order-btns">
-            <button class="btn-tg" onclick="checkout('tg')"><i class="fab fa-telegram"></i> Telegram</button>
-            <button class="btn-wa" onclick="checkout('wa')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-        </div>
+        <button class="order-btn" onclick="checkout('tg')">Оформити в Telegram</button>
     </div>
 </div>
 
 <div id="product-modal" class="modal">
-    <div class="modal-content">
-        <span onclick="closeModal()" class="close-modal">✕</span>
+    <div class="modal-inner">
+        <span class="modal-close" onclick="closeModal()">✕</span>
         <div class="modal-grid">
             <div class="modal-gallery">
-                <div class="swiper-container">
-                    <img id="modal-main-img" src="" alt="">
-                    <button class="prev-pic" onclick="changeModalPic(-1)">❮</button>
-                    <button class="next-pic" onclick="changeModalPic(1)">❯</button>
-                </div>
-                <div id="modal-thumbnails" class="thumbnails"></div>
+                <img id="modal-main-img" src="">
+                <div id="modal-thumbnails" class="thumbs"></div>
             </div>
-            <div class="modal-info">
-                <div id="modal-subcat" class="subcat-label"></div>
+            <div class="modal-details">
                 <h2 id="modal-name"></h2>
-                <div class="modal-price-block">
-                    <span id="modal-old-price" class="old-price"></span>
-                    <span id="modal-price" class="price"></span>
-                </div>
+                <div class="modal-price" id="modal-price"></div>
                 <p id="modal-desc"></p>
-                <div id="modal-vendor" class="vendor-code"></div>
-                <select id="modal-size-selector" class="size-selector"></select>
-                <button id="modal-add-btn" class="btn-buy">До кошика</button>
+                <select id="modal-size-selector" class="size-select"></select>
+                <button id="modal-add-btn" class="main-buy-btn">Додати в кошик</button>
             </div>
         </div>
     </div>
 </div>
 
-<footer class="site-footer">
-    <div class="footer-container">
-        <div class="footer-section">
-            <img src="1000020364.webp" alt="VARTA GEAR" class="footer-logo">
-            <div class="schedule">
-                <h4>Графік роботи:</h4>
-                <p><span>ПН - ПТ:</span> 09:00 - 20:00</p>
-                <p><span>СБ - НД:</span> 11:00 - 16:00</p>
-            </div>
-        </div>
-        <div class="footer-section">
-            <h4>Клієнтам</h4>
-            <ul class="footer-links">
-                <li><a href="#" onclick="openReviews()">Залишити відгук</a></li>
-                <li><a href="#catalog">Каталог</a></li>
-            </ul>
-        </div>
-        <div class="footer-section">
-            <h4>Контакти</h4>
-            <div class="social-grid">
-                <a href="https://t.me/vartagear" class="social-card tg"><i class="fab fa-telegram-plane"></i><span>Telegram</span></a>
-                <a href="https://instagram.com/vartagear.ua" class="social-card inst"><i class="fab fa-instagram"></i><span>Insta</span></a>
-                <a href="https://tiktok.com/@vartagearua" class="social-card tt"><i class="fab fa-tiktok"></i><span>TikTok</span></a>
-                <a href="https://wa.me/380933923810" class="social-card wa"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></a>
-            </div>
-        </div>
+<footer class="footer">
+    <div class="footer-links">
+        <a href="https://t.me/vartagear"><i class="fab fa-telegram"></i></a>
+        <a href="https://instagram.com/vartagear.ua"><i class="fab fa-instagram"></i></a>
     </div>
-    <div class="footer-bottom"><p>&copy; 2026 VARTA GEAR. Слава Україні! 🇺🇦</p></div>
+    <p>&copy; 2026 VARTA GEAR. Слава Україні! 🇺🇦</p>
 </footer>
 
-<script src="script.js?v=1.1"></script>
+<script src="script.js?v=2.0"></script>
 </body>
 </html>
