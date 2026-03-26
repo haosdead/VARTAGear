@@ -131,3 +131,88 @@ body {
     width: 40px; height: 40px; border-radius: 8px; cursor: pointer;
 }
 .page-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+/* Карусель у модалці */
+.slider-main {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1/1;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.slider-main img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    transition: 0.3s;
+}
+
+.slider-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    padding: 15px 10px;
+    cursor: pointer;
+    font-size: 20px;
+    z-index: 10;
+    border-radius: 4px;
+}
+.slider-nav:hover { background: var(--accent); color: #000; }
+.prev { left: 5px; }
+.next { right: 5px; }
+
+/* Мініатюри */
+.thumb-list {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+}
+.thumb-list img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    opacity: 0.6;
+}
+.thumb-list img:hover { opacity: 1; border-color: var(--accent); }
+
+/* Красива обводка для опису */
+.desc-card {
+    background: #1a1a1a;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent); /* Зелена полоска збоку */
+    border-radius: 12px;
+    margin: 20px 0;
+    overflow: hidden;
+}
+.desc-header {
+    background: #222;
+    padding: 10px 15px;
+    font-weight: 800;
+    font-size: 13px;
+    text-transform: uppercase;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+}
+.desc-body {
+    padding: 15px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #ccc;
+    max-height: 250px;
+    overflow-y: auto;
+}
+/* Кастомізація скролбару опису */
+.desc-body::-webkit-scrollbar { width: 4px; }
+.desc-body::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }

@@ -70,29 +70,39 @@
 </aside>
 
 <div id="product-modal" class="modal">
-    <div class="modal-card">
-        <button class="modal-close-top" onclick="closeModal()">✕</button>
-        <div class="modal-body">
-            <div class="modal-visuals">
-                <div class="modal-main-frame">
+    <div class="modal-wrap">
+        <span class="modal-close" onclick="closeModal()">✕</span>
+        <div class="modal-content">
+            
+            <div class="modal-preview">
+                <div class="slider-main">
+                    <button class="slider-nav prev" onclick="changeModalPic(-1)">❮</button>
                     <img id="modal-main-img" src="" alt="">
+                    <button class="slider-nav next" onclick="changeModalPic(1)">❯</button>
                 </div>
-                <div id="modal-thumbnails" class="modal-thumbs-row"></div>
+                <div id="modal-thumbnails" class="thumb-list"></div>
             </div>
-            <div class="modal-text-info">
+
+            <div class="modal-info">
                 <h2 id="modal-name"></h2>
-                <div class="modal-prices">
-                    <span id="modal-old-price" class="price-old"></span>
-                    <span id="modal-price" class="price-new"></span>
-                </div>
-                <div id="modal-desc" class="product-description"></div>
                 
-                <div class="modal-order-block">
+                <div class="modal-price-row">
+                    <span id="modal-old-price" class="old-p"></span>
+                    <span id="modal-price" class="new-p"></span>
+                </div>
+
+                <div class="desc-card">
+                    <div class="desc-header">Характеристики та опис</div>
+                    <div id="modal-desc" class="desc-body"></div>
+                </div>
+
+                <div class="modal-actions">
                     <label>Оберіть розмір:</label>
-                    <select id="modal-size-selector" class="size-dropdown"></select>
-                    <button id="modal-add-btn" class="add-to-cart-btn">ДОДАТИ В КОШИК</button>
+                    <select id="modal-size-selector" class="size-select"></select>
+                    <button id="modal-add-btn" class="btn-add">ДОДАТИ В КОШИК</button>
                 </div>
             </div>
+            
         </div>
     </div>
 </div>
