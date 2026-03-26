@@ -15,7 +15,7 @@
 <header class="header">
     <div class="header-inner">
         <button class="nav-icon" onclick="toggleMobileMenu(true)"><i class="fas fa-bars"></i></button>
-        <div class="brand">VARTA GEAR</div>
+        <div class="logo">VARTA <span class="accent-text">GEAR</span></div>
         <button class="nav-icon" onclick="toggleCart(true)">
             <i class="fas fa-shopping-bag"></i>
             <span id="cart-count">0</span>
@@ -28,92 +28,70 @@
         <h3>КАТЕГОРІЇ</h3>
         <button class="close-btn" onclick="toggleMobileMenu(false)">✕</button>
     </div>
-    
     <div class="search-container">
-        <input type="text" id="search" placeholder="Пошук товару..." oninput="resetPageAndFilter()">
+        <input type="text" id="search-input" placeholder="Пошук (назва, арт)..." oninput="resetPageAndFilter()">
     </div>
-
-    <nav id="category-tree" class="category-tree">
-        </nav>
-    
-    <button class="reset-filters-btn" onclick="resetFilters()">Показати всі товари</button>
+    <nav id="category-tree" class="category-tree"></nav>
+    <button class="reset-filters-btn" onclick="resetFilters()">Скинути все</button>
 </aside>
 
 <main class="main-container">
     <div class="quick-filters">
         <button class="filter-tag active" onclick="filterByBadge('all', this)">Всі</button>
-        <button class="filter-tag sale" onclick="filterByBadge('SALE', this)">🔥 SALE</button>
-        <button class="filter-tag top" onclick="filterByBadge('TOP', this)">⭐ ТОП</button>
+        <button class="filter-tag sale-tag-btn" onclick="filterByBadge('SALE', this)">🔥 SALE</button>
+        <button class="filter-tag top-tag-btn" onclick="filterByBadge('TOP', this)">⭐ ТОП</button>
     </div>
 
     <div id="catalog" class="products-grid"></div>
-    
     <div id="pagination" class="pagination-bar"></div>
 </main>
 
 <aside id="cart-sidebar" class="side-panel right">
-    <div class="panel-header">
-        <h3>КОШИК</h3>
-        <button class="close-btn" onclick="toggleCart(false)">✕</button>
-    </div>
+    <div class="panel-header"><h3>КОШИК</h3><button class="close-btn" onclick="toggleCart(false)">✕</button></div>
     <div id="cart-content" class="cart-items-list"></div>
     <div id="cart-footer" class="cart-bottom" style="display:none;">
         <div class="cart-sum">Разом: <span id="cart-total-price">0</span> грн</div>
-        <div class="checkout-inputs">
-            <input type="text" id="cust-name" placeholder="Ваше ПІБ">
-            <input type="tel" id="cust-phone" placeholder="Номер телефону">
-            <input type="text" id="cust-city" placeholder="Місто">
-            <input type="text" id="cust-post" placeholder="Відділення Нової Пошти">
+        <div class="checkout-btns">
+            <button class="btn-tg" onclick="checkout('tg')"><i class="fab fa-telegram"></i> Telegram</button>
+            <button class="btn-wa" onclick="checkout('wa')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
         </div>
-        <button class="checkout-btn" onclick="checkout('tg')">ЗАМОВИТИ У TELEGRAM</button>
     </div>
 </aside>
 
 <div id="product-modal" class="modal">
-    <div class="modal-wrap">
-        <span class="modal-close" onclick="closeModal()">✕</span>
+    <div class="modal-dialog">
         <div class="modal-content">
-            
-            <div class="modal-preview">
-                <div class="slider-main">
-                    <button class="slider-nav prev" onclick="changeModalPic(-1)">❮</button>
-                    <img id="modal-main-img" src="" alt="">
-                    <button class="slider-nav next" onclick="changeModalPic(1)">❯</button>
-                </div>
-                <div id="modal-thumbnails" class="thumb-list"></div>
-            </div>
-
-            <div class="modal-info">
+            <div class="modal-header">
                 <h2 id="modal-name"></h2>
-                
-                <div class="modal-price-row">
-                    <span id="modal-old-price" class="old-p"></span>
-                    <span id="modal-price" class="new-p"></span>
+                <span class="close-modal" onclick="closeModal()">✕</span>
+            </div>
+            <div class="modal-body-top">
+                <div class="modal-photo-container">
+                    <button class="nav-pic prev" onclick="changeModalPic(-1)">❮</button>
+                    <img id="modal-main-img" src="" alt="">
+                    <button class="nav-pic next" onclick="changeModalPic(1)">❯</button>
                 </div>
-
-                <div class="desc-card">
-                    <div class="desc-header">Характеристики та опис</div>
-                    <div id="modal-desc" class="desc-body"></div>
-                </div>
-
-                <div class="modal-actions">
-                    <label>Оберіть розмір:</label>
-                    <select id="modal-size-selector" class="size-select"></select>
-                    <button id="modal-add-btn" class="btn-add">ДОДАТИ В КОШИК</button>
+                <div class="modal-actions-area">
+                    <div id="modal-thumbnails" class="thumb-list"></div>
+                    <div class="modal-price-block">
+                        <span id="modal-old-price" class="old-price"></span>
+                        <span id="modal-price" class="current-price"></span>
+                    </div>
+                    <div class="selector-block">
+                        <label>Розмір:</label>
+                        <select id="modal-size-selector" class="size-dropdown"></select>
+                    </div>
+                    <button id="modal-add-btn" class="add-to-cart-btn">ДОДАТИ В КОШИК</button>
                 </div>
             </div>
-            
+            <div class="modal-description-bottom">
+                <h3>Опис та характеристики</h3>
+                <div id="modal-desc"></div>
+                <div id="modal-vendor" class="vendor-label"></div>
+            </div>
         </div>
     </div>
 </div>
-
-<footer class="main-footer">
-    <div class="footer-trust">
-        <div class="trust-box"><i class="fas fa-undo"></i> <span>Легкий обмін</span></div>
-        <div class="trust-box"><i class="fas fa-shield-alt"></i> <span>Післяплата</span></div>
-    </div>
-    <p>© 2026 VARTA GEAR. Слава Україні!</p>
-</footer>
 
 <script src="script.js"></script>
 </body>
