@@ -1,0 +1,139 @@
+:root {
+    --olive: #556b2f;
+    --dark-olive: #3b4a20;
+    --khaki: #bdb76b;
+    --black: #1a1a1a;
+    --gray: #2c2c2c;
+    --white: #f5f5f5;
+    --accent: #8b4513;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+
+body {
+    background-color: var(--black);
+    color: var(--white);
+    background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+}
+
+header {
+    background: var(--dark-olive);
+    padding: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    border-bottom: 2px solid var(--olive);
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo { font-weight: bold; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; }
+.cart-trigger { cursor: pointer; font-size: 1.2rem; }
+
+.filters {
+    max-width: 1200px;
+    margin: 1rem auto;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+input, select {
+    padding: 12px;
+    background: var(--gray);
+    border: 1px solid var(--olive);
+    color: white;
+    border-radius: 4px;
+    outline: none;
+}
+
+input:focus { border-color: var(--khaki); }
+
+.catalog {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.card {
+    background: var(--gray);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s, border-color 0.3s;
+    border: 1px solid #444;
+    display: flex;
+    flex-direction: column;
+}
+
+.card:hover { transform: translateY(-5px); border-color: var(--olive); }
+
+.card-img-container {
+    width: 100%;
+    height: 250px;
+    background: #000;
+    position: relative;
+    cursor: pointer;
+}
+
+.card img { width: 100%; height: 100%; object-fit: cover; }
+
+.card-body { padding: 15px; flex-grow: 1; }
+.price { color: var(--khaki); font-size: 1.25rem; font-weight: bold; margin: 10px 0; }
+.old-price { text-decoration: line-through; color: #888; font-size: 0.9rem; margin-right: 10px; }
+
+.size-selector { margin-top: 10px; width: 100%; padding: 8px; }
+
+.btn-buy {
+    background: var(--olive);
+    color: white;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    margin-top: 15px;
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: 0.3s;
+}
+
+.btn-buy:hover { background: var(--dark-olive); }
+
+#cart-sidebar {
+    position: fixed;
+    right: -100%;
+    top: 0;
+    width: 350px;
+    height: 100%;
+    background: var(--gray);
+    z-index: 2000;
+    transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 20px;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+    border-left: 2px solid var(--olive);
+}
+
+#cart-sidebar.active { right: 0; }
+
+.cart-item { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #444; }
+
+.order-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+.btn-tg { background: #0088cc; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.btn-wa { background: #25d366; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+
+.btn-close { margin-top: 20px; background: none; color: #888; border: none; cursor: pointer; width: 100%; text-align: center; }
+
+@media (max-width: 600px) {
+    #cart-sidebar { width: 100%; }
+    .logo { font-size: 1.1rem; }
+}
