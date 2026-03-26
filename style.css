@@ -1,166 +1,133 @@
 :root {
-    --primary: #a2d24a;
-    --dark: #0a0a0a;
-    --card: #151515;
-    --border: #222;
-    --text: #ffffff;
-    --gray: #888;
+    --accent: #a2d24a;
+    --sale-color: #ff3300;
+    --bg: #0a0a0a;
+    --card-bg: #161616;
+    --border: #282828;
+    --text-main: #ffffff;
+    --text-dim: #a0a0a0;
 }
 
-body {
-    background: var(--dark);
-    color: var(--text);
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
+* { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+body { 
+    background: var(--bg); color: var(--text-main); 
+    font-family: 'Inter', -apple-system, sans-serif; margin: 0; 
 }
 
-/* Шапка */
-.main-header {
-    background: rgba(0,0,0,0.9);
-    padding: 10px 20px;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+/* Header */
+.header {
+    background: rgba(0,0,0,0.9); height: 65px;
     border-bottom: 1px solid var(--border);
-    backdrop-filter: blur(10px);
+    position: sticky; top: 0; z-index: 1000; padding: 0 15px;
+    display: flex; align-items: center; backdrop-filter: blur(10px);
 }
-
-.header-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.header-inner {
+    width: 100%; max-width: 1200px; margin: 0 auto;
+    display: flex; justify-content: space-between; align-items: center;
 }
-
-.brand-logo img {
-    height: 45px;
-    width: auto;
+.brand { font-weight: 900; font-size: 22px; letter-spacing: 1px; color: var(--accent); }
+.nav-icon { 
+    background: none; border: none; color: #fff; font-size: 22px; 
+    cursor: pointer; position: relative; padding: 5px;
 }
-
-.icon-btn {
-    background: var(--card);
-    border: 1px solid var(--border);
-    color: white;
-    padding: 10px;
-    border-radius: 10px;
-    cursor: pointer;
-    position: relative;
-}
-
 #cart-count {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: var(--primary);
-    color: black;
-    font-size: 10px;
-    font-weight: bold;
-    padding: 2px 6px;
-    border-radius: 10px;
+    position: absolute; top: 0; right: 0; background: var(--sale-color);
+    font-size: 10px; width: 18px; height: 18px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
 }
 
-/* Банер */
-.hero-banner {
-    height: 300px;
-    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('1000020364.webp');
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+/* Catalog Grid */
+.products-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 12px; padding: 15px; max-width: 1200px; margin: 0 auto;
 }
-
-/* Сітка товарів */
-.catalog-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 15px;
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
 @media (min-width: 768px) {
-    .catalog-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; }
+    .products-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; }
 }
 
 .card {
-    background: var(--card);
-    border-radius: 15px;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    transition: 0.3s;
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; transition: 0.3s;
+    display: flex; flex-direction: column; cursor: pointer;
+}
+.card:hover { border-color: var(--accent); transform: translateY(-4px); }
+
+.card-img-wrap { width: 100%; aspect-ratio: 1/1; position: relative; background: #000; }
+.card-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+
+.badge-sale {
+    position: absolute; top: 10px; left: 10px;
+    background: var(--sale-color); color: #fff;
+    font-weight: 900; padding: 5px 12px; border-radius: 4px; font-size: 14px;
 }
 
-.card img {
-    width: 100%;
-    aspect-ratio: 1/1;
-    object-fit: cover;
-}
+.card-info { padding: 12px; flex-grow: 1; display: flex; flex-direction: column; }
+.card-info small { color: var(--accent); font-weight: 600; text-transform: uppercase; font-size: 10px; }
+.card h4 { margin: 8px 0; font-size: 14px; line-height: 1.4; height: 40px; overflow: hidden; }
+.price-box { font-size: 18px; font-weight: 800; color: #fff; margin-top: auto; }
 
-.card-body { padding: 12px; }
-.card h4 { font-size: 14px; margin: 5px 0; height: 40px; overflow: hidden; }
-
-/* Відгуки */
-.reviews-section { padding: 40px 20px; background: #0d0d0d; }
-.reviews-slider {
-    display: flex;
-    overflow-x: auto;
-    gap: 15px;
-    padding-bottom: 20px;
-}
-
-.review-card {
-    min-width: 250px;
-    background: var(--card);
-    border-radius: 15px;
-    padding: 10px;
-    border: 1px solid var(--border);
-}
-
-.review-card img { width: 100%; border-radius: 10px; }
-.rev-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 12px; color: var(--gray); }
-
-/* Модальне вікно */
-.modal-inner {
-    background: var(--dark);
-    max-width: 900px;
-    width: 95%;
-    border-radius: 20px;
-    padding: 20px;
-    position: relative;
-    border: 1px solid var(--border);
-}
-
-.modal-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
-@media (min-width: 768px) { .modal-grid { grid-template-columns: 1fr 1fr; } }
-
-/* Кнопки */
-.main-buy-btn {
-    background: var(--primary);
-    color: black;
-    border: none;
-    padding: 15px;
-    width: 100%;
-    border-radius: 12px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
+/* Side Panels */
 .side-panel {
-    position: fixed;
-    top: 0;
-    left: -100%;
-    width: 300px;
-    height: 100%;
-    background: var(--card);
-    z-index: 2000;
-    transition: 0.4s;
-    padding: 20px;
+    position: fixed; top: 0; left: -100%; width: 320px; height: 100%;
+    background: #111; z-index: 2000; transition: 0.4s; padding: 20px;
+    border-right: 1px solid var(--border);
+}
+.side-panel.active { left: 0; }
+.side-panel.right { left: auto; right: -100%; border-right: none; border-left: 1px solid var(--border); }
+.side-panel.right.active { right: 0; }
+#body-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1500; display: none; }
+#body-overlay.active { display: block; }
+
+/* Category Tree */
+.cat-item { margin-bottom: 15px; }
+.cat-name { 
+    display: block; font-weight: 800; padding: 10px; 
+    background: #1a1a1a; border-radius: 6px; color: var(--accent); cursor: pointer;
+}
+.sub-list { padding-left: 15px; margin-top: 5px; }
+.sub-item { padding: 8px 0; color: #ccc; cursor: pointer; border-bottom: 1px solid #222; font-size: 14px; }
+.sub-item:hover { color: var(--accent); }
+
+/* Modal FIX */
+.modal {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+    z-index: 3000; padding: 15px; align-items: center; justify-content: center;
+}
+.modal-card {
+    background: #111; width: 100%; max-width: 1000px; 
+    border-radius: 20px; overflow: hidden; position: relative; border: 1px solid var(--border);
+}
+.modal-body { display: flex; flex-direction: column; max-height: 90vh; overflow-y: auto; }
+@media (min-width: 768px) {
+    .modal-body { flex-direction: row; }
+    .modal-visuals { width: 50%; }
+    .modal-text-info { width: 50%; padding: 40px; }
 }
 
-.side-panel.open, .side-panel.active { left: 0; }
-.side-panel.right { left: auto; right: -100%; }
-.side-panel.right.active { right: 0; }
+.modal-main-frame { width: 100%; aspect-ratio: 1/1; background: #000; }
+.modal-main-frame img { width: 100%; height: 100%; object-fit: contain; }
+
+.modal-text-info { padding: 20px; }
+.price-new { font-size: 32px; font-weight: 900; color: var(--accent); }
+.price-old { text-decoration: line-through; color: #555; margin-right: 15px; font-size: 20px; }
+.product-description { line-height: 1.6; color: #bbb; margin: 20px 0; font-size: 14px; }
+
+/* Buttons & Tags */
+.filter-tag {
+    background: var(--card-bg); border: 1px solid var(--border); color: #fff;
+    padding: 8px 20px; border-radius: 50px; cursor: pointer; white-space: nowrap;
+}
+.filter-tag.active { border-color: var(--accent); color: var(--accent); }
+.quick-filters { display: flex; gap: 10px; overflow-x: auto; padding: 20px 15px; }
+
+.add-to-cart-btn {
+    background: var(--accent); color: #000; border: none; padding: 18px;
+    width: 100%; border-radius: 12px; font-weight: 900; cursor: pointer; margin-top: 20px;
+}
+
+.pagination-bar { display: flex; justify-content: center; gap: 8px; padding: 40px 0; flex-wrap: wrap; }
+.page-btn { 
+    background: #1a1a1a; border: 1px solid var(--border); color: #fff;
+    width: 40px; height: 40px; border-radius: 8px; cursor: pointer;
+}
+.page-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
