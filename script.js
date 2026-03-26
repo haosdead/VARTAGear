@@ -1,357 +1,343 @@
-let allProducts = [];
-let filteredProducts = [];
-let cart = [];
+// --- КОНФІГУРАЦІЯ ---
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTba0F9SbTUxpjBJ2uggBkP6iPNuEoWcc6-PhBRvQosa1sAqvJvEye_fQmeMFgoUl_6VCvq0WX8W--3/pub?gid=859081876&single=true&output=csv'; // Переконайся, що файл у папці або встав посилання на Google CSV
+const ITEMS_PER_PAGE = 10;
 
-// НАЛАШТУВАННЯ
-const CSV_URL = 'data.csv'; 
-const ITEMS_PER_PAGE = 10; // Тільки 10 товарів на сторінці
-let currentPage = 1;
-
-// Галерея модалки
-let currentModalPics = [];
+// Глобальні змінні стану
+let allProducts = [];      // Всі товари з бази
+let filteredProducts = []; // Товари після фільтрів та пошуку
+let cart = [];             // Кошик
+let currentPage = 1;       // Поточна сторінка
+let currentModalPics = []; // Картинки для галереї в модалці
 let currentModalPicIndex = 0;
 
-// Ініціалізація
+// --- ІНІЦІАЛІЗАЦІЯ ПРИ ЗАВАНТАЖЕННІ ---
 document.addEventListener('DOMContentLoaded', () => {
     loadCSV();
+    initFAQ();
+    
+    // Закриття всього при кліку на фон
+    document.getElementById('body-overlay').onclick = () => {
+        toggleMobileMenu(false);
+        toggleCart(false);
+        closeModal();
+    };
 });
 
+// --- РОБОТА З ДАНИМИ (CSV) ---
 function loadCSV() {
     Papa.parse(CSV_URL, {
         download: true,
         header: true,
-        complete: function(results) {
-            // Фільтруємо сміття
-            allProducts = results.data.filter(p => p.Name && p.Name.trim() !== "");
-            filteredProducts = [...allProducts]; // Спочатку показуємо все
+        skipEmptyLines: true,
+        complete: function(res) {
+            // Очищення та підготовка даних
+            allProducts = res.data.filter(p => p.Name).map((p, i) => ({
+                ...p,
+                myUniqueId: i,
+                Price: parseFloat(p.Price) || 0
+            }));
+
+            // Сортування: Товари з Badge 'SALE' завжди зверху
+            allProducts.sort((a, b) => {
+                const aSale = a.Badge?.toUpperCase() === 'SALE' ? 1 : 0;
+                const bSale = b.Badge?.toUpperCase() === 'SALE' ? 1 : 0;
+                return bSale - aSale;
+            });
+
+            filteredProducts = [...allProducts];
             
-            populateMainCategories();
-            renderCatalog();
+            generateCategoryFilters(); // Створюємо список категорій у меню
+            renderCatalog();           // Малюємо товари
+            checkUrlHash();            // Перевіряємо, чи немає посилання на конкретний товар
         }
     });
 }
 
-// ПАГІНАЦІЯ ТА ВИВІД
+// --- ВІДОБРАЖЕННЯ КАТАЛОГУ ---
 function renderCatalog() {
     const container = document.getElementById('catalog');
-    container.innerHTML = '';
+    if (!container) return;
+
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const items = filteredProducts.slice(start, start + ITEMS_PER_PAGE);
     
-    // Розрахунок товарів для поточної сторінки
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    const pageItems = filteredProducts.slice(startIndex, endIndex);
-
-    if (pageItems.length === 0) {
-        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #888;">Товарів не знайдено</div>';
-        renderPagination(0);
-        return;
+    if (items.length === 0) {
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #888;">Товарів не знайдено за вашим запитом.</div>`;
+    } else {
+        container.innerHTML = items.map(p => {
+            const pic = p.Pictures ? p.Pictures.split(',')[0].trim() : 'placeholder.jpg';
+            const badge = p.Badge ? `<div class="badge badge-${p.Badge.toLowerCase()}">${p.Badge === 'SALE' ? 'АКЦІЯ' : p.Badge}</div>` : '';
+            
+            return `
+                <div class="card" onclick="openModal(${p.myUniqueId})">
+                    <div class="card-img-container">
+                        ${badge}
+                        <img src="${pic}" alt="${p.Name}" loading="lazy">
+                    </div>
+                    <div class="card-body">
+                        <small style="color:var(--varta-lime)">${p.SubCategory || p.Category || 'Спорядження'}</small>
+                        <h4 style="margin:10px 0; min-height: 40px;">${p.Name}</h4>
+                        <div style="margin-bottom:15px">
+                            ${p.OldPrice ? `<span style="text-decoration:line-through; color:#666; margin-right:10px; font-size: 0.9rem;">${p.OldPrice}</span>` : ''}
+                            <b style="font-size:1.2rem; color: #fff;">${p.Price} грн</b>
+                        </div>
+                        <button class="btn-buy" onclick="event.stopPropagation(); openModal(${p.myUniqueId})">КУПИТИ</button>
+                    </div>
+                </div>`;
+        }).join('');
     }
-
-    pageItems.forEach((item) => {
-        // Знаходимо індекс оригінального товару
-        const originalIndex = allProducts.findIndex(p => p.VendorCode === item.VendorCode);
-        
-        const pics = item.Pictures ? item.Pictures.split(',') : [];
-        const mainPic = pics[0] || 'https://via.placeholder.com/400x400?text=No+Photo';
-
-        const card = document.createElement('div');
-        card.className = 'card';
-        // Клік на картку відкриває модалку
-        card.onclick = (e) => {
-            if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'SELECT') {
-                openModal(originalIndex);
-            }
-        };
-
-        card.innerHTML = `
-            <div class="card-img-container">
-                <img src="${mainPic.trim()}" alt="${item.Name}" loading="lazy">
-            </div>
-            <div class="card-body">
-                <div class="subcat-label">${item.SubCategory}</div>
-                <h4 class="card-name">${item.Name}</h4>
-                <div class="price-block">
-                    ${item.OldPrice ? `<span class="old-price">${item.OldPrice} грн</span>` : ''}
-                    <span class="price">${item.Price} грн</span>
-                </div>
-                <button class="btn-buy" onclick="addToCartFromCard(event, ${originalIndex})">Купити</button>
-            </div>
-        `;
-        container.appendChild(card);
-    });
-
-    renderPagination(filteredProducts.length);
+    
+    renderPagination();
 }
 
-function renderPagination(totalItems) {
-    const container = document.getElementById('pagination');
-    container.innerHTML = '';
-    
-    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-    
-    if (totalPages <= 1) return; // Не треба кнопок, якщо сторінка одна
+// --- ПАГІНАЦІЯ ---
+function renderPagination() {
+    const paginationContainer = document.getElementById('pagination');
+    if (!paginationContainer) return;
 
-    // Максимум 5 кнопок навколо поточної
-    let startPage = Math.max(1, currentPage - 2);
-    let endPage = Math.min(totalPages, startPage + 4);
-    
-    if (endPage - startPage < 4) {
-        startPage = Math.max(1, endPage - 4);
-    }
+    const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+    let html = '';
 
-    for (let i = startPage; i <= endPage; i++) {
-        const btn = document.createElement('button');
-        btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
-        btn.innerText = i;
-        btn.onclick = () => {
-            currentPage = i;
-            renderCatalog();
-            window.scrollTo({top: 0, behavior: 'smooth'});
-        };
-        container.appendChild(btn);
-    }
-}
-
-// ФІЛЬТРАЦІЯ ТА КАТЕГОРІЇ
-function populateMainCategories() {
-    const cats = [...new Set(allProducts.map(p => p.Category))].filter(Boolean).sort();
-    const select = document.getElementById('filter-cat');
-    cats.forEach(c => {
-        let opt = document.createElement('option');
-        opt.value = c; opt.innerText = c; select.appendChild(opt);
-    });
-}
-
-// Коли змінюється головна категорія, оновлюємо підкатегорії
-document.getElementById('filter-cat').addEventListener('change', function() {
-    const mainCat = this.value;
-    const subSelect = document.getElementById('filter-subcat');
-    subSelect.innerHTML = '<option value="">Усі підкатегорії</option>';
-    subSelect.disabled = true;
-
-    if (mainCat) {
-        const subCats = [...new Set(allProducts
-            .filter(p => p.Category === mainCat)
-            .map(p => p.SubCategory))]
-            .filter(Boolean).sort();
-        
-        if (subCats.length > 0) {
-            subCats.forEach(s => {
-                let opt = document.createElement('option');
-                opt.value = s; opt.innerText = s; subSelect.appendChild(opt);
-            });
-            subSelect.disabled = false;
+    if (totalPages > 1) {
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<button class="f-btn ${i === currentPage ? 'active' : ''}" 
+                     onclick="currentPage=${i}; renderCatalog(); window.scrollTo(0,0)">${i}</button>`;
         }
     }
-});
-
-function resetPageAndFilter() {
-    currentPage = 1; // Завжди повертаємось на 1 сторінку при пошуку
-    filterItems();
+    paginationContainer.innerHTML = html;
 }
 
-function filterItems() {
-    const q = document.getElementById('search').value.toLowerCase().trim();
-    const cat = document.getElementById('filter-cat').value;
-    const subcat = document.getElementById('filter-subcat').value;
-
-    filteredProducts = allProducts.filter(p => {
-        const name = (p.Name || "").toLowerCase();
-        const desc = (p.Description || "").toLowerCase();
-        const vendor = (p.VendorCode || "").toLowerCase();
-
-        // Пошук в назві, описі та артикулі
-        const matchSearch = q === "" || name.includes(q) || desc.includes(q) || vendor.includes(q);
-        const matchCat = cat === "" || p.Category === cat;
-        const matchSub = subcat === "" || p.SubCategory === subcat;
-        
-        return matchSearch && matchCat && matchSub;
-    });
+// --- МОДАЛЬНЕ ВІКНО ТА ГАЛЕРЕЯ ---
+function openModal(id) {
+    const p = allProducts.find(x => x.myUniqueId === id);
+    if (!p) return;
     
-    renderCatalog();
-}
-
-// МОДАЛЬНЕ ВІКНО ТА КАРУСЕЛЬ (Карусель з фото)
-function openModal(index) {
-    const item = allProducts[index];
-    if (!item) return;
-
-    // Інфо
-    document.getElementById('modal-name').innerText = item.Name;
-    document.getElementById('modal-subcat').innerText = item.SubCategory;
-    document.getElementById('modal-desc').innerText = item.Description || "Опис відсутній.";
-    document.getElementById('modal-price').innerText = `${item.Price} грн`;
-    document.getElementById('modal-old-price').innerText = item.OldPrice ? `${item.OldPrice} грн` : '';
-    document.getElementById('modal-vendor').innerText = `Арт: ${item.VendorCode}`;
-
-    // Розміри
-    const sizes = item.Sizes ? item.Sizes.split(',') : [];
-    const sizeSelect = document.getElementById('modal-size-selector');
-    sizeSelect.innerHTML = '<option value="">Оберіть розмір</option>';
-    sizes.forEach(s => {
-        let opt = document.createElement('option');
-        opt.value = s.trim(); opt.innerText = s.trim(); sizeSelect.appendChild(opt);
-    });
-
-    // Кнопка купити в модалці
-    const addBtn = document.getElementById('modal-add-btn');
-    addBtn.onclick = () => addToCartFromModal(index);
-
-    // Галерея / Карусель
-    currentModalPics = item.Pictures ? item.Pictures.split(',').map(p => p.trim()) : [];
+    // Оновлюємо URL для Deep Linking
+    window.location.hash = p.VendorCode || id;
+    
+    document.getElementById('modal-name').innerText = p.Name;
+    document.getElementById('modal-price').innerText = p.Price + ' грн';
+    document.getElementById('modal-desc').innerText = p.Description || 'Детальний опис товару уточнюйте у менеджера.';
+    
+    // Налаштування розмірів
+    const sizes = p.Sizes ? p.Sizes.split(',') : [];
+    const sizeSelector = document.getElementById('modal-size-selector');
+    if (sizes.length > 0 && sizes[0] !== "") {
+        sizeSelector.style.display = 'block';
+        sizeSelector.innerHTML = '<option value="">Оберіть розмір</option>' + 
+            sizes.map(s => `<option value="${s.trim()}">${s.trim()}</option>`).join('');
+    } else {
+        sizeSelector.style.display = 'none';
+        sizeSelector.innerHTML = '<option value="Без розміру">Стандарт</option>';
+    }
+    
+    // Налаштування галереї
+    currentModalPics = p.Pictures ? p.Pictures.split(',').map(s => s.trim()) : [];
     currentModalPicIndex = 0;
-    renderModalGallery();
-
-    document.getElementById('product-modal').classList.add('open');
-    document.body.style.overflow = 'hidden'; // Заборонити скрол фону
-}
-
-function closeModal() {
-    document.getElementById('product-modal').classList.remove('open');
-    document.body.style.overflow = '';
-}
-
-// Закриття по кліку на фоні
-window.onclick = function(event) {
-    const modal = document.getElementById('product-modal');
-    if (event.target === modal) {
-        closeModal();
-    }
-}
-
-// Логіка каруселі
-function renderModalGallery() {
-    const mainImg = document.getElementById('modal-main-img');
-    const thumbsContainer = document.getElementById('modal-thumbnails');
-    const prevBtn = document.querySelector('.prev-pic');
-    const nextBtn = document.querySelector('.next-pic');
-
-    thumbsContainer.innerHTML = '';
+    updateModalGallery();
     
-    if (currentModalPics.length === 0) {
-        mainImg.src = 'https://via.placeholder.com/400x400?text=No+Photo';
-        prevBtn.style.display = 'none';
-        nextBtn.style.display = 'none';
-        return;
-    }
+    document.getElementById('product-modal').classList.add('open');
+    document.getElementById('body-overlay').classList.add('active');
+    document.body.style.overflow = 'hidden'; // Заборона скролу фону
 
-    mainImg.src = currentModalPics[currentModalPicIndex];
+    // Налаштування кнопки додавання
+    document.getElementById('modal-add-btn').onclick = () => {
+        const selectedSize = sizeSelector.value;
+        if (!selectedSize) return alert('Будь ласка, оберіть розмір!');
+        
+        cart.push({ ...p, selectedSize: selectedSize });
+        updateCartUI();
+        closeModal();
+        toggleCart(true);
+    };
+}
 
-    // Показуємо кнопки навігації тільки якщо > 1 фото
-    const showNav = currentModalPics.length > 1;
-    prevBtn.style.display = showNav ? 'block' : 'none';
-    nextBtn.style.display = showNav ? 'block' : 'none';
-
-    // Рендер мініатюр
-    if (showNav) {
-        currentModalPics.forEach((pic, index) => {
-            const img = document.createElement('img');
-            img.src = pic;
-            img.className = `thumb ${index === currentModalPicIndex ? 'active' : ''}`;
-            img.onclick = () => {
-                currentModalPicIndex = index;
-                renderModalGallery();
-            };
-            thumbsContainer.appendChild(img);
-        });
+function updateModalGallery() {
+    const mainImg = document.getElementById('modal-main-img');
+    const thumbContainer = document.getElementById('modal-thumbnails');
+    
+    if (currentModalPics.length > 0) {
+        mainImg.src = currentModalPics[currentModalPicIndex];
+        thumbContainer.innerHTML = currentModalPics.map((src, i) => 
+            `<img src="${src}" class="thumb ${i === currentModalPicIndex ? 'active' : ''}" 
+             onclick="currentModalPicIndex=${i}; updateModalGallery();">`
+        ).join('');
     }
 }
 
 function changeModalPic(direction) {
-    currentModalPicIndex += direction;
-    if (currentModalPicIndex >= currentModalPics.length) currentModalPicIndex = 0;
-    if (currentModalPicIndex < 0) currentModalPicIndex = currentModalPics.length - 1;
-    renderModalGallery();
+    currentModalPicIndex = (currentModalPicIndex + direction + currentModalPics.length) % currentModalPics.length;
+    updateModalGallery();
 }
 
-// КОШИК ТА ЗАМОВЛЕННЯ
-function addToCartFromCard(event, index) {
-    event.stopPropagation(); // Зупинити відкриття модалки
-    // На картці немає вибору розміру, тому відкриваємо модалку
-    openModal(index);
+function closeModal() {
+    document.getElementById('product-modal').classList.remove('open');
+    document.getElementById('body-overlay').classList.remove('active');
+    document.body.style.overflow = '';
+    history.replaceState(null, null, ' '); // Прибираємо хеш з URL
 }
 
-function addToCartFromModal(index) {
-    const sizeSelect = document.getElementById('modal-size-selector');
-    const size = sizeSelect.value;
-    
-    if(!size) { 
-        sizeSelect.style.borderColor = '#ff4444';
-        setTimeout(() => sizeSelect.style.borderColor = '', 1000);
-        return; 
+// --- ФІЛЬТРАЦІЯ ТА ПОШУК ---
+function generateCategoryFilters() {
+    const menuContainer = document.getElementById('categories-list');
+    if (!menuContainer) return;
+
+    const categories = [...new Set(allProducts.map(p => p.Category).filter(Boolean))];
+    menuContainer.innerHTML = categories.map(cat => 
+        `<div class="faq-question" style="padding: 10px 0; border-bottom: 1px solid #222;" 
+              onclick="filterByCategory('${cat}')">${cat}</div>`
+    ).join('');
+}
+
+function filterByCategory(cat) {
+    filteredProducts = allProducts.filter(p => p.Category === cat);
+    currentPage = 1;
+    renderCatalog();
+    toggleMobileMenu(false);
+}
+
+function filterByBadge(badgeType, btn) {
+    document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    if (badgeType === 'all') {
+        filteredProducts = [...allProducts];
+    } else {
+        filteredProducts = allProducts.filter(p => p.Badge?.toLowerCase() === badgeType.toLowerCase());
     }
-    
-    const item = allProducts[index];
-    cart.push({ name: item.Name, price: item.Price, size: size, vendor: item.VendorCode });
-    
-    updateCartUI();
-    closeModal();
-    toggleCart(true);
+    currentPage = 1;
+    renderCatalog();
 }
 
+function resetPageAndFilter() {
+    const query = document.getElementById('search').value.toLowerCase();
+    filteredProducts = allProducts.filter(p => 
+        p.Name.toLowerCase().includes(query) || 
+        (p.VendorCode && p.VendorCode.toLowerCase().includes(query))
+    );
+    currentPage = 1;
+    renderCatalog();
+}
+
+function resetFilters() {
+    document.getElementById('search').value = '';
+    filteredProducts = [...allProducts];
+    currentPage = 1;
+    document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.f-btn').classList.add('active');
+    renderCatalog();
+}
+
+// --- КОШИК ТА ЗАМОВЛЕННЯ ---
 function updateCartUI() {
-    document.getElementById('cart-count').innerText = cart.length;
+    const countLabel = document.getElementById('cart-count');
     const content = document.getElementById('cart-content');
     const footer = document.getElementById('cart-footer');
+    const totalPriceLabel = document.getElementById('cart-total-price');
+
+    countLabel.innerText = cart.length;
     
-    if(cart.length === 0) { 
-        content.innerHTML = '<div style="text-align:center; padding: 30px; color:#666;">Порожньо</div>'; 
+    if (cart.length === 0) {
+        content.innerHTML = 'Кошик порожній';
         footer.style.display = 'none';
-        return; 
+    } else {
+        footer.style.display = 'block';
+        let total = 0;
+        content.innerHTML = cart.map((item, idx) => {
+            total += parseFloat(item.Price);
+            return `
+                <div style="padding:15px 0; border-bottom:1px solid #333; position: relative;">
+                    <b style="font-size: 0.9rem;">${item.Name}</b><br>
+                    <small style="color: #888;">Розмір: ${item.selectedSize} | ${item.Price} грн</small>
+                    <span onclick="removeFromCart(${idx})" style="position: absolute; right: 0; top: 15px; color: #ff4400; cursor: pointer;">✕</span>
+                </div>`;
+        }).join('');
+        totalPriceLabel.innerText = total;
     }
-    
-    footer.style.display = 'block';
-    let totalPrice = 0;
-
-    content.innerHTML = cart.map((it, i) => {
-        totalPrice += parseFloat(it.price);
-        return `
-            <div class="cart-item">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div>
-                        <b style="color:white;">${it.name}</b><br>
-                        <small style="color:var(--mono-coyote);">Розмір: ${it.size} | Арт: ${it.vendor}</small><br>
-                        <b>${it.price} грн</b>
-                    </div>
-                    <span onclick="removeFromCart(${i})" style="color:#ff4444; cursor:pointer; padding:5px; font-weight:bold;">✕</span>
-                </div>
-            </div>
-        `;
-    }).join('');
-
-    document.getElementById('cart-total-price').innerText = totalPrice;
 }
 
-function removeFromCart(i) {
-    cart.splice(i, 1);
+function removeFromCart(index) {
+    cart.splice(index, 1);
     updateCartUI();
-}
-
-function toggleCart(show = null) {
-    const sidebar = document.getElementById('cart-sidebar');
-    if(show === true) sidebar.classList.add('active');
-    else if(show === false) sidebar.classList.remove('active');
-    else sidebar.classList.toggle('active');
 }
 
 function checkout(platform) {
-    if(cart.length === 0) return;
+    if (cart.length === 0) return;
+
+    const name = document.getElementById('cust-name').value.trim();
+    const phone = document.getElementById('cust-phone').value.trim();
+    const city = document.getElementById('cust-city').value.trim();
+    const post = document.getElementById('cust-post').value.trim();
+    const pay = document.querySelector('input[name="pay-method"]:checked').value;
+
+    if (!name || !phone || !city || !post) {
+        alert('Заповніть, будь ласка, всі дані для доставки Новою Поштою!');
+        return;
+    }
+
+    const total = document.getElementById('cart-total-price').innerText;
     
-    let text = "🪖 ЗАМОВЛЕННЯ VARTA GEAR:\n\n";
-    let total = 0;
-    
-    cart.forEach((it, index) => {
-        text += `${index + 1}. ${it.name}\n   Арт: ${it.vendor}\n   📏 Розмір: ${it.size}\n   💰 Ціна: ${it.price} грн\n\n`;
-        total += parseFloat(it.price);
+    let message = `🛒 НОВЕ ЗАМОВЛЕННЯ VARTA GEAR:\n`;
+    message += `━━━━━━━━━━━━━━━\n`;
+    cart.forEach((item, i) => {
+        message += `${i+1}. ${item.Name}\n   Розмір: ${item.selectedSize} | ${item.Price} грн\n`;
     });
+    message += `━━━━━━━━━━━━━━━\n`;
+    message += `💰 РАЗОМ: ${total} грн\n`;
+    message += `💳 ОПЛАТА: ${pay}\n`;
+    message += `📍 ДОСТАВКА: ${city}, ${post}\n`;
+    message += `👤 ОТРИМУВАЧ: ${name}, ${phone}\n`;
+
+    const encoded = encodeURIComponent(message);
     
-    text += `💵 РАЗОМ ДО ОПЛАТИ: ${total} грн`;
+    // Встав тут свій реальний номер телефону
+    const phoneNum = "380933923810"; 
     
-    const encoded = encodeURIComponent(text);
-    
-    if(platform === 'tg') {
-        window.open(`https://t.me/vartagear?text=${encoded}`); // ЗАМІНИ vartagear НА СВІЙ НІК
+    if (platform === 'tg') {
+        window.open(`https://t.me/vartagear?text=${encoded}`);
     } else {
-        window.open(`https://wa.me/+380933923810?text=${encoded}`); // ЗАМІНИ НОМЕР НА СВІЙ
+        window.open(`https://wa.me/${phoneNum}?text=${encoded}`);
+    }
+}
+
+// --- ІНТЕРФЕЙСНІ ФУНКЦІЇ ---
+function toggleMobileMenu(show) {
+    const menu = document.getElementById('mobile-menu');
+    const overlay = document.getElementById('body-overlay');
+    if (show) {
+        menu.classList.add('open');
+        overlay.classList.add('active');
+    } else {
+        menu.classList.remove('open');
+        overlay.classList.remove('active');
+    }
+}
+
+function toggleCart(show) {
+    const cartMenu = document.getElementById('cart-sidebar');
+    const overlay = document.getElementById('body-overlay');
+    if (show) {
+        cartMenu.classList.add('active');
+        overlay.classList.add('active');
+    } else {
+        cartMenu.classList.remove('active');
+        overlay.classList.remove('active');
+    }
+}
+
+function initFAQ() {
+    document.querySelectorAll('.faq-question').forEach(q => {
+        q.addEventListener('click', () => {
+            q.parentElement.classList.toggle('active');
+        });
+    });
+}
+
+// Перевірка хешу в URL (для відкриття товару за прямим посиланням)
+function checkUrlHash() {
+    const hash = window.location.hash.substring(1);
+    if (hash) {
+        const product = allProducts.find(p => p.VendorCode === hash || p.myUniqueId == hash);
+        if (product) openModal(product.myUniqueId);
     }
 }
