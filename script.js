@@ -289,24 +289,42 @@ function resetPageAndFilter() {
 // ==========================================
 // ПАГІНАЦІЯ ТА ПЕРЕХІД МІЖ СТОРІНКАМИ
 // ==========================================
+// ==========================================
+// РОЗУМНА ПАГІНАЦІЯ (Ховає зайві сторінки під ...)
+// ==========================================
 function renderPagination(totalItems, currentPage) {
-    const itemsPerPage = 12; // Має співпадати з цифрою в renderCatalog
+    const itemsPerPage = 12; 
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const paginationBar = document.getElementById('pagination');
 
-    // Якщо сторінка лише одна (або товарів нуль) - ховаємо пагінацію
     if (totalPages <= 1) {
         paginationBar.innerHTML = '';
         return;
     }
 
     let html = '';
+    const range = 1; // Скільки сторінок показувати з боків від поточної
+    
+    // Кнопка "Назад" (якщо ми не на 1 сторінці)
+    if (currentPage > 1) {
+        html += `<button class="page-btn" onclick="goToPage(${currentPage - 1})">❮</button>`;
+    }
+
     for (let i = 1; i <= totalPages; i++) {
-        // Якщо це поточна сторінка - робимо кнопку активною (зеленою)
-        const activeClass = (i === currentPage) ? 'active' : '';
-        
-        // Викликаємо нову функцію goToPage при кліку
-        html += `<button class="page-btn ${activeClass}" onclick="goToPage(${i})">${i}</button>`;
+        // Завжди показуємо першу, останню та сусідні з поточною сторінки
+        if (i === 1 || i === totalPages || (i >= currentPage - range && i <= currentPage + range)) {
+            const activeClass = (i === currentPage) ? 'active' : '';
+            html += `<button class="page-btn ${activeClass}" onclick="goToPage(${i})">${i}</button>`;
+        } 
+        // Додаємо три крапки, якщо є розрив у цифрах
+        else if (i === currentPage - range - 1 || i === currentPage + range + 1) {
+            html += `<span class="page-dots">...</span>`;
+        }
+    }
+
+    // Кнопка "Вперед" (якщо ми не на останній сторінці)
+    if (currentPage < totalPages) {
+        html += `<button class="page-btn" onclick="goToPage(${currentPage + 1})">❯</button>`;
     }
     
     paginationBar.innerHTML = html;
