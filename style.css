@@ -651,3 +651,26 @@ input, textarea, .search-box input {
 body {
     -webkit-tap-highlight-color: transparent;
 }
+
+/* =================== TOAST NOTIFICATION =================== */
+.toast {
+    position: fixed;
+    bottom: -100px; /* Сховано за екраном */
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(20, 20, 20, 0.95);
+    border: 1px solid var(--mono-lime);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    z-index: 9999;
+    box-shadow: 0 10px 30px rgba(162, 210, 74, 0.3);
+    transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.toast i { color: var(--mono-lime); font-size: 18px; }
+.toast.show { bottom: 30px; } /* Виїжджає вгору на 30px від низу екрану */

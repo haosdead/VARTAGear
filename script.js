@@ -35,7 +35,8 @@ function setupAddToCart(p, sel) {
         
         updateCartUI();
         closeModal();
-        toggleCart(true);
+        showToast(p.Name);
+        //toggleCart(true);
     };
 }
 
@@ -592,4 +593,59 @@ function handleCarouselSwipe() {
     if (touchEndX > touchStartX + swipeThreshold) {
         moveCarousel3D(-1); // Свайпнули вправо -> Попередній товар
     }
+}
+
+// Додаємо змінні для автоплею десь біля current3DIndex
+let autoplayTimer;
+
+// Функція запуску
+function startAutoplay() {
+    stopAutoplay(); // Очищаємо старий таймер, щоб вони не накладалися
+    autoplayTimer = setInterval(() => {
+        moveCarousel3D(1); // Карусель робить крок вправо кожні 4 секунди
+    }, 4000); // 4000 мілісекунд = 4 секунди
+}
+
+// Функція зупинки
+function stopAutoplay() {
+    clearInterval(autoplayTimer);
+}
+
+// Додаємо "розумну" зупинку, коли клієнт взаємодіє з каруселлю
+document.addEventListener('DOMContentLoaded', () => {
+    const carouselViewport = document.querySelector('.carousel-3d-viewport');
+    
+    if (carouselViewport) {
+        // ЗУПИНЯЄМО, коли клієнт наводить мишку або торкається пальцем
+        carouselViewport.addEventListener('mouseenter', stopAutoplay);
+        carouselViewport.addEventListener('touchstart', stopAutoplay, { passive: true });
+        
+        // ЗАПУСКАЄМО ЗНОВУ, коли клієнт забирає мишку/палець
+        carouselViewport.addEventListener('mouseleave', startAutoplay);
+        carouselViewport.addEventListener('touchend', startAutoplay, { passive: true });
+    }
+});
+
+// ==========================================
+// 5. СПЛИВАЮЧЕ ПОВІДОМЛЕННЯ (TOAST)
+// ==========================================
+function showToast(productName) {
+    const toast = document.getElementById('toast-notification');
+    const msg = document.getElementById('toast-message');
+    
+    if (!toast || !msg) return; // Захист від помилок
+
+    // Обрізаємо занадто довгі назви, щоб не ламався дизайн
+    const shortName = productName.length > 25 ? productName.substring(0, 25) + '...' : productName;
+    
+    // Вставляємо текст
+    msg.innerHTML = `<strong>${shortName}</strong> додано у кошик!`;
+    
+    // Показуємо (виїжджає знизу)
+    toast.classList.add('show');
+    
+    // Ховаємо через 3 секунди
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
 }
