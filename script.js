@@ -136,45 +136,9 @@ function openModal(id, updateUrl = true) {
 
     document.getElementById('modal-name').innerText = p.Name;
     document.getElementById('modal-price').innerText = `${p.Price} грн`;
-    
-    const oldPriceEl = document.getElementById('modal-old-price');
-    const badgeSaleEl = document.getElementById('modal-sale-badge');
-    
-    if (p.Badge === 'SALE') {
-        const discountPercentage = p.OldPrice ? Math.round(((parseFloat(p.OldPrice) - p.Price) / parseFloat(p.OldPrice)) * 100) : null;
-        badgeSaleEl.innerHTML = `
-            <span class="sale-line1">SALE:</span>
-            <span class="sale-line2">${discountPercentage ? `-${discountPercentage}%` : ''}</span>
-        `;
-        badgeSaleEl.style.display = 'flex';
-        
-        if (p.OldPrice) {
-            oldPriceEl.innerText = `${p.OldPrice} грн`;
-            oldPriceEl.style.display = 'inline-block';
-        } else {
-            oldPriceEl.innerText = '';
-            oldPriceEl.style.display = 'none';
-        }
-    } else {
-        badgeSaleEl.innerHTML = '';
-        badgeSaleEl.style.display = 'none';
-        oldPriceEl.innerText = '';
-        oldPriceEl.style.display = 'none';
-    }
-
-    const descEl = document.getElementById('modal-desc');
-    descEl.classList.add('expanded'); 
-    document.getElementById('modal-desc-container').classList.add('active'); 
-    document.getElementById('desc-toggle-text').innerText = 'Згорнути';
-
-    if (p.Description) {
-        let formattedDesc = p.Description.replace(/\n/g, '<br>');
-        descEl.innerHTML = formattedDesc;
-    } else {
-        descEl.innerHTML = 'Опис очікується...';
-    }
-
-    document.getElementById('modal-vendor').innerText = `Артикул: ${p.VendorCode || 'Не вказано'}`;
+    document.getElementById('modal-old-price').innerText = p.OldPrice ? `${p.OldPrice} грн` : '';
+    document.getElementById('modal-desc').innerHTML = p.Description || 'Опис очікується...';
+    document.getElementById('modal-vendor').innerText = `Артикул: ${p.VendorCode}`;
 
     currentModalPics = p.Pictures ? p.Pictures.split(',').map(s => s.trim()) : [];
     currentModalPicIndex = 0;
@@ -190,15 +154,22 @@ function openModal(id, updateUrl = true) {
     document.getElementById('body-overlay').classList.add('active');
     document.body.style.overflow = 'hidden';
 
+    // ВІШАЄМО ОБРОБНИК КЛІКУ НА КНОПКУ "ДОДАТИ В КОШИК"
     document.getElementById('modal-add-btn').onclick = () => {
         if (!sel.value) return alert('Оберіть розмір!');
+        
+        // Додаємо товар у масив
         cart.push({ ...p, selectedSize: sel.value });
+        
+        // ЗБЕРІГАЄМО ОНОВЛЕНИЙ МАСИВ У ПАМ'ЯТЬ
+        localStorage.setItem('varta_cart', JSON.stringify(cart));
+        
         updateCartUI();
         closeModal();
         toggleCart(true);
     };
 
-    // НОВЕ: Змінюємо посилання в адресному рядку
+    // Оновлення URL (унікальне посилання на товар)
     if (updateUrl) {
         const url = new URL(window.location);
         url.searchParams.set('product', id);

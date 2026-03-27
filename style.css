@@ -2,11 +2,10 @@
 :root {
     --bg-black: #0c0c0c;
     --card-gray: #161616;
-    --border-gray: #262626;
+    --border-gray: #2a2a2a;
     --text-white: #FFFFFF;
-    --mono-lime: #a2d24a;
-    --mono-olive: #6B8E23;
-    --sale: #ff3c00;
+    --mono-lime: #a2d24a; /* Наш неоновий зелений */
+    --sale: #ff3300;
 }
 
 /* =================== БАЗОВІ СТИЛІ ТА ТАКТИЧНИЙ ФОН =================== */
@@ -34,47 +33,133 @@ body {
 }
 
 /* =================== HEADER (ШАПКА) =================== */
-.header { 
-    background: rgba(0, 0, 0, 0.85); 
-    backdrop-filter: blur(15px); 
-    height: 70px; 
-    border-bottom: 1px solid var(--border-gray); 
-    position: sticky; 
-    top: 0; 
-    z-index: 1000; 
-    display: flex; 
-    align-items: center; 
-}
-.header-inner { 
-    width: 100%; 
-    max-width: 1200px; 
-    margin: 0 auto; 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    padding: 0 15px; 
-}
-.logo { font-weight: 800; font-size: 24px; letter-spacing: 2px; text-transform: uppercase; }
-.accent-text { color: var(--mono-lime); }
-.nav-icon { 
-    background: #1c1c1c; 
-    border: 1px solid var(--border-gray); 
-    color: #fff; 
-    width: 44px; height: 44px; 
-    border-radius: 50%; 
-    cursor: pointer; 
-    display: flex; align-items: center; justify-content: center;
-    position: relative; transition: 0.2s; font-size: 16px;
-}
-.nav-icon:active { transform: scale(0.9); background: var(--mono-lime); color: #000; }
-#cart-count {
-    position: absolute; top: -5px; right: -5px;
-    background: var(--mono-lime); color: #000;
-    font-size: 11px; font-weight: 800;
-    width: 20px; height: 20px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
+/* =================== ШАПКА (HEADER) =================== */
+.header {
+    background: #000;
+    height: 90px; /* Трохи збільшили для комфортного розміщення тексту */
+    border-bottom: 2px solid var(--border-gray);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.8);
 }
 
+.header-inner {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px;
+}
+
+/* ГАРНИЙ ЗЕЛЕНИЙ ОВАЛ (ОБОЛОНКА ЛОГОТИПУ) */
+.brand-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none !important; /* Прибирає синю лінію браузера */
+    color: #fff !important; /* Прибирає синій колір посилання */
+    padding: 8px 25px;
+    border-radius: 50px; /* Створює овал */
+    border: 2px solid var(--mono-lime); /* Зелена тонка лінія */
+    background: rgba(162, 210, 74, 0.03); /* Ледь помітний зелений фон всередині */
+    box-shadow: 0 0 15px rgba(162, 210, 74, 0.1); /* М'яке світіння навколо */
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.brand-wrapper:hover {
+    background: rgba(162, 210, 74, 0.08);
+    box-shadow: 0 0 20px rgba(162, 210, 74, 0.3); /* Яскравіше світіння при наведенні */
+    transform: translateY(-1px);
+}
+
+/* Текст всередині овалу */
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.logo-main {
+    font-weight: 900;
+    font-size: 20px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    line-height: 1;
+    color: #fff;
+}
+.logo-main .accent {
+    color: var(--mono-lime);
+}
+
+.logo-sub {
+    font-size: 10px;
+    color: #888;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-top: 5px;
+    text-transform: none;
+}
+
+/* Символи */
+.flag-ua, .emblem-ua {
+    font-size: 20px;
+    filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
+}
+
+/* Адаптація під мобільні (щоб овал не був завеликим) */
+@media (max-width: 767px) {
+    .header { height: 80px; }
+    .brand-wrapper { padding: 6px 15px; gap: 8px; }
+    .logo-main { font-size: 16px; }
+    .logo-sub { font-size: 9px; }
+    .flag-ua, .emblem-ua { font-size: 18px; }
+}
+
+/* Іконки (Меню, Кошик) */
+.nav-icon {
+    background: var(--card-gray);
+    border: 1px solid var(--border-gray);
+    color: #fff;
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: 0.3s;
+}
+.nav-icon:hover {
+    border-color: var(--mono-lime);
+    color: var(--mono-lime);
+    box-shadow: 0 0 10px rgba(162, 210, 74, 0.3);
+}
+
+#cart-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--mono-lime);
+    color: #000;
+    font-size: 11px;
+    font-weight: 800;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(162, 210, 74, 0.5);
+}
 /* =================== ПОШУК =================== */
 .main-search-wrapper { padding: 15px 15px 0 15px; max-width: 600px; margin: 0 auto; }
 .search-box { position: relative; width: 100%; }
@@ -383,8 +468,42 @@ body {
 .sale-line2 { font-size: 18px; font-weight: 900;}
 
 /* =================== ФУТЕР (ПІДВАЛ) =================== */
-.site-footer { background: #080808; border-top: 1px solid var(--border-gray); padding: 40px 15px 25px 15px; margin-top: 50px; }
-.footer-inner { max-width: 1200px; margin: 0 auto; display: grid; gap: 15px; grid-template-columns: 1fr; }
+.footer-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 30px;
+    border: 2px solid var(--border-gray); /* Тактична оболонка */
+    border-radius: 50px;
+    background: rgba(20, 20, 20, 0.5);
+    transition: 0.3s;
+}
+.footer-inner:hover {
+    border-color: var(--mono-lime); /* Світиться при наведенні */
+    box-shadow: 0 0 15px rgba(162, 210, 74, 0.2);
+}
+
+.footer-slogan {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 15px;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.footer-slogan .flag-ua,
+.footer-slogan .emblem-ua {
+    font-size: 18px;
+}
+
+.footer-copyright {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+}
 @media (min-width: 768px) { .footer-inner { grid-template-columns: repeat(3, 1fr); gap: 30px; } }
 .footer-block { background: #121212; border: 1px solid #1c1c1c; border-radius: 20px; padding: 25px; text-align: center; transition: 0.3s; }
 .footer-block:hover { border-color: #2a2a2a; }
@@ -461,4 +580,52 @@ html, body {
 input, textarea, .search-box input {
     user-select: text;
     -webkit-user-select: text;
+}
+
+@media (max-width: 767px) {
+    .header {
+        height: 70px; /* Трохи компактніше */
+    }
+    
+    .brand-wrapper {
+        gap: 8px; /* Менші відступи */
+        padding: 6px 15px; /* Компактніша оболонка */
+        border-radius: 30px;
+    }
+    
+    .logo-main {
+        font-size: 17px; /* Менший шрифт */
+        letter-spacing: 1px;
+    }
+    
+    .logo-sub {
+        font-size: 9px; /* Дуже компактний підзаголовок */
+        margin-top: 2px;
+    }
+    
+    .flag-ua, .emblem-ua {
+        font-size: 19px; /* Менші патріотичні символи */
+    }
+    
+    .nav-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        font-size: 16px;
+    }
+    
+    /* Футер на мобільному */
+    .footer-inner {
+        width: 100%;
+        max-width: 320px; /* Щоб не розтягувався */
+        padding: 10px 20px;
+    }
+    .footer-slogan {
+        font-size: 13px;
+        gap: 5px;
+    }
+    .footer-slogan .flag-ua,
+    .footer-slogan .emblem-ua {
+        font-size: 16px;
+    }
 }
