@@ -51,6 +51,36 @@
         <button class="filter-tag top-tag-btn" onclick="filterByBadge('TOP', this)">⭐ ТОП</button>
     </div>
 
+    <div class="trust-signals-container">
+        <div class="trust-oval" onclick="openTrustInfo('warranty')">
+            <i class="fas fa-history trust-icon"></i>
+            <div class="trust-text">
+                <strong>ОБМІН ТА ПОВЕРНЕННЯ</strong>
+                <span>Протягом 14 днів без питань</span>
+            </div>
+            <button class="trust-arrow-btn"><i class="fas fa-angle-right"></i></button>
+        </div>
+
+        <div class="trust-oval" onclick="openTrustInfo('payment')">
+            <i class="fas fa-hand-holding-usd trust-icon"></i>
+            <div class="trust-text">
+                <strong>НАКЛАДЕНИЙ ПЛАТІЖ</strong>
+                <span>Оплата при отриманні (Через НП)</span>
+            </div>
+            <button class="trust-arrow-btn"><i class="fas fa-angle-right"></i></button>
+        </div>
+
+        <div class="trust-oval" onclick="openTrustInfo('support')">
+            <i class="fas fa-headset trust-icon"></i>
+            <div class="trust-text">
+                <strong>МИ ЗАВЖДИ НА ЗВ'ЯЗКУ</strong>
+                <span>Професійна консультація</span>
+            </div>
+            <button class="trust-arrow-btn"><i class="fas fa-angle-right"></i></button>
+        </div>
+    </div>
+
+    <div class="green-trust-divider"></div>
     <div id="catalog" class="products-grid"></div>
     <div id="pagination" class="pagination-bar"></div>
 </main>
@@ -60,12 +90,48 @@
         <h3>КОШИК</h3>
         <button class="close-btn" onclick="toggleCart(false)">✕</button>
     </div>
-    <div id="cart-content" class="cart-items-list"></div>
-    <div id="cart-footer" class="cart-bottom" style="display:none;">
-        <div class="cart-sum">Разом: <span id="cart-total-price">0</span> грн</div>
-        <div class="checkout-btns">
-            <button class="btn-tg" onclick="checkout('tg')"><i class="fab fa-telegram"></i> Telegram</button>
-            <button class="btn-wa" onclick="checkout('wa')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+
+    <div id="cart-items-container">
+        <div id="cart-content" class="cart-items-list"></div>
+        <div id="cart-footer" class="cart-bottom" style="display:none;">
+            <div class="cart-sum">Разом: <span id="cart-total-price">0</span> грн</div>
+            <button class="add-to-cart-btn" onclick="showCheckoutForm()">ОФОРМИТИ ЗАМОВЛЕННЯ</button>
+        </div>
+    </div>
+
+    <div id="checkout-form-container" style="display: none;">
+        <button class="back-to-cart-btn" onclick="hideCheckoutForm()">❮ Назад до кошика</button>
+        
+        <div class="checkout-form">
+            <label>ПІБ отримувача:</label>
+            <input type="text" id="order-name" placeholder="Іванов Іван Іванович">
+
+            <label>Номер телефону:</label>
+            <input type="tel" id="order-phone" placeholder="+380...">
+
+            <label>Місто:</label>
+            <input type="text" id="order-city" placeholder="Київ">
+
+            <label>Відділення / Поштомат НП:</label>
+            <input type="text" id="order-np" placeholder="Відділення №1">
+
+            <label>Спосіб оплати:</label>
+            <div class="payment-options">
+                <label class="radio-label">
+                    <input type="radio" name="payment-method" value="Післяоплата" checked>
+                    <span>Післяоплата (при отриманні)</span>
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="payment-method" value="Повна оплата">
+                    <span>Повна оплата <b style="color:var(--mono-lime)">(Безкоштовна доставка)</b></span>
+                </label>
+            </div>
+
+            <div class="checkout-actions">
+                <p class="final-sum">До сплати: <span id="final-total-price">0</span> грн</p>
+                <button class="btn-tg" onclick="submitOrder('tg')"><i class="fab fa-telegram"></i> Надіслати в Telegram</button>
+                <button class="btn-wa" onclick="submitOrder('wa')"><i class="fab fa-whatsapp"></i> Надіслати в WhatsApp</button>
+            </div>
         </div>
     </div>
 </aside>

@@ -91,7 +91,12 @@ function openModal(id) {
     document.getElementById('modal-name').innerText = p.Name;
     document.getElementById('modal-price').innerText = `${p.Price} грн`;
     document.getElementById('modal-old-price').innerText = p.OldPrice ? `${p.OldPrice} грн` : '';
-    document.getElementById('modal-desc').innerHTML = p.Description || 'Опис очікується...';
+    document.getElementById('modal-desc').innerHTML = if (p.Description) {
+        let formattedDesc = p.Description.replace(/\n/g, '<br>');
+        document.getElementById('modal-desc').innerHTML = formattedDesc;
+    } else {
+        document.getElementById('modal-desc').innerHTML = 'Опис очікується...';
+    };
     document.getElementById('modal-vendor').innerText = `Артикул: ${p.VendorCode}`;
 
     currentModalPics = p.Pictures ? p.Pictures.split(',').map(s => s.trim()) : [];
@@ -115,6 +120,16 @@ function openModal(id) {
         closeModal();
         toggleCart(true);
     };
+}
+
+function openTrustInfo(type) {
+    const messages = {
+        warranty: "Політика VARTA GEAR:\nВи можете обміняти або повернути товар протягом 14 днів, якщо він не був у вжитку та збережено товарний вигляд. Ми цінуємо нашу репутацію.",
+        payment: "Безпечна оплата:\nМи відправляємо накладеним платежем через Нову Пошту. Ви оглядаєте товар у відділенні і платите тільки якщо все влаштовує.",
+        support: "Консультація 24/7:\nНаші менеджери завжди на зв'язку в Telegram та WhatsApp, щоб допомогти з вибором розміру або спорядження."
+    };
+    
+    alert(messages[type] || "Деталі уточнюйте у менеджера.");
 }
 
 function updateModalGallery() {
@@ -195,38 +210,89 @@ function updateCartUI() {
     document.getElementById('cart-count').innerText = cart.length;
     const content = document.getElementById('cart-content');
     const footer = document.getElementById('cart-footer');
+    
     if (cart.length === 0) {
-        content.innerHTML = '<div style="text-align:center; padding:30px; color:#666; font-size:14px;">Порожньо</div>';
+        content.innerHTML = '<div style="text-align:center; padding:50px 0; color:#666;"><i class="fas fa-shopping-cart" style="font-size:40px; margin-bottom:15px; opacity:0.3"></i><br>Кошик порожній</div>';
         footer.style.display = 'none';
+        hideCheckoutForm(); // Ховаємо форму, якщо видалили всі товари
     } else {
         footer.style.display = 'block';
         let total = 0;
         content.innerHTML = cart.map((it, i) => {
             total += parseFloat(it.Price);
-            return `<div style="padding:10px 0; border-bottom:1px solid #222; font-size:14px; display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <b>${it.Name}</b> (${it.selectedSize})<br>${it.Price} грн 
+            return `
+            <div class="cart-item">
+                <div class="cart-item-info">
+                    <span class="cart-item-title">${it.Name}</span>
+                    <span class="cart-item-meta">Розмір: ${it.selectedSize}</span>
+                    <span class="cart-item-price">${it.Price} грн</span>
                 </div>
-                <span onclick="removeFromCart(${i})" style="color:red; cursor:pointer; font-size:18px; padding:0 5px;">✕</span>
+                <span class="cart-item-remove" onclick="removeFromCart(${i})"><i class="fas fa-times"></i></span>
             </div>`;
         }).join('');
+        
         document.getElementById('cart-total-price').innerText = total;
+        document.getElementById('final-total-price').innerText = total; // Оновлюємо суму і в формі
     }
 }
 
-function removeFromCart(i) { cart.splice(i, 1); updateCartUI(); }
-function toggleMobileMenu(s) { document.getElementById('mobile-menu').classList.toggle('active', s); document.getElementById('body-overlay').classList.toggle('active', s); document.body.style.overflow = s ? 'hidden' : 'auto'; }
+function removeFromCart(i) { 
+    cart.splice(i, 1); 
+    updateCartUI(); 
+}function toggleMobileMenu(s) { document.getElementById('mobile-menu').classList.toggle('active', s); document.getElementById('body-overlay').classList.toggle('active', s); document.body.style.overflow = s ? 'hidden' : 'auto'; }
 function toggleCart(s) { document.getElementById('cart-sidebar').classList.toggle('active', s); document.getElementById('body-overlay').classList.toggle('active', s); document.body.style.overflow = s ? 'hidden' : 'auto'; }
 function closeModal() { document.getElementById('product-modal').style.display = 'none'; document.getElementById('body-overlay').classList.remove('active'); document.body.style.overflow = 'auto'; }
 function closeAllPanels() { toggleMobileMenu(false); toggleCart(false); closeModal(); }
 function resetFilters() { document.getElementById('search-input').value = ''; filterByBadge('all', document.querySelector('.filter-tag')); }
 
-function checkout(platform) {
+function showCheckoutForm() {
+    document.getElementById('cart-items-container').style.display = 'none';
+    document.getElementById('checkout-form-container').style.display = 'block';
+}
+
+function hideCheckoutForm() {
+    document.getElementById('cart-items-container').style.display = 'block';
+    document.getElementById('checkout-form-container').style.display = 'none';
+}
+
+// Збираємо дані і відправляємо в месенджер
+function submitOrder(platform) {
     if (cart.length === 0) return;
-    let txt = "🪖 ЗАМОВЛЕННЯ VARTA GEAR:\n\n";
-    cart.forEach((it, i) => { txt += `${i+1}. ${it.Name} (${it.selectedSize}) - ${it.Price} грн\n`; });
-    txt += `\n💰 РАЗОМ: ${document.getElementById('cart-total-price').innerText} грн`;
+    
+    // Зчитуємо дані з полів
+    const name = document.getElementById('order-name').value.trim();
+    const phone = document.getElementById('order-phone').value.trim();
+    const city = document.getElementById('order-city').value.trim();
+    const np = document.getElementById('order-np').value.trim();
+    const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+
+    // Перевірка на заповненість
+    if (!name || !phone || !city || !np) {
+        alert('Будь ласка, заповніть всі поля для доставки!');
+        return;
+    }
+
+    // Формуємо красивий чек для повідомлення
+    let txt = "🪖 НОВЕ ЗАМОВЛЕННЯ VARTA GEAR:\n\n";
+    cart.forEach((it, i) => { 
+        txt += `${i+1}. ${it.Name} (Розмір: ${it.selectedSize}) - ${it.Price} грн\n`; 
+    });
+    
+    const total = document.getElementById('cart-total-price').innerText;
+    txt += `\n💰 РАЗОМ: ${total} грн\n\n`;
+    
+    txt += `📦 ДАНІ ДОСТАВКИ:\n`;
+    txt += `👤 ПІБ: ${name}\n`;
+    txt += `📞 Тел: ${phone}\n`;
+    txt += `🏙 Місто: ${city}\n`;
+    txt += `📮 Відділення НП: ${np}\n`;
+    txt += `💳 Оплата: ${paymentMethod}\n`;
+
+    // Відкриваємо месенджер
     const encoded = encodeURIComponent(txt);
-    if(platform === 'tg') window.open(`https://t.me/vartagear?text=${encoded}`);
-    else window.open(`https://wa.me/+380933923810?text=${encoded}`);
+    if(platform === 'tg') {
+        window.open(`https://t.me/vartagear?text=${encoded}`);
+    } else {
+        window.open(`https://wa.me/+380933923810?text=${encoded}`);
+    }
 }

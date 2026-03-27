@@ -386,16 +386,60 @@ body {
 .add-to-cart-btn:hover { background: #b0e060; transform: translateY(-3px); box-shadow: 0 6px 20px rgba(162, 210, 74, 0.4); }
 
 /* Блок опису в напівкруглій рамці */
+/* ================= БЛОК ОПИСУ (Адаптивний) ================= */
 .modal-description-bottom { 
-    background: #141414; 
-    padding: 25px 30px; 
-    border-radius: 20px; /* Напівкруглі краї */
+    background: #111; /* Трохи темніший фон для контрасту */
+    padding: 20px;    /* Комфортний відступ для мобілок */
+    border-radius: 16px; 
     border: 1px solid var(--border-gray);
-    margin: 0 30px 30px 30px; /* Відступ від стінок модального вікна */
+    margin: 0 15px 25px 15px; /* Невеликі відступи по краях на телефоні */
 }
-.modal-description-bottom h3 { margin: 0 0 15px 0; font-size: 18px; color: #fff; border-bottom: 1px solid #222; padding-bottom: 12px; }
-#modal-desc { color: #bbb; font-size: 14px; line-height: 1.7; }
-.vendor-label { margin-top: 20px; font-size: 13px; color: #666; font-weight: 600; text-align: left; }
+
+/* На комп'ютері робимо блок ширшим */
+@media (min-width: 768px) {
+    .modal-description-bottom { 
+        padding: 30px; 
+        margin: 0 30px 30px 30px; 
+        border-radius: 20px;
+    }
+}
+
+.modal-description-bottom h3 { 
+    margin: 0 0 15px 0; 
+    font-size: 18px; 
+    color: #fff; 
+    border-bottom: 1px solid #222; 
+    padding-bottom: 12px; 
+    font-weight: 700; 
+    text-transform: uppercase;
+}
+
+#modal-desc { 
+    color: #ddd; /* Зробив текст трохи світлішим, щоб очі не втомлювались */
+    font-size: 15px; 
+    line-height: 1.7; /* Збільшений міжрядковий інтервал (повітря між текстом) */
+    letter-spacing: 0.3px;
+}
+
+/* Додаємо простір між абзацами, які ми створимо в JS */
+#modal-desc br {
+    content: "";
+    display: block;
+    margin-bottom: 10px;
+}
+
+/* Гарне оформлення артикулу */
+.vendor-label { 
+    margin-top: 25px; 
+    font-size: 13px; 
+    color: #888; 
+    font-weight: 600; 
+    background: #0a0a0a;
+    padding: 10px 15px;
+    border-radius: 8px;
+    display: inline-block;
+    border: 1px solid #1a1a1a;
+}
 
 /* =================== ЗВИЧАЙНІ ЦІНИ =================== */
 .price-box { 
@@ -489,4 +533,174 @@ body {
 .buy-btn-sale:hover {
     background: var(--sale);
     color: #fff;
+}
+/* =================== КОШИК ТА ФОРМА ОФОРМЛЕННЯ =================== */
+
+/* Вигляд товару в кошику */
+.cart-item { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 15px 0; 
+    border-bottom: 1px solid var(--border-gray); 
+}
+.cart-item-info { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.cart-item-title { font-weight: 700; color: #fff; line-height: 1.3; }
+.cart-item-meta { color: #888; font-size: 13px; }
+.cart-item-price { color: var(--mono-lime); font-weight: 800; font-size: 16px; margin-top: 3px; }
+.cart-item-remove { 
+    color: #ff4444; 
+    cursor: pointer; 
+    font-size: 18px; 
+    padding: 10px; 
+    background: #1a1a1a;
+    border-radius: 8px;
+    transition: 0.2s; 
+}
+.cart-item-remove:hover { background: #ff4444; color: #fff; transform: scale(1.05); }
+
+.cart-bottom { margin-top: 15px; border-top: 1px solid var(--border-gray); padding-top: 20px; }
+.cart-sum { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 15px; text-align: center; }
+
+/* Форма оформлення */
+.back-to-cart-btn { 
+    background: transparent; border: none; color: var(--mono-lime); 
+    cursor: pointer; font-size: 15px; margin-bottom: 20px; padding: 0; font-weight: bold; 
+}
+.back-to-cart-btn:hover { color: #fff; }
+
+.checkout-form { display: flex; flex-direction: column; gap: 12px; }
+.checkout-form label { font-size: 13px; color: #aaa; font-weight: 600; margin-top: 5px; }
+.checkout-form input[type="text"], .checkout-form input[type="tel"] {
+    background: #141414; border: 1px solid var(--border-gray); color: #fff; 
+    padding: 14px 15px; border-radius: 10px; font-family: 'Inter', sans-serif; 
+    outline: none; transition: 0.3s; font-size: 14px;
+}
+.checkout-form input:focus { border-color: var(--mono-lime); box-shadow: 0 0 8px rgba(162, 210, 74, 0.2); }
+
+/* Радіо кнопки (Вибір оплати) */
+.payment-options { display: flex; flex-direction: column; gap: 12px; margin-top: 5px; background: #141414; padding: 15px; border-radius: 10px; border: 1px solid var(--border-gray); }
+.radio-label { display: flex; align-items: center; gap: 12px; font-size: 14px; color: #eee; cursor: pointer; }
+.radio-label input[type="radio"] { accent-color: var(--mono-lime); width: 18px; height: 18px; cursor: pointer; }
+
+/* Кнопки відправки */
+.checkout-actions { margin-top: 25px; display: flex; flex-direction: column; gap: 12px; }
+.final-sum { font-size: 20px; font-weight: bold; color: #fff; text-align: center; margin-bottom: 10px; }
+
+.btn-tg, .btn-wa { 
+    border: none; padding: 16px; border-radius: 12px; font-weight: 800; color: #fff; 
+    cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; 
+    gap: 10px; transition: 0.3s; text-transform: uppercase;
+}
+.btn-tg { background: #2AABEE; } .btn-tg:hover { background: #229ED9; transform: translateY(-2px); }
+.btn-wa { background: #25D366; } .btn-wa:hover { background: #128C7E; transform: translateY(-2px); }
+
+/* =================== БЛОК ДОВІРИ (OVALS) =================== */
+.trust-signals-container {
+    display: flex;
+    flex-direction: column; /* На мобілках стовпчиком */
+    gap: 12px;
+    padding: 10px 15px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* На комп'ютерах (ширше 768px) робимо в рядок */
+@media (min-width: 768px) {
+    .trust-signals-container {
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 20px 15px;
+        gap: 20px;
+    }
+}
+
+.trust-oval {
+    background: rgba(20, 20, 20, 0.6); /* Напівпрозорий фон */
+    border: 1px solid var(--border-gray);
+    border-radius: 50px; /* Форма овалу/капсули */
+    padding: 15px 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    flex: 1; /* Рівна ширина на пк */
+    position: relative;
+    overflow: hidden;
+}
+
+/* Інтерактивний ефект при наведенні */
+.trust-oval:hover {
+    border-color: var(--mono-lime);
+    background: rgba(26, 26, 26, 0.9);
+    transform: translateY(-3px);
+    /* Легке лаймове світіння */
+    box-shadow: 0 5px 20px rgba(162, 210, 74, 0.15);
+}
+
+.trust-icon {
+    color: var(--mono-lime);
+    font-size: 20px;
+    width: 30px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.trust-text {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.trust-text strong {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.trust-text span {
+    color: #aaa;
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+/* Інтерактивна кнопка-стрілка всередині овалу */
+.trust-arrow-btn {
+    background: #1a1a1a;
+    border: 1px solid var(--border-gray);
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.3s;
+    flex-shrink: 0; /* Щоб не стискалась */
+}
+
+.trust-oval:hover .trust-arrow-btn {
+    background: var(--mono-lime);
+    color: #000;
+    border-color: var(--mono-lime);
+    transform: translateX(3px); /* Легкий рух стрілки */
+}
+
+/* ЗЕЛЕНА РОЗДІЛЬНА ПОЛОСА */
+.green-trust-divider {
+    height: 2px;
+    background: var(--mono-lime);
+    background: linear-gradient(90deg, transparent 0%, var(--mono-lime) 50%, transparent 100%);
+    max-width: 1200px;
+    margin: 10px auto 30px auto;
+    opacity: 0.6;
+    box-shadow: 0 0 10px rgba(162, 210, 74, 0.3);
+}
+@media (max-width: 767px) {
+    .green-trust-divider { margin: 5px auto 20px auto; }
 }
