@@ -271,15 +271,28 @@ body {
 .thumb-list img:hover { opacity: 0.8; }
 .thumb-list img.active { opacity: 1; border-color: var(--mono-lime); transform: scale(1.05); }
 
-@media (min-width: 768px) {
-    .modal-body-top { flex-direction: column; /* Головне фото та інфо в один стовпчик на ПК */}
-    .modal-photo-container { order: 1; aspect-ratio: auto; min-height: auto; width: 100%; }
-    .modal-photo-container img { max-height: 600px; }
-    .modal-actions-area { order: 2; flex-direction: row; flex-wrap: wrap; gap: 30px; padding: 0 30px 30px 30px; }
-    .modal-price-block { order: 1; flex: 1; font-size: 32px;}
-    .selector-block { order: 2; flex: 1; }
-    .add-to-cart-btn { order: 3; width: 100%; flex: 1 1 100%; }
-    .modal-description-bottom { order: 4; width: 100%; margin: 0; }
+/* ПРАВИЛЬНА ГАЛЕРЕЯ ДЛЯ ПК (Головне фото зліва, мініатюри та інфо - справа) */
+@media (min-width: 768px) { 
+    .modal-body-top { 
+        flex-direction: row; /* Фото зліва, інформація справа */
+        align-items: flex-start;
+    } 
+    .modal-photo-container { 
+        flex: 1.2; 
+        position: relative;
+    }
+    .modal-actions-area { 
+        flex: 1; 
+        display: flex; 
+        flex-direction: column; 
+        gap: 20px; 
+    }
+    .thumb-list { 
+        order: 0; /* Мініатюри знаходяться ВЕРХУ справа */
+        flex-wrap: wrap; /* Дозволяємо перенос, якщо фотографій багато */
+        padding: 0;
+    }
+    .thumb-list img { width: 65px; height: 65px; } /* Трохи більші мініатюри для ПК */
 }
 
 .modal-price-block { font-size: 28px; font-weight: 800; color: var(--mono-lime); display: flex; align-items: center; gap: 12px; flex-wrap: wrap;}
@@ -382,3 +395,28 @@ body {
 #scrollTopBtn { display: none; position: fixed; bottom: 25px; right: 20px; z-index: 1000; background: var(--mono-lime); color: #000; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 20px; cursor: pointer; box-shadow: 0 4px 15px rgba(162, 210, 74, 0.4); transition: 0.3s; align-items: center; justify-content: center; }
 #scrollTopBtn:hover { transform: translateY(-5px); background: #b0e060; }
 @media (max-width: 767px) { #scrollTopBtn { width: 45px; height: 45px; bottom: 20px; right: 15px; font-size: 18px; } }
+
+/* Кнопка "На головну" в боковому меню */
+.home-link-sidebar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 15px; background: #1a1a1a;
+    border-radius: 8px; color: #fff; text-decoration: none;
+    font-weight: 700; font-size: 15px; margin-bottom: 20px;
+    transition: 0.3s; border: 1px solid var(--border-gray);
+}
+.home-link-sidebar i { color: var(--mono-lime); font-size: 18px; }
+.home-link-sidebar:hover { border-color: var(--mono-lime); background: #222; }
+
+/* Всі назви товарів ВЕЛИКИМИ ЛІТЕРАМИ */
+.card h4, .modal-header h2, .cart-item-title { 
+    text-transform: uppercase; 
+}
+
+/* ІНТЕРАКТИВНА ЦІНА: Неонове світіння при наведенні на картку */
+.card:hover .current-price {
+    text-shadow: 0 0 10px rgba(162, 210, 74, 0.8), 0 0 20px rgba(162, 210, 74, 0.4);
+    transform: scale(1.05);
+    display: inline-block;
+    transition: 0.3s;
+}
+.current-price { transition: 0.3s; } /* Плавне повернення */
