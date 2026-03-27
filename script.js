@@ -84,6 +84,9 @@ function loadCSV() {
 // ==========================================
 // 1. ОНОВЛЕНИЙ РЕНДЕР КАТАЛОГУ (Логіка приховування SALE)
 // ==========================================
+// ==========================================
+// 1. ОНОВЛЕНИЙ РЕНДЕР КАТАЛОГУ (Повернули кнопку КУПИТИ)
+// ==========================================
 function renderCatalog(page = 1) {
     const catalog = document.getElementById('catalog');
     const pagination = document.getElementById('pagination');
@@ -91,19 +94,15 @@ function renderCatalog(page = 1) {
     
     let productsToShow = [...filteredProducts];
     
-    // ПЕРЕВІРКА: Чи ми на "Головній" сторінці?
-    // Тобто: не обрано категорію, не введено пошук, і не натиснуто фільтри (крім "Всі")
     const isMainPage = 
         (!window.currentCategory || window.currentCategory === 'all') && 
         (!window.currentSearchQuery || window.currentSearchQuery === '') && 
         (!window.currentBadgeFilter || window.currentBadgeFilter === 'all');
 
     if (isMainPage) {
-        // МИ НА ГОЛОВНІЙ: Показуємо 3D карусель, ховаємо SALE з сітки
         if (carouselSection) carouselSection.style.display = 'block';
         productsToShow = productsToShow.filter(p => p.Badge !== 'SALE');
     } else {
-        // МИ В КАТЕГОРІЇ АБО ПОШУКУ: Ховаємо карусель, SALE залишаються в сітці
         if (carouselSection) carouselSection.style.display = 'none';
     }
 
@@ -113,7 +112,7 @@ function renderCatalog(page = 1) {
         return;
     }
 
-    const itemsPerPage = 12; // Скільки товарів на сторінку
+    const itemsPerPage = 12; 
     const start = (page - 1) * itemsPerPage;
     const end = start + itemsPerPage;
     const paginated = productsToShow.slice(start, end);
@@ -122,10 +121,15 @@ function renderCatalog(page = 1) {
         const isSale = p.Badge === 'SALE';
         const cardClass = isSale ? 'card sale-card' : 'card';
         const badgeHTML = isSale ? `<div class="badge-sale">🔥 SALE</div>` : (p.Badge ? `<div class="badge-top">⭐ ТОП</div>` : '');
+        
         const priceHTML = isSale ? 
             `<div class="price-box-sale"><span class="old-price">${p.OldPrice} грн</span><span class="current-price">${p.Price} грн</span></div>` :
             `<div class="price-box"><span class="current-price">${p.Price} грн</span></div>`;
+            
         const mainPic = p.Pictures ? p.Pictures.split(',')[0].trim() : '';
+        
+        // Визначаємо стиль кнопки (зелена для звичайних, червона для SALE)
+        const btnClass = isSale ? 'buy-btn-card buy-btn-sale' : 'buy-btn-card';
         
         return `
         <div class="${cardClass}" onclick="openModal(${p.myId})">
@@ -136,6 +140,7 @@ function renderCatalog(page = 1) {
             <div class="card-info">
                 <h4>${p.Name}</h4>
                 ${priceHTML}
+                <button class="${btnClass}"><i class="fas fa-shopping-cart"></i> КУПИТИ</button>
             </div>
         </div>`;
     }).join('');
