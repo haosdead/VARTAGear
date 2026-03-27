@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VARTA GEAR | Tactical Store</title>
+    <title>VARTA GEAR | Магазин тактичного одягу та амуніції</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
@@ -19,7 +19,16 @@
 <header class="header">
     <div class="header-inner">
         <button class="nav-icon" onclick="toggleMobileMenu(true)"><i class="fas fa-bars"></i></button>
-        <a href="index.html" class="brand">VARTA <span class="accent-text">GEAR</span></a>
+        
+        <a href="index.html" class="brand-wrapper">
+            <span class="flag-ua">🇺🇦</span>
+            <div class="brand-text">
+                <div class="logo-main">VARTA <span class="accent">GEAR</span></div>
+                <div class="logo-sub">Магазин тактичного одягу | Амуніції</div>
+            </div>
+            <span class="emblem-ua">🔱</span>
+        </a>
+
         <button class="nav-icon" onclick="toggleCart(true)">
             <i class="fas fa-shopping-bag"></i>
             <span id="cart-count">0</span>
@@ -40,7 +49,7 @@
         <button class="close-btn" onclick="toggleMobileMenu(false)">✕</button>
     </div>
     
-    <a href="#" class="home-link-sidebar" onclick="closeAllPanels(); window.scrollTo(0,0); return false;">
+    <a href="index.html" class="home-link-sidebar">
         <i class="fas fa-home"></i> НА ГОЛОВНУ
     </a>
     
@@ -104,20 +113,15 @@
 
     <div id="checkout-form-container" style="display: none;">
         <button class="back-to-cart-btn" onclick="hideCheckoutForm()">❮ Назад до кошика</button>
-        
         <div class="checkout-form">
             <label>ПІБ отримувача:</label>
             <input type="text" id="order-name" placeholder="Іванов Іван Іванович">
-
             <label>Номер телефону:</label>
             <input type="tel" id="order-phone" placeholder="+380...">
-
             <label>Місто:</label>
             <input type="text" id="order-city" placeholder="Київ">
-
             <label>Відділення / Поштомат НП:</label>
             <input type="text" id="order-np" placeholder="Відділення №1">
-
             <label>Спосіб оплати:</label>
             <div class="payment-options">
                 <label class="radio-label">
@@ -129,11 +133,10 @@
                     <span>Повна оплата <b style="color:var(--mono-lime)">(Безкоштовна доставка)</b></span>
                 </label>
             </div>
-
             <div class="checkout-actions">
                 <p class="final-sum">До сплати: <span id="final-total-price">0</span> грн</p>
-                <button class="btn-tg" onclick="submitOrder('tg')"><i class="fab fa-telegram"></i> Надіслати в Telegram</button>
-                <button class="btn-wa" onclick="submitOrder('wa')"><i class="fab fa-whatsapp"></i> Надіслати в WhatsApp</button>
+                <button class="btn-tg" onclick="submitOrder('tg')"><i class="fab fa-telegram"></i> Telegram</button>
+                <button class="btn-wa" onclick="submitOrder('wa')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
             </div>
         </div>
     </div>
@@ -146,7 +149,6 @@
                 <h2 id="modal-name"></h2>
                 <span class="close-modal" onclick="closeModal()">✕</span>
             </div>
-            
             <div class="modal-body-top">
                 <div class="modal-photo-container">
                     <button class="nav-pic prev" onclick="changeModalPic(-1)">❮</button>
@@ -154,7 +156,6 @@
                     <button class="nav-pic next" onclick="changeModalPic(1)">❯</button>
                     <div id="modal-sale-badge" class="badge-sale-modal" style="display:none;"></div>
                 </div>
-                
                 <div class="modal-actions-area">
                     <div id="modal-thumbnails" class="thumb-list"></div>
                     <div class="modal-price-block">
@@ -168,7 +169,6 @@
                     <button id="modal-add-btn" class="add-to-cart-btn">ДОДАТИ В КОШИК</button>
                 </div>
             </div>
-            
             <div id="modal-desc-container" class="modal-description-bottom">
                 <div class="desc-header-toggle" onclick="toggleModalDescription()">
                     <div class="desc-title-wrap">
@@ -183,7 +183,6 @@
                 <div id="modal-desc"></div>
                 <div id="modal-vendor" class="vendor-label"></div>
             </div>
-            
         </div>
     </div>
 </div>
@@ -193,49 +192,32 @@
         <div class="footer-block schedule-block">
             <h4><i class="fas fa-clock"></i> Графік роботи</h4>
             <div class="schedule-items">
-                <div class="schedule-item">
-                    <span class="days">ПН - ПТ</span>
-                    <span class="hours">09:00 - 20:00</span>
-                </div>
-                <div class="schedule-item">
-                    <span class="days weekend">СБ - НД</span>
-                    <span class="hours">11:00 - 16:00</span>
-                </div>
+                <div class="schedule-item"><span>ПН - ПТ</span><span class="hours">09:00 - 20:00</span></div>
+                <div class="schedule-item"><span class="weekend">СБ - НД</span><span class="hours">11:00 - 16:00</span></div>
             </div>
         </div>
-        
         <div class="footer-block contact-block">
             <h4><i class="fas fa-headset"></i> Написати менеджеру</h4>
             <div class="social-icons">
-                <a href="https://t.me/vartagear" target="_blank" class="social-btn tg-btn" title="Telegram">
-                    <i class="fab fa-telegram-plane"></i>
-                </a>
-                <a href="https://wa.me/+380933923810" target="_blank" class="social-btn wa-btn" title="WhatsApp">
-                    <i class="fab fa-whatsapp"></i>
-                </a>
+                <a href="https://t.me/vartagear" target="_blank" class="social-btn tg-btn"><i class="fab fa-telegram-plane"></i></a>
+                <a href="https://wa.me/+380933923810" target="_blank" class="social-btn wa-btn"><i class="fab fa-whatsapp"></i></a>
             </div>
         </div>
-        
         <div class="footer-block social-block">
             <h4><i class="fas fa-mobile-alt"></i> Ми в соцмережах</h4>
             <div class="social-icons">
-                <a href="https://instagram.com/vartagear.ua" target="_blank" class="social-btn inst-btn" title="Instagram">
-                    <i class="fab fa-instagram"></i>
-                </a>
-                <a href="https://tiktok.com/@vartagearua" target="_blank" class="social-btn tt-btn" title="TikTok">
-                    <i class="fab fa-tiktok"></i>
-                </a>
+                <a href="#" target="_blank" class="social-btn inst-btn"><i class="fab fa-instagram"></i></a>
+                <a href="#" target="_blank" class="social-btn tt-btn"><i class="fab fa-tiktok"></i></a>
             </div>
         </div>
     </div>
-    
     <div class="footer-bottom">
-        <div class="slogan">Слава Україні! Героям Слава! 🇺🇦</div>
+        <div class="slogan">🇺🇦 Слава Україні! Героям Слава! 🔱</div>
         <div class="copyright">© VARTA GEAR - 2025. Всі права захищено.</div>
     </div>
 </footer>
 
-<button id="scrollTopBtn" onclick="scrollToTop()" title="Вгору"><i class="fas fa-arrow-up"></i></button>
+<button id="scrollTopBtn" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i></button>
 
 <script src="script.js"></script>
 </body>
