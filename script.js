@@ -466,32 +466,30 @@ function renderSaleCarousel() {
     const track = document.getElementById('sale-carousel-track');
     if (!track) return;
 
-    // Беремо тільки SALE
     carouselItemsData = allProducts.filter(p => p.Badge === 'SALE');
-    
     if (carouselItemsData.length === 0) {
         document.getElementById('main-sale-carousel').style.display = 'none';
         return;
     }
 
-    // Малюємо картки всередині треку
     track.innerHTML = carouselItemsData.map((p, i) => {
         const mainPic = p.Pictures ? p.Pictures.split(',')[0].trim() : '';
         return `
         <div class="carousel-3d-item" onclick="openModal(${p.myId})">
             <div class="badge-sale" style="top:10px; left:10px;">🔥 SALE</div>
-            <img src="${mainPic}" class="carousel-img" alt="${p.Name}">
+            <img src="${mainPic}" class="carousel-img" alt="${p.Name}" loading="lazy">
             <div class="carousel-info">
                 <h4>${p.Name.toUpperCase()}</h4>
                 <div class="price-box-sale">
                     <span class="old-price" style="font-size:12px;">${p.OldPrice ? p.OldPrice + ' грн' : ''}</span>
                     <span class="current-price" style="font-size:18px; text-shadow:none;">${p.Price} грн</span>
                 </div>
+                <button class="btn-buy-carousel"><i class="fas fa-shopping-cart"></i> КУПИТИ</button>
             </div>
         </div>`;
     }).join('');
 
-    current3DIndex = 0; // Починаємо з першого товару
+    current3DIndex = 0; 
     update3DCarousel();
 }
 
@@ -511,41 +509,34 @@ function update3DCarousel() {
     if (items.length === 0) return;
 
     const isMobile = window.innerWidth <= 767;
-    // Налаштування відстані та кута для ПК і Мобілок
-    const offsetBase = isMobile ? 130 : 250; // Зміщення вліво/вправо (в пікселях)
-    const rotateBase = isMobile ? 35 : 45;   // Кут нахилу 3D
+    const offsetBase = isMobile ? 120 : 250; 
+    const rotateBase = isMobile ? 35 : 45;   
 
     items.forEach((item, index) => {
-        // Рахуємо позицію відносно центрального (активного) елемента
         let offset = index - current3DIndex;
-        
-        // Робимо так, щоб карусель горталася по колу (найкоротший шлях)
         if (offset > Math.floor(items.length / 2)) offset -= items.length;
         if (offset < -Math.floor(items.length / 2)) offset += items.length;
 
         if (offset === 0) {
-            // ЦЕНТРАЛЬНА (АКТИВНА) КАРТКА
+            // АКТИВНА КАРТКА (По центру)
             item.style.transform = `translateX(0px) scale(1) translateZ(50px) rotateY(0deg)`;
             item.style.zIndex = 10;
             item.style.opacity = 1;
-            item.style.filter = 'blur(0px)';
-            item.style.pointerEvents = 'auto'; // Можна клікати
+            item.style.pointerEvents = 'auto'; 
             item.classList.add('active-3d');
         } else {
             // БОКОВІ КАРТКИ
-            const sign = Math.sign(offset);     // -1 (зліва) або 1 (справа)
-            const absOffset = Math.abs(offset); // 1, 2, 3...
+            const sign = Math.sign(offset);     
+            const absOffset = Math.abs(offset); 
             
-            // Чим далі картка, тим вона менша і темніша
             const translateZ = absOffset === 1 ? -150 : -300;
             const scale = absOffset === 1 ? 0.85 : 0.65;
-            const opacity = absOffset === 1 ? 0.7 : 0; // Ховаємо картки, які далі ніж 1 крок
+            const opacity = absOffset === 1 ? 0.6 : 0; // Більше не юзаємо blur!
             
             item.style.transform = `translateX(${sign * offsetBase * absOffset}px) scale(${scale}) translateZ(${translateZ}px) rotateY(${-sign * rotateBase}deg)`;
             item.style.zIndex = 10 - absOffset;
             item.style.opacity = opacity;
-            item.style.filter = absOffset === 1 ? 'blur(3px)' : 'blur(8px)';
-            item.style.pointerEvents = 'none'; // Не можна клікати бокові
+            item.style.pointerEvents = 'none'; 
             item.classList.remove('active-3d');
         }
     });

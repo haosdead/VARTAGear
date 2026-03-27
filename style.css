@@ -523,3 +523,88 @@ input, textarea, .search-box input {
     .carousel-header h3 { font-size: 16px; }
     .nav-arrow { width: 38px; height: 38px; font-size: 14px; }
 }
+
+/* =================== ОПТИМІЗАЦІЯ 3D КАРТКИ =================== */
+.carousel-3d-item {
+    position: absolute;
+    top: 50%; left: 50%;
+    margin-top: -180px; 
+    margin-left: -120px; 
+    width: 240px;
+    height: 360px; /* Трохи збільшили висоту для кнопки */
+    
+    background: var(--card-gray);
+    border: 2px solid #333;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    display: flex; flex-direction: column;
+    
+    /* АПАРАТНЕ ПРИСКОРЕННЯ (РЯТУЄ ВІД ЛАГІВ) */
+    will-change: transform, opacity;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    
+    /* Плавна і швидка анімація */
+    transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease;
+    
+    /* Віддзеркалення лишаємо тільки для ПК */
+    -webkit-box-reflect: below 5px linear-gradient(transparent 75%, rgba(255,255,255,0.15));
+}
+
+.carousel-3d-item.active-3d {
+    border-color: var(--sale);
+    box-shadow: 0 0 25px rgba(255, 51, 0, 0.4), 0 15px 35px rgba(0,0,0,0.8);
+}
+
+.carousel-3d-item .carousel-img { width: 100%; height: 210px; object-fit: cover; display: block; }
+
+.carousel-3d-item .carousel-info {
+    padding: 10px 12px; text-align: center; flex-grow: 1; 
+    display: flex; flex-direction: column; justify-content: space-between; /* Розподіляє простір */
+    background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(22,22,22,1));
+}
+.carousel-3d-item h4 { color: #fff; font-size: 13px; margin: 0 0 5px 0; text-transform: uppercase; }
+
+/* =================== НЕОНОВА КНОПКА КУПИТИ В КАРУСЕЛІ =================== */
+.btn-buy-carousel {
+    width: 100%;
+    background: rgba(162, 210, 74, 0.1);
+    border: 1px solid var(--mono-lime);
+    color: var(--mono-lime);
+    padding: 8px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 13px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: 0.3s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+
+/* Коли картка активна (по центру) - кнопка яскраво світиться зеленим */
+.carousel-3d-item.active-3d .btn-buy-carousel {
+    background: var(--mono-lime);
+    color: #000;
+    box-shadow: 0 0 15px rgba(162, 210, 74, 0.5);
+}
+
+.carousel-3d-item.active-3d .btn-buy-carousel:hover {
+    background: #b0e060;
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(162, 210, 74, 0.8);
+}
+
+/* =================== АДАПТАЦІЯ ТА ФІКС ЛАГІВ НА МОБІЛЬНОМУ =================== */
+@media (max-width: 767px) {
+    .carousel-3d-viewport { height: 360px; }
+    .carousel-3d-item { 
+        width: 200px; height: 320px;
+        margin-top: -160px; margin-left: -100px;
+        /* ВИМИКАЄМО ВІДДЗЕРКАЛЕННЯ НА ТЕЛЕФОНІ - ГОЛОВНА ПРИЧИНА ЛАГІВ! */
+        -webkit-box-reflect: none;
+    }
+    .carousel-3d-item .carousel-img { height: 170px; }
+    .carousel-header h3 { font-size: 16px; }
+}
