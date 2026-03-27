@@ -1,5 +1,5 @@
 const CSV_URL = 'data.csv';
-const ITEMS_PER_PAGE = 21; /* Кількість товарів на сторінці для заповнення менших карток (кратне 3, 5, 6, 7) */
+const ITEMS_PER_PAGE = 21;
 
 let allProducts = [], filteredProducts = [], cart = [], currentPage = 1;
 let currentModalPics = [], currentModalPicIndex = 0;
@@ -22,6 +22,9 @@ function loadCSV() {
             filteredProducts = [...allProducts];
             renderCatalog();
             buildCategoryTree();
+        },
+        error: function(err) {
+            console.error("Помилка завантаження CSV:", err);
         }
     });
 }
@@ -31,10 +34,15 @@ function renderCatalog() {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     const items = filteredProducts.slice(start, start + ITEMS_PER_PAGE);
 
+    if (items.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding: 50px; width: 100%; grid-column: 1/-1; color: #888;">Товарів не знайдено</div>';
+        return;
+    }
+
     container.innerHTML = items.map(p => {
         const pics = p.Pictures ? p.Pictures.split(',').map(s => s.trim()) : [];
         const mainPic = pics[0] || '';
-        const isSale = p.Badge === 'SALE'; // Перевіряємо, чи це розпродаж
+        const isSale = p.Badge === 'SALE';
         
         return `
         <div class="card ${isSale ? 'sale-card' : ''}" onclick="openModal(${p.myId})">
@@ -79,7 +87,6 @@ function buildCategoryTree() {
         </div>`).join('');
 }
 
-// Функція для плавного розгортання/згортання меню
 function toggleCategory(catGroupElement) {
     catGroupElement.classList.toggle('active');
 }
@@ -90,14 +97,25 @@ function openModal(id) {
 
     document.getElementById('modal-name').innerText = p.Name;
     document.getElementById('modal-price').innerText = `${p.Price} грн`;
-    document.getElementById('modal-old-price').innerText = p.OldPrice ? `${p.OldPrice} грн` : '';
-    document.getElementById('modal-desc').innerHTML = if (p.Description) {
+    
+    const oldPriceEl = document.getElementById('modal-old-price');
+    if (p.OldPrice) {
+        oldPriceEl.innerText = `${p.OldPrice} грн`;
+        oldPriceEl.style.display = 'inline-block';
+    } else {
+        oldPriceEl.innerText = '';
+        oldPriceEl.style.display = 'none';
+    }
+
+    // Форматування опису (абзаци)
+    if (p.Description) {
         let formattedDesc = p.Description.replace(/\n/g, '<br>');
         document.getElementById('modal-desc').innerHTML = formattedDesc;
     } else {
         document.getElementById('modal-desc').innerHTML = 'Опис очікується...';
-    };
-    document.getElementById('modal-vendor').innerText = `Артикул: ${p.VendorCode}`;
+    }
+
+    document.getElementById('modal-vendor').innerText = `Артикул: ${p.VendorCode || 'Не вказано'}`;
 
     currentModalPics = p.Pictures ? p.Pictures.split(',').map(s => s.trim()) : [];
     currentModalPicIndex = 0;
@@ -122,20 +140,11 @@ function openModal(id) {
     };
 }
 
-function openTrustInfo(type) {
-    const messages = {
-        warranty: "Політика VARTA GEAR:\nВи можете обміняти або повернути товар протягом 14 днів, якщо він не був у вжитку та збережено товарний вигляд. Ми цінуємо нашу репутацію.",
-        payment: "Безпечна оплата:\nМи відправляємо накладеним платежем через Нову Пошту. Ви оглядаєте товар у відділенні і платите тільки якщо все влаштовує.",
-        support: "Консультація 24/7:\nНаші менеджери завжди на зв'язку в Telegram та WhatsApp, щоб допомогти з вибором розміру або спорядження."
-    };
-    
-    alert(messages[type] || "Деталі уточнюйте у менеджера.");
-}
-
 function updateModalGallery() {
+    if(currentModalPics.length === 0) return;
     document.getElementById('modal-main-img').src = currentModalPics[currentModalPicIndex] || '';
     document.getElementById('modal-thumbnails').innerHTML = currentModalPics.map((src, i) => 
-        `<img src="${src}" class="${i === currentModalPicIndex ? 'active' : ''}" onclick="setModalPic(${i})" alt="thumb ${i}">`).join('');
+        `<img src="${src}" class="${i === currentModalPicIndex ? 'active' : ''}" onclick="setModalPic(${i})" alt="thumb">`).join('');
 }
 
 function setModalPic(i) { currentModalPicIndex = i; updateModalGallery(); }
@@ -167,36 +176,25 @@ function renderPagination() {
     const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
     const container = document.getElementById('pagination');
     
-    // Якщо сторінка всього одна або нуль - ховаємо пагінацію
     if (totalPages <= 1) { 
         container.innerHTML = ''; 
         return; 
     }
 
     let html = '';
-
-    // Кнопка "Назад"
     if (currentPage > 1) {
         html += `<button class="page-btn" onclick="changePage(${currentPage - 1})">❮</button>`;
     }
-
-    // Розумна логіка відображення номерів сторінок
     for (let i = 1; i <= totalPages; i++) {
-        // Показуємо завжди 1-шу, останню, та сусідні навколо поточної
         if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
             html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
-        } 
-        // Додаємо крапки, якщо є розрив
-        else if (i === currentPage - 2 || i === currentPage + 2) {
+        } else if (i === currentPage - 2 || i === currentPage + 2) {
             html += `<span class="page-dots">...</span>`;
         }
     }
-
-    // Кнопка "Вперед"
     if (currentPage < totalPages) {
         html += `<button class="page-btn" onclick="changePage(${currentPage + 1})">❯</button>`;
     }
-
     container.innerHTML = html;
 }
 
@@ -206,6 +204,7 @@ function changePage(page) {
     window.scrollTo(0,0);
 }
 
+// =================== ЛОГІКА КОШИКА ТА ОФОРМЛЕННЯ ===================
 function updateCartUI() {
     document.getElementById('cart-count').innerText = cart.length;
     const content = document.getElementById('cart-content');
@@ -214,7 +213,7 @@ function updateCartUI() {
     if (cart.length === 0) {
         content.innerHTML = '<div style="text-align:center; padding:50px 0; color:#666;"><i class="fas fa-shopping-cart" style="font-size:40px; margin-bottom:15px; opacity:0.3"></i><br>Кошик порожній</div>';
         footer.style.display = 'none';
-        hideCheckoutForm(); // Ховаємо форму, якщо видалили всі товари
+        hideCheckoutForm();
     } else {
         footer.style.display = 'block';
         let total = 0;
@@ -232,18 +231,11 @@ function updateCartUI() {
         }).join('');
         
         document.getElementById('cart-total-price').innerText = total;
-        document.getElementById('final-total-price').innerText = total; // Оновлюємо суму і в формі
+        document.getElementById('final-total-price').innerText = total;
     }
 }
 
-function removeFromCart(i) { 
-    cart.splice(i, 1); 
-    updateCartUI(); 
-}function toggleMobileMenu(s) { document.getElementById('mobile-menu').classList.toggle('active', s); document.getElementById('body-overlay').classList.toggle('active', s); document.body.style.overflow = s ? 'hidden' : 'auto'; }
-function toggleCart(s) { document.getElementById('cart-sidebar').classList.toggle('active', s); document.getElementById('body-overlay').classList.toggle('active', s); document.body.style.overflow = s ? 'hidden' : 'auto'; }
-function closeModal() { document.getElementById('product-modal').style.display = 'none'; document.getElementById('body-overlay').classList.remove('active'); document.body.style.overflow = 'auto'; }
-function closeAllPanels() { toggleMobileMenu(false); toggleCart(false); closeModal(); }
-function resetFilters() { document.getElementById('search-input').value = ''; filterByBadge('all', document.querySelector('.filter-tag')); }
+function removeFromCart(i) { cart.splice(i, 1); updateCartUI(); }
 
 function showCheckoutForm() {
     document.getElementById('cart-items-container').style.display = 'none';
@@ -255,24 +247,20 @@ function hideCheckoutForm() {
     document.getElementById('checkout-form-container').style.display = 'none';
 }
 
-// Збираємо дані і відправляємо в месенджер
 function submitOrder(platform) {
     if (cart.length === 0) return;
     
-    // Зчитуємо дані з полів
     const name = document.getElementById('order-name').value.trim();
     const phone = document.getElementById('order-phone').value.trim();
     const city = document.getElementById('order-city').value.trim();
     const np = document.getElementById('order-np').value.trim();
     const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
 
-    // Перевірка на заповненість
     if (!name || !phone || !city || !np) {
         alert('Будь ласка, заповніть всі поля для доставки!');
         return;
     }
 
-    // Формуємо красивий чек для повідомлення
     let txt = "🪖 НОВЕ ЗАМОВЛЕННЯ VARTA GEAR:\n\n";
     cart.forEach((it, i) => { 
         txt += `${i+1}. ${it.Name} (Розмір: ${it.selectedSize}) - ${it.Price} грн\n`; 
@@ -288,7 +276,6 @@ function submitOrder(platform) {
     txt += `📮 Відділення НП: ${np}\n`;
     txt += `💳 Оплата: ${paymentMethod}\n`;
 
-    // Відкриваємо месенджер
     const encoded = encodeURIComponent(txt);
     if(platform === 'tg') {
         window.open(`https://t.me/vartagear?text=${encoded}`);
@@ -296,3 +283,20 @@ function submitOrder(platform) {
         window.open(`https://wa.me/+380933923810?text=${encoded}`);
     }
 }
+
+// Функція для блоку довіри (Ovals)
+function openTrustInfo(type) {
+    const messages = {
+        warranty: "Політика VARTA GEAR:\nВи можете обміняти або повернути товар протягом 14 днів, якщо він не був у вжитку та збережено товарний вигляд. Ми цінуємо нашу репутацію.",
+        payment: "Безпечна оплата:\nМи відправляємо накладеним платежем через Нову Пошту. Ви оглядаєте товар у відділенні і платите тільки якщо все влаштовує.",
+        support: "Консультація 24/7:\nНаші менеджери завжди на зв'язку в Telegram та WhatsApp, щоб допомогти з вибором розміру або спорядження."
+    };
+    alert(messages[type] || "Деталі уточнюйте у менеджера.");
+}
+
+// Допоміжні функції інтерфейсу
+function toggleMobileMenu(s) { document.getElementById('mobile-menu').classList.toggle('active', s); document.getElementById('body-overlay').classList.toggle('active', s); document.body.style.overflow = s ? 'hidden' : 'auto'; }
+function toggleCart(s) { document.getElementById('cart-sidebar').classList.toggle('active', s); document.getElementById('body-overlay').classList.toggle('active', s); document.body.style.overflow = s ? 'hidden' : 'auto'; }
+function closeModal() { document.getElementById('product-modal').style.display = 'none'; document.getElementById('body-overlay').classList.remove('active'); document.body.style.overflow = 'auto'; }
+function closeAllPanels() { toggleMobileMenu(false); toggleCart(false); closeModal(); }
+function resetFilters() { document.getElementById('search-input').value = ''; filterByBadge('all', document.querySelector('.filter-tag')); }
