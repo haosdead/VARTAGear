@@ -128,7 +128,8 @@ function openModal(id) {
     // Згорнутий опис
     const descEl = document.getElementById('modal-desc');
     descEl.classList.remove('expanded'); // Спочатку згорнутий
-    document.getElementById('modal-desc-container').classList.remove('active'); // Скидання іконки
+    document.getElementById('modal-desc-container').classList.remove('active'); 
+    document.getElementById('desc-toggle-text').innerText = 'Розгорнути';// Скидання іконки
 
     if (p.Description) {
         let formattedDesc = p.Description.replace(/\n/g, '<br>');
@@ -163,11 +164,20 @@ function openModal(id) {
 }
 
 // Додайте цю нову функцію в кінець script.js
+// Функція розгортання/згортання опису
 function toggleModalDescription() {
     const descEl = document.getElementById('modal-desc');
     const containerEl = document.getElementById('modal-desc-container');
+    const textEl = document.getElementById('desc-toggle-text');
+
     descEl.classList.toggle('expanded');
-    containerEl.classList.toggle('active'); // Повертає іконку стрілки
+    containerEl.classList.toggle('active');
+
+    if (containerEl.classList.contains('active')) {
+        textEl.innerText = 'Згорнути';
+    } else {
+        textEl.innerText = 'Розгорнути';
+    }
 }
 
 function updateModalGallery() {
@@ -335,4 +345,18 @@ function toggleModalDescription() {
     const containerEl = document.getElementById('modal-desc-container');
     descEl.classList.toggle('expanded');
     containerEl.classList.toggle('active'); // Повертає іконку стрілки
+}
+// =================== ПЛАВНА ПРОКРУТКА ВГОРУ ===================
+window.onscroll = function() {
+    const btn = document.getElementById("scrollTopBtn");
+    // Показувати кнопку, якщо прокрутили більше 400 пікселів вниз
+    if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
+        btn.style.display = "flex";
+    } else {
+        btn.style.display = "none";
+    }
+};
+
+function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }

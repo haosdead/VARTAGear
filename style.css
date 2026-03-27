@@ -10,9 +10,11 @@
 }
 
 /* =================== БАЗОВІ СТИЛІ ТА ТАКТИЧНИЙ ФОН =================== */
+html { scroll-behavior: smooth; }
+
 body {
     background-color: #0c0c0c;
-    /* Десатурований камуфляжний/тактичний патерн */
+    /* Десатурований тактичний патерн */
     background-image: 
         linear-gradient(rgba(12, 12, 12, 0.92), rgba(12, 12, 12, 0.92)), 
         url('https://www.transparenttextures.com/patterns/camo.png');
@@ -269,16 +271,30 @@ body {
 .add-to-cart-btn:hover { background: #b0e060; transform: translateY(-3px); box-shadow: 0 6px 20px rgba(162, 210, 74, 0.4); }
 @media (max-width: 767px) { .add-to-cart-btn { width: 100%; } }
 
-/* Згорнутий опис в модалці */
+/* =================== ІНТУЇТИВНА КНОПКА ОПИСУ В МОДАЛЦІ =================== */
 .modal-description-bottom { padding: 0 20px 20px 20px; }
 @media (min-width: 768px) { .modal-description-bottom { padding: 0 30px 30px 30px; } }
-.desc-header-toggle { display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-bottom: 1px solid #222; padding: 15px 0; }
-.desc-header-toggle h3 { margin: 0; font-size: 16px; color: #fff; text-transform: uppercase; }
-.desc-toggle-icon { color: #888; transition: transform 0.3s; }
+
+.desc-header-toggle { 
+    display: flex; justify-content: space-between; align-items: center; 
+    cursor: pointer; background: #1a1a1a; padding: 15px 20px; 
+    border-radius: 10px; border: 1px solid var(--border-gray); transition: 0.3s;
+}
+.desc-header-toggle:hover { border-color: var(--mono-lime); background: #222; }
+
+.desc-title-wrap { display: flex; align-items: center; gap: 10px; }
+.desc-title-wrap i { color: var(--mono-lime); font-size: 16px; }
+.desc-title-wrap h3 { margin: 0; font-size: 16px; color: #fff; text-transform: uppercase; }
+
+.desc-action-wrap { display: flex; align-items: center; gap: 8px; color: var(--mono-lime); font-size: 13px; font-weight: 600; transition: 0.3s; }
+.desc-toggle-icon { transition: transform 0.3s; }
+
 #modal-desc { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; color: #bbb; font-size: 14px; line-height: 1.6; letter-spacing: 0.3px; }
 #modal-desc.expanded { max-height: 1000px; padding-top: 15px; }
 #modal-desc br { content: ""; display: block; margin-bottom: 8px; }
+
 .modal-description-bottom.active .desc-toggle-icon { transform: rotate(180deg); }
+.modal-description-bottom.active .desc-action-wrap { color: #888; }
 .vendor-label { margin-top: 20px; font-size: 12px; color: #666; font-weight: 600; background: #080808; padding: 8px 12px; border-radius: 6px; display: inline-block; border: 1px solid #1a1a1a; }
 
 /* Бейдж SALE в модалці */
@@ -312,3 +328,16 @@ body {
 .footer-bottom { max-width: 1200px; margin: 40px auto 0 auto; padding-top: 20px; border-top: 1px dashed #222; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
 .slogan { color: #fff; font-size: 16px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; text-shadow: 0 0 10px rgba(255, 255, 255, 0.1); }
 .copyright { color: #666; font-size: 13px; font-weight: 500; }
+
+/* =================== КНОПКА ПЛАВНОЇ ПРОКРУТКИ ВГОРУ =================== */
+#scrollTopBtn {
+    display: none; position: fixed; bottom: 25px; right: 20px; z-index: 1000;
+    background: var(--mono-lime); color: #000; border: none; border-radius: 50%;
+    width: 50px; height: 50px; font-size: 20px; cursor: pointer;
+    box-shadow: 0 4px 15px rgba(162, 210, 74, 0.4); transition: 0.3s;
+    align-items: center; justify-content: center;
+}
+#scrollTopBtn:hover { transform: translateY(-5px); background: #b0e060; }
+@media (max-width: 767px) {
+    #scrollTopBtn { width: 45px; height: 45px; bottom: 20px; right: 15px; font-size: 18px; }
+}
