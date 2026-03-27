@@ -91,6 +91,7 @@ function toggleCategory(catGroupElement) {
     catGroupElement.classList.toggle('active');
 }
 
+// =================== ОНОВЛЕНА openModal ===================
 function openModal(id) {
     const p = allProducts.find(x => x.myId === id);
     if(!p) return;
@@ -98,21 +99,42 @@ function openModal(id) {
     document.getElementById('modal-name').innerText = p.Name;
     document.getElementById('modal-price').innerText = `${p.Price} грн`;
     
+    // Відображення і виділення SALE
     const oldPriceEl = document.getElementById('modal-old-price');
-    if (p.OldPrice) {
-        oldPriceEl.innerText = `${p.OldPrice} грн`;
-        oldPriceEl.style.display = 'inline-block';
+    const badgeSaleEl = document.getElementById('modal-sale-badge');
+    
+    if (p.Badge === 'SALE') {
+        const discountPercentage = p.OldPrice ? Math.round(((parseFloat(p.OldPrice) - p.Price) / parseFloat(p.OldPrice)) * 100) : null;
+        badgeSaleEl.innerHTML = `
+            <span class="sale-line1">SALE:</span>
+            <span class="sale-line2">${discountPercentage ? `-${discountPercentage}%` : ''}</span>
+        `;
+        badgeSaleEl.style.display = 'flex';
+        
+        if (p.OldPrice) {
+            oldPriceEl.innerText = `${p.OldPrice} грн`;
+            oldPriceEl.style.display = 'inline-block';
+        } else {
+            oldPriceEl.innerText = '';
+            oldPriceEl.style.display = 'none';
+        }
     } else {
+        badgeSaleEl.innerHTML = '';
+        badgeSaleEl.style.display = 'none';
         oldPriceEl.innerText = '';
         oldPriceEl.style.display = 'none';
     }
 
-    // Форматування опису (абзаци)
+    // Згорнутий опис
+    const descEl = document.getElementById('modal-desc');
+    descEl.classList.remove('expanded'); // Спочатку згорнутий
+    document.getElementById('modal-desc-container').classList.remove('active'); // Скидання іконки
+
     if (p.Description) {
         let formattedDesc = p.Description.replace(/\n/g, '<br>');
-        document.getElementById('modal-desc').innerHTML = formattedDesc;
+        descEl.innerHTML = formattedDesc;
     } else {
-        document.getElementById('modal-desc').innerHTML = 'Опис очікується...';
+        descEl.innerHTML = 'Опис очікується...';
     }
 
     document.getElementById('modal-vendor').innerText = `Артикул: ${p.VendorCode || 'Не вказано'}`;
@@ -138,6 +160,14 @@ function openModal(id) {
         closeModal();
         toggleCart(true);
     };
+}
+
+// Додайте цю нову функцію в кінець script.js
+function toggleModalDescription() {
+    const descEl = document.getElementById('modal-desc');
+    const containerEl = document.getElementById('modal-desc-container');
+    descEl.classList.toggle('expanded');
+    containerEl.classList.toggle('active'); // Повертає іконку стрілки
 }
 
 function updateModalGallery() {
@@ -300,3 +330,9 @@ function toggleCart(s) { document.getElementById('cart-sidebar').classList.toggl
 function closeModal() { document.getElementById('product-modal').style.display = 'none'; document.getElementById('body-overlay').classList.remove('active'); document.body.style.overflow = 'auto'; }
 function closeAllPanels() { toggleMobileMenu(false); toggleCart(false); closeModal(); }
 function resetFilters() { document.getElementById('search-input').value = ''; filterByBadge('all', document.querySelector('.filter-tag')); }
+function toggleModalDescription() {
+    const descEl = document.getElementById('modal-desc');
+    const containerEl = document.getElementById('modal-desc-container');
+    descEl.classList.toggle('expanded');
+    containerEl.classList.toggle('active'); // Повертає іконку стрілки
+}

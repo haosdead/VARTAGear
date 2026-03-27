@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VARTA GEAR | Tactical Store</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     
@@ -39,7 +39,6 @@
         <h3>КАТЕГОРІЇ</h3>
         <button class="close-btn" onclick="toggleMobileMenu(false)">✕</button>
     </div>
-    
     <nav id="category-tree" class="category-tree"></nav>
     <button class="reset-filters-btn" onclick="resetFilters()">Скинути все</button>
 </aside>
@@ -60,7 +59,6 @@
             </div>
             <button class="trust-arrow-btn"><i class="fas fa-angle-right"></i></button>
         </div>
-
         <div class="trust-oval" onclick="openTrustInfo('payment')">
             <i class="fas fa-hand-holding-usd trust-icon"></i>
             <div class="trust-text">
@@ -69,7 +67,6 @@
             </div>
             <button class="trust-arrow-btn"><i class="fas fa-angle-right"></i></button>
         </div>
-
         <div class="trust-oval" onclick="openTrustInfo('support')">
             <i class="fas fa-headset trust-icon"></i>
             <div class="trust-text">
@@ -79,8 +76,9 @@
             <button class="trust-arrow-btn"><i class="fas fa-angle-right"></i></button>
         </div>
     </div>
-
+    
     <div class="green-trust-divider"></div>
+
     <div id="catalog" class="products-grid"></div>
     <div id="pagination" class="pagination-bar"></div>
 </main>
@@ -95,7 +93,7 @@
         <div id="cart-content" class="cart-items-list"></div>
         <div id="cart-footer" class="cart-bottom" style="display:none;">
             <div class="cart-sum">Разом: <span id="cart-total-price">0</span> грн</div>
-            <button class="add-to-cart-btn" onclick="showCheckoutForm()">ОФОРМИТИ ЗАМОВЛЕННЯ</button>
+            <button class="add-to-cart-btn" style="width:100%" onclick="showCheckoutForm()">ОФОРМИТИ ЗАМОВЛЕННЯ</button>
         </div>
     </div>
 
@@ -143,16 +141,19 @@
                 <h2 id="modal-name"></h2>
                 <span class="close-modal" onclick="closeModal()">✕</span>
             </div>
+            
             <div class="modal-body-top">
                 <div class="modal-photo-container">
                     <button class="nav-pic prev" onclick="changeModalPic(-1)">❮</button>
                     <img id="modal-main-img" src="" alt="">
                     <button class="nav-pic next" onclick="changeModalPic(1)">❯</button>
+                    <div id="modal-sale-badge" class="badge-sale-modal" style="display:none;"></div>
                 </div>
+                
                 <div class="modal-actions-area">
                     <div id="modal-thumbnails" class="thumb-list"></div>
                     <div class="modal-price-block">
-                        <span id="modal-old-price" class="old-price"></span>
+                        <span id="modal-old-price" class="old-price" style="display:none;"></span>
                         <span id="modal-price" class="current-price"></span>
                     </div>
                     <div class="selector-block">
@@ -162,14 +163,66 @@
                     <button id="modal-add-btn" class="add-to-cart-btn">ДОДАТИ В КОШИК</button>
                 </div>
             </div>
-            <div class="modal-description-bottom">
-                <h3>Опис та характеристики</h3>
+            
+            <div id="modal-desc-container" class="modal-description-bottom">
+                <div class="desc-header-toggle" onclick="toggleModalDescription()">
+                    <h3>Опис та характеристики</h3>
+                    <i class="fas fa-chevron-down desc-toggle-icon"></i>
+                </div>
                 <div id="modal-desc"></div>
                 <div id="modal-vendor" class="vendor-label"></div>
             </div>
+            
         </div>
     </div>
 </div>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-block schedule-block">
+            <h4><i class="fas fa-clock"></i> Графік роботи</h4>
+            <div class="schedule-items">
+                <div class="schedule-item">
+                    <span class="days">ПН - ПТ</span>
+                    <span class="hours">09:00 - 20:00</span>
+                </div>
+                <div class="schedule-item">
+                    <span class="days weekend">СБ - НД</span>
+                    <span class="hours">11:00 - 16:00</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-block contact-block">
+            <h4><i class="fas fa-headset"></i> Написати менеджеру</h4>
+            <div class="social-icons">
+                <a href="https://t.me/vartagear" target="_blank" class="social-btn tg-btn" title="Telegram">
+                    <i class="fab fa-telegram-plane"></i>
+                </a>
+                <a href="https://wa.me/+380933923810" target="_blank" class="social-btn wa-btn" title="WhatsApp">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div class="footer-block social-block">
+            <h4><i class="fas fa-mobile-alt"></i> Ми в соцмережах</h4>
+            <div class="social-icons">
+                <a href="#" target="_blank" class="social-btn inst-btn" title="Instagram">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="#" target="_blank" class="social-btn tt-btn" title="TikTok">
+                    <i class="fab fa-tiktok"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer-bottom">
+        <div class="slogan">Слава Україні! Героям Слава! 🇺🇦</div>
+        <div class="copyright">© VARTA GEAR - 2025. Всі права захищено.</div>
+    </div>
+</footer>
 
 <script src="script.js"></script>
 </body>
