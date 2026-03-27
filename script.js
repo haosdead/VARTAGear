@@ -510,16 +510,21 @@ function update3DCarousel() {
 
     const isMobile = window.innerWidth <= 767;
     const offsetBase = isMobile ? 120 : 250; 
-    const rotateBase = isMobile ? 35 : 45;   
+    // Зменшуємо кут для Android, щоб легше було малювати 3D
+    const rotateBase = isMobile ? 25 : 45;   
 
     items.forEach((item, index) => {
         let offset = index - current3DIndex;
         if (offset > Math.floor(items.length / 2)) offset -= items.length;
         if (offset < -Math.floor(items.length / 2)) offset += items.length;
 
+        // Залізно вимикаємо blur всюди, щоб не вантажити телефон
+        item.style.filter = 'none';
+
         if (offset === 0) {
-            // АКТИВНА КАРТКА (По центру)
-            item.style.transform = `translateX(0px) scale(1) translateZ(50px) rotateY(0deg)`;
+            // АКТИВНА КАРТКА
+            // Використовуємо translate3d для GPU-прискорення
+            item.style.transform = `translate3d(0px, 0px, 50px) rotateY(0deg) scale(1)`;
             item.style.zIndex = 10;
             item.style.opacity = 1;
             item.style.pointerEvents = 'auto'; 
@@ -531,9 +536,10 @@ function update3DCarousel() {
             
             const translateZ = absOffset === 1 ? -150 : -300;
             const scale = absOffset === 1 ? 0.85 : 0.65;
-            const opacity = absOffset === 1 ? 0.6 : 0; // Більше не юзаємо blur!
+            const opacity = absOffset === 1 ? 0.6 : 0; 
             
-            item.style.transform = `translateX(${sign * offsetBase * absOffset}px) scale(${scale}) translateZ(${translateZ}px) rotateY(${-sign * rotateBase}deg)`;
+            // GPU-прискорений запис через translate3d
+            item.style.transform = `translate3d(${sign * offsetBase * absOffset}px, 0px, ${translateZ}px) rotateY(${-sign * rotateBase}deg) scale(${scale})`;
             item.style.zIndex = 10 - absOffset;
             item.style.opacity = opacity;
             item.style.pointerEvents = 'none'; 
