@@ -458,3 +458,29 @@ function renderSaleCarousel() {
         </div>`;
     }).join('');
 }
+
+function moveCarousel(direction) {
+    const track = document.getElementById('sale-carousel-track');
+    const items = document.querySelectorAll('.carousel-item');
+    if (items.length === 0) return;
+
+    const itemWidth = items[0].offsetWidth + 15; // Ширина + gap
+    const visibleWidth = document.querySelector('.carousel-viewport').offsetWidth;
+    const maxScroll = track.scrollWidth - visibleWidth;
+    
+    carouselIndex += direction;
+    
+    let targetTranslate = carouselIndex * itemWidth;
+    
+    // Перевірка межі
+    if (targetTranslate < 0) {
+        targetTranslate = 0;
+        carouselIndex = 0;
+    }
+    if (targetTranslate > maxScroll) {
+        targetTranslate = maxScroll;
+        carouselIndex = Math.ceil(maxScroll / itemWidth);
+    }
+
+    track.style.transform = `translateX(-${targetTranslate}px)`;
+}
