@@ -149,10 +149,37 @@ function resetPageAndFilter() {
 function renderPagination() {
     const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
     const container = document.getElementById('pagination');
-    let html = '';
-    for (let i = 1; i <= totalPages; i++) {
-        html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="changePage(${i})">${i}</button>`;
+    
+    // Якщо сторінка всього одна або нуль - ховаємо пагінацію
+    if (totalPages <= 1) { 
+        container.innerHTML = ''; 
+        return; 
     }
+
+    let html = '';
+
+    // Кнопка "Назад"
+    if (currentPage > 1) {
+        html += `<button class="page-btn" onclick="changePage(${currentPage - 1})">❮</button>`;
+    }
+
+    // Розумна логіка відображення номерів сторінок
+    for (let i = 1; i <= totalPages; i++) {
+        // Показуємо завжди 1-шу, останню, та сусідні навколо поточної
+        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+            html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+        } 
+        // Додаємо крапки, якщо є розрив
+        else if (i === currentPage - 2 || i === currentPage + 2) {
+            html += `<span class="page-dots">...</span>`;
+        }
+    }
+
+    // Кнопка "Вперед"
+    if (currentPage < totalPages) {
+        html += `<button class="page-btn" onclick="changePage(${currentPage + 1})">❯</button>`;
+    }
+
     container.innerHTML = html;
 }
 

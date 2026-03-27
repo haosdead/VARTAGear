@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VARTA GEAR | Tactical Store</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -23,14 +27,19 @@
     </div>
 </header>
 
+<div class="main-search-wrapper">
+    <div class="search-box">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="search-input" placeholder="Пошук (назва, арт)..." oninput="resetPageAndFilter()">
+    </div>
+</div>
+
 <aside id="mobile-menu" class="side-panel">
     <div class="panel-header">
         <h3>КАТЕГОРІЇ</h3>
         <button class="close-btn" onclick="toggleMobileMenu(false)">✕</button>
     </div>
-    <div class="search-container">
-        <input type="text" id="search-input" placeholder="Пошук (назва, арт)..." oninput="resetPageAndFilter()">
-    </div>
+    
     <nav id="category-tree" class="category-tree"></nav>
     <button class="reset-filters-btn" onclick="resetFilters()">Скинути все</button>
 </aside>
@@ -47,7 +56,10 @@
 </main>
 
 <aside id="cart-sidebar" class="side-panel right">
-    <div class="panel-header"><h3>КОШИК</h3><button class="close-btn" onclick="toggleCart(false)">✕</button></div>
+    <div class="panel-header">
+        <h3>КОШИК</h3>
+        <button class="close-btn" onclick="toggleCart(false)">✕</button>
+    </div>
     <div id="cart-content" class="cart-items-list"></div>
     <div id="cart-footer" class="cart-bottom" style="display:none;">
         <div class="cart-sum">Разом: <span id="cart-total-price">0</span> грн</div>
