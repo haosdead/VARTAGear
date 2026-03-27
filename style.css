@@ -14,22 +14,24 @@ html { scroll-behavior: smooth; }
 
 body {
     background-color: #0c0c0c;
-    /* ТАКТИЧНИЙ ФОН З ФІРМОВИМИ КОЛЬОРАМИ */
+    /* ЕФЕКТНИЙ ТАКТИЧНИЙ ФОН: Мультикам + М'який перелив кольорів */
     background-image: 
-        /* Легке неонове світіння: Лайм зліва зверху, Оранж справа знизу */
-        radial-gradient(circle at 0% 0%, rgba(162, 210, 74, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 100% 100%, rgba(255, 60, 0, 0.06) 0%, transparent 40%),
-        /* Напівпрозоре затемнення (75%, щоб камуфляж було гарно видно) */
-        linear-gradient(rgba(10, 10, 10, 0.75), rgba(10, 10, 10, 0.85)),
-        /* Текстура камуфляжу */
-        url('https://www.transparenttextures.com/patterns/camo.png');
+        /* Лаймове сяйво зліва зверху */
+        radial-gradient(circle at 15% 15%, rgba(162, 210, 74, 0.12) 0%, transparent 40%),
+        /* Оранжеве сяйво справа знизу */
+        radial-gradient(circle at 85% 85%, rgba(255, 60, 0, 0.1) 0%, transparent 40%),
+        /* Основне затемнення для читабельності тексту (70% прозорості) */
+        linear-gradient(rgba(12, 12, 12, 0.7), rgba(12, 12, 12, 0.8)),
+        /* Патерн мультикаму/тканини */
+        url('https://www.transparenttextures.com/patterns/fabric-of-the-nation.png');
     
+    background-size: 100% 100%, 100% 100%, 100% 100%, 250px 250px;
     background-attachment: fixed;
     color: var(--text-white);
     margin: 0;
     font-family: 'Inter', sans-serif;
-    overflow-x: hidden;
-    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 /* =================== HEADER (ШАПКА) =================== */
@@ -468,53 +470,96 @@ body {
 .sale-line2 { font-size: 18px; font-weight: 900;}
 
 /* =================== ФУТЕР (ПІДВАЛ) =================== */
+/* =================== ФУТЕР (ПІДВАЛ) =================== */
+.site-footer {
+    background: rgba(0, 0, 0, 0.6); /* Напівпрозорий, щоб бачити фон */
+    border-top: 1px solid var(--border-gray);
+    padding: 40px 15px;
+    margin-top: 60px;
+}
+
 .footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    /* ТУТ МАГІЯ: Вирівнювання в рядок на ПК */
+    display: flex;
+    flex-direction: row; 
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 20px;
+}
+
+.footer-block {
+    background: rgba(18, 18, 18, 0.8);
+    border: 1px solid var(--border-gray);
+    border-radius: 20px;
+    padding: 20px;
+    flex: 1; /* Всі блоки однакової ширини */
+    text-align: center;
+    transition: 0.3s;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 15px;
-    padding: 15px 30px;
-    border: 2px solid var(--border-gray); /* Тактична оболонка */
-    border-radius: 50px;
-    background: rgba(20, 20, 20, 0.5);
-    transition: 0.3s;
-}
-.footer-inner:hover {
-    border-color: var(--mono-lime); /* Світиться при наведенні */
-    box-shadow: 0 0 15px rgba(162, 210, 74, 0.2);
+    justify-content: center;
 }
 
-.footer-slogan {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 800;
-    font-size: 15px;
+.footer-block:hover {
+    border-color: var(--mono-lime);
+    background: rgba(25, 25, 25, 0.9);
+}
+
+.footer-block h4 {
     color: #fff;
+    font-size: 13px;
+    margin: 0 0 15px 0;
     text-transform: uppercase;
     letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
-.footer-slogan .flag-ua,
-.footer-slogan .emblem-ua {
-    font-size: 18px;
+.footer-block h4 i { color: var(--mono-lime); }
+
+/* Графік роботи компактно */
+.schedule-items { display: flex; flex-direction: column; gap: 8px; }
+.schedule-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+}
+.schedule-item .hours { color: var(--mono-lime); }
+
+/* Нижній рядок (Слава Україні) */
+.footer-bottom {
+    max-width: 1200px;
+    margin: 30px auto 0 auto;
+    text-align: center;
+    border-top: 1px dashed #333;
+    padding-top: 20px;
+}
+.slogan {
+    font-weight: 900;
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
-.footer-copyright {
-    font-size: 12px;
-    color: #666;
-    font-weight: 500;
+/* =================== АДАПТАЦІЯ ДЛЯ МОБІЛОК =================== */
+@media (max-width: 900px) {
+    .footer-inner {
+        flex-direction: column; /* На мобільних знову стають один під одним */
+        align-items: center;
+    }
+    .footer-block {
+        width: 100%;
+        max-width: 400px;
+    }
 }
-@media (min-width: 768px) { .footer-inner { grid-template-columns: repeat(3, 1fr); gap: 30px; } }
-.footer-block { background: #121212; border: 1px solid #1c1c1c; border-radius: 20px; padding: 25px; text-align: center; transition: 0.3s; }
-.footer-block:hover { border-color: #2a2a2a; }
-.footer-block h4 { color: #fff; font-size: 14px; margin: 0 0 20px 0; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-.footer-block h4 i { color: var(--mono-lime); font-size: 16px; }
-
-.schedule-items { display: flex; flex-direction: column; gap: 10px; }
-.schedule-item { display: flex; justify-content: space-between; align-items: center; background: #0a0a0a; padding: 14px 20px; border-radius: 12px; border: 1px solid #1a1a1a; font-size: 14px; font-weight: 600; text-transform: uppercase; }
-.schedule-item .days { color: #aaa; }
-.schedule-item .days.weekend { color: var(--sale); }
-.schedule-item .hours { color: var(--mono-lime); font-size: 15px; font-weight: 800; }
 
 /* ПРЕМІАЛЬНІ ІКОНКИ СОЦМЕРЕЖ */
 .social-icons { display: flex; justify-content: center; gap: 20px; }
