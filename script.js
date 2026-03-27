@@ -27,19 +27,38 @@ function setupAddToCart(p, sel) {
     document.getElementById('modal-add-btn').onclick = () => {
         if (!sel.value) return alert('Оберіть розмір!');
         
-        // Додаємо товар у масив
+        // 1. Додаємо товар у масив кошика
         cart.push({ ...p, selectedSize: sel.value });
         
-        // ЗБЕРІГАЄМО ОНОВЛЕНИЙ МАСИВ У ПАМ'ЯТЬ
+        // 2. ЗБЕРІГАЄМО ОНОВЛЕНИЙ МАСИВ У ПАМ'ЯТЬ (localStorage)
         localStorage.setItem('varta_cart', JSON.stringify(cart));
         
+        // 3. НАДСИЛАЄМО ПОДІЮ В GOOGLE ANALYTICS 4
+        if (typeof gtag === 'function') {
+            const productPrice = parseFloat(p.Price) || 0; // Захист від помилок у ціні
+            gtag('event', 'add_to_cart', {
+                currency: 'UAH',
+                value: productPrice,
+                items: [{
+                    item_id: String(p.myId),
+                    item_name: p.Name,
+                    item_category: p.Category,
+                    item_variant: sel.value,
+                    price: productPrice,
+                    quantity: 1
+                }]
+            });
+        }
+
+        // 4. Оновлюємо інтерфейс
         updateCartUI();
         closeModal();
         showToast(p.Name);
-        //toggleCart(true);
+        
+        // Якщо захочете автоматично відкривати кошик — розкоментуйте нижче:
+        // toggleCart(true);
     };
 }
-
 function loadCSV() {
     Papa.parse(CSV_URL, {
         download: true, 
