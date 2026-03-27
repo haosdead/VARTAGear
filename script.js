@@ -17,15 +17,20 @@ function loadCSV() {
                 OldPrice: p.OldPrice ? parseFloat(p.OldPrice) || null : null,
                 Badge: p.Badge ? p.Badge.trim().toUpperCase() : ""
             }));
-            // Сортування: SALE завжди зверху
             allProducts.sort((a, b) => (b.Badge === 'SALE') - (a.Badge === 'SALE'));
             filteredProducts = [...allProducts];
             renderCatalog();
             buildCategoryTree();
+            
+            // НОВЕ: Перевіряємо посилання при завантаженні сторінки
+            const params = new URLSearchParams(window.location.search);
+            const prodId = params.get('product');
+            if (prodId !== null) {
+                // Відкриваємо товар, якщо хтось перейшов за прямим посиланням
+                setTimeout(() => openModal(parseInt(prodId), false), 300); 
+            }
         },
-        error: function(err) {
-            console.error("Помилка завантаження CSV:", err);
-        }
+        error: function(err) { console.error("Помилка завантаження CSV:", err); }
     });
 }
 
@@ -92,14 +97,13 @@ function toggleCategory(catGroupElement) {
 }
 
 // =================== ОНОВЛЕНА openModal ===================
-function openModal(id) {
+function openModal(id, updateUrl = true) {
     const p = allProducts.find(x => x.myId === id);
     if(!p) return;
 
     document.getElementById('modal-name').innerText = p.Name;
     document.getElementById('modal-price').innerText = `${p.Price} грн`;
     
-    // Відображення і виділення SALE
     const oldPriceEl = document.getElementById('modal-old-price');
     const badgeSaleEl = document.getElementById('modal-sale-badge');
     
@@ -125,11 +129,10 @@ function openModal(id) {
         oldPriceEl.style.display = 'none';
     }
 
-    // Згорнутий опис
     const descEl = document.getElementById('modal-desc');
-    descEl.classList.remove('expanded'); // Спочатку згорнутий
-    document.getElementById('modal-desc-container').classList.remove('active'); 
-    document.getElementById('desc-toggle-text').innerText = 'Розгорнути';// Скидання іконки
+    descEl.classList.add('expanded'); 
+    document.getElementById('modal-desc-container').classList.add('active'); 
+    document.getElementById('desc-toggle-text').innerText = 'Згорнути';
 
     if (p.Description) {
         let formattedDesc = p.Description.replace(/\n/g, '<br>');
@@ -161,8 +164,14 @@ function openModal(id) {
         closeModal();
         toggleCart(true);
     };
-}
 
+    // НОВЕ: Змінюємо посилання в адресному рядку
+    if (updateUrl) {
+        const url = new URL(window.location);
+        url.searchParams.set('product', id);
+        window.history.pushState({ productId: id }, '', url);
+    }
+}
 // Додайте цю нову функцію в кінець script.js
 // Функція розгортання/згортання опису
 function toggleModalDescription() {
@@ -337,7 +346,18 @@ function openTrustInfo(type) {
 // Допоміжні функції інтерфейсу
 function toggleMobileMenu(s) { document.getElementById('mobile-menu').classList.toggle('active', s); document.getElementById('body-overlay').classList.toggle('active', s); document.body.style.overflow = s ? 'hidden' : 'auto'; }
 function toggleCart(s) { document.getElementById('cart-sidebar').classList.toggle('active', s); document.getElementById('body-overlay').classList.toggle('active', s); document.body.style.overflow = s ? 'hidden' : 'auto'; }
-function closeModal() { document.getElementById('product-modal').style.display = 'none'; document.getElementById('body-overlay').classList.remove('active'); document.body.style.overflow = 'auto'; }
+function closeModal(updateUrl = true) { 
+    document.getElementById('product-modal').style.display = 'none'; 
+    document.getElementById('body-overlay').classList.remove('active'); 
+    document.body.style.overflow = 'auto'; 
+    
+    // НОВЕ: Прибираємо товар з посилання
+    if (updateUrl) {
+        const url = new URL(window.location);
+        url.searchParams.delete('product');
+        window.history.pushState({}, '', url);
+    }
+}
 function closeAllPanels() { toggleMobileMenu(false); toggleCart(false); closeModal(); }
 function resetFilters() { document.getElementById('search-input').value = ''; filterByBadge('all', document.querySelector('.filter-tag')); }
 function toggleModalDescription() {
@@ -360,3 +380,19 @@ window.onscroll = function() {
 function scrollToTop() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+// =================== НАВІГАЦІЯ БРАУЗЕРА (КНОПКА НАЗАД) ===================
+window.addEventListener('popstate', () => {
+    const params = new URLSearchParams(window.location.search);
+    const prodId = params.get('product');
+    
+    if (prodId !== null) {
+        // Якщо натиснули "Вперед" і там є товар
+        openModal(parseInt(prodId), false); 
+    } else {
+        // Якщо натиснули "Назад" на головну сторінку - ховаємо всі панелі
+        closeModal(false);
+        toggleMobileMenu(false);
+        toggleCart(false);
+    }
+});
