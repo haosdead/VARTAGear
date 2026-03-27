@@ -13,24 +13,32 @@ html { scroll-behavior: smooth; }
 
 body {
     background-color: #080808;
-    /* ПОТУЖНИЙ ТАКТИЧНИЙ ФОН: Яскраві неонові плями + чіткий камуфляж */
+    color: var(--text-white);
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: default;
+}
+
+/* ФІКС ЛАГІВ ПРИ СКРОЛІ: Фон на окремому апаратному шарі */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: -100; /* Ховаємо під усі товари */
+    
+    /* Наш потужний фон */
     background-image: 
         radial-gradient(circle at 10% 10%, rgba(162, 210, 74, 0.25) 0%, transparent 50%),
         radial-gradient(circle at 90% 90%, rgba(255, 51, 0, 0.2) 0%, transparent 50%),
         linear-gradient(rgba(10, 10, 10, 0.5), rgba(10, 10, 10, 0.7)),
         url('https://www.transparenttextures.com/patterns/fabric-of-the-nation.png');
     
-    background-attachment: fixed;
     background-size: 100% 100%, 100% 100%, 100% 100%, 280px 280px;
-    color: var(--text-white);
-    margin: 0;
-    font-family: 'Inter', sans-serif;
-    overflow-x: hidden;
-    
-    /* ПОВНА ЗАБОРОНА КУРСОРУ-ПАЛИЧКИ ДЛЯ ТЕКСТУ */
-    user-select: none;
-    -webkit-user-select: none;
-    cursor: default;
+    pointer-events: none; /* Щоб не заважав клікати */
 }
 
 /* Дозволяємо виділення та курсор лише в полях введення */
@@ -39,7 +47,6 @@ input, textarea, .search-box input {
     -webkit-user-select: text !important;
     cursor: text !important;
 }
-
 /* =================== ШАПКА (HEADER) ТА ЛОГОТИП =================== */
 .header {
     background: #000;
@@ -122,6 +129,8 @@ input, textarea, .search-box input {
     margin: 20px auto;
     padding: 0 15px;
     position: relative;
+    /* ФІКС СКРОЛУ: Кажемо браузеру не перераховувати сторінку через карусель */
+    contain: content; 
 }
 
 .carousel-header {
@@ -477,12 +486,11 @@ input, textarea, .search-box input {
 /* 3D КАРТКА - ФІКС ВИПАДАННЯ ВНИЗ */
 .carousel-3d-item {
     position: absolute;
-    /* Збираємо всі картки рівно по центру! */
     top: 50%; left: 50%;
-    margin-top: -170px; /* Половина висоти */
-    margin-left: -120px; /* Половина ширини */
+    margin-top: -180px; 
+    margin-left: -120px; 
     width: 240px;
-    height: 340px;
+    height: 360px;
     
     background: var(--card-gray);
     border: 2px solid #333;
@@ -490,18 +498,22 @@ input, textarea, .search-box input {
     overflow: hidden;
     cursor: pointer;
     display: flex; flex-direction: column;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.8);
     
-    /* Плавність 3D переміщення */
-    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.6s, filter 0.6s;
+    /* ВИДАЛИЛИ will-change, бо він забивав пам'ять Андроїда при скролі! */
+    -webkit-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
     
-    /* Віддзеркалення знизу (працює в Chrome/Safari) */
-    -webkit-box-reflect: below 5px linear-gradient(transparent 75%, rgba(255,255,255,0.2));
+    box-shadow: none; /* Тінь вимкнена під час руху */
+    transition: transform 0.4s ease-out, opacity 0.4s ease-out;
 }
 
+/* Активна картка (отримує тінь ТІЛЬКИ коли зупинилась по центру) */
 .carousel-3d-item.active-3d {
     border-color: var(--sale);
-    box-shadow: 0 0 30px rgba(255, 51, 0, 0.5), 0 15px 35px rgba(0,0,0,0.8);
+    /* Спрощена тінь для Андроїда (без подвійних шарів) */
+    box-shadow: 0 10px 25px rgba(255, 51, 0, 0.4); 
 }
 
 .carousel-3d-item .carousel-img { width: 100%; height: 220px; object-fit: cover; display: block; }
@@ -525,13 +537,14 @@ input, textarea, .search-box input {
 }
 
 /* =================== ОПТИМІЗАЦІЯ 3D КАРТКИ =================== */
+/* =================== ОПТИМІЗОВАНА 3D КАРТКА =================== */
 .carousel-3d-item {
     position: absolute;
     top: 50%; left: 50%;
     margin-top: -180px; 
     margin-left: -120px; 
     width: 240px;
-    height: 360px; /* Трохи збільшили висоту для кнопки */
+    height: 360px;
     
     background: var(--card-gray);
     border: 2px solid #333;
@@ -540,22 +553,25 @@ input, textarea, .search-box input {
     cursor: pointer;
     display: flex; flex-direction: column;
     
-    /* АПАРАТНЕ ПРИСКОРЕННЯ (РЯТУЄ ВІД ЛАГІВ) */
+    /* СУПЕР-ФІКС ДЛЯ ANDROID: Вимикаємо базову тінь, бо вона лагає при русі */
+    box-shadow: none; 
+    
+    /* Примусово кидаємо на відеокарту */
     will-change: transform, opacity;
+    -webkit-transform-style: preserve-3d;
+    transform-style: preserve-3d;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-    transform: translateZ(0);
     
-    /* Плавна і швидка анімація */
-    transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease;
-    
-    /* Віддзеркалення лишаємо тільки для ПК */
-    -webkit-box-reflect: below 5px linear-gradient(transparent 75%, rgba(255,255,255,0.15));
+    /* ФІКС ЛАГІВ: Анімуємо ТІЛЬКИ рух і прозорість (ніякого transition: all!) */
+    transition: transform 0.4s ease-out, opacity 0.4s ease-out;
 }
 
+/* Активна картка (отримує тінь ТІЛЬКИ коли зупинилась по центру) */
 .carousel-3d-item.active-3d {
     border-color: var(--sale);
-    box-shadow: 0 0 25px rgba(255, 51, 0, 0.4), 0 15px 35px rgba(0,0,0,0.8);
+    /* Спрощена тінь для Андроїда (без подвійних шарів) */
+    box-shadow: 0 10px 25px rgba(255, 51, 0, 0.4); 
 }
 
 .carousel-3d-item .carousel-img { width: 100%; height: 210px; object-fit: cover; display: block; }
