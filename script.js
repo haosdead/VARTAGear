@@ -41,8 +41,11 @@ function setupAddToCart(p, sel) {
 
 function loadCSV() {
     Papa.parse(CSV_URL, {
-        download: true, header: true, skipEmptyLines: true,
+        download: true, 
+        header: true, 
+        skipEmptyLines: true,
         complete: function(res) {
+            // 1. Парсинг даних та підготовка об'єктів
             allProducts = res.data.filter(p => p.Name).map((p, i) => ({
                 ...p,
                 myId: i,
@@ -50,20 +53,29 @@ function loadCSV() {
                 OldPrice: p.OldPrice ? parseFloat(p.OldPrice) || null : null,
                 Badge: p.Badge ? p.Badge.trim().toUpperCase() : ""
             }));
+
+            // 2. Сортування (SALE завжди вище в загальному списку)
             allProducts.sort((a, b) => (b.Badge === 'SALE') - (a.Badge === 'SALE'));
-            filteredProducts = [...allProducts];
-            renderCatalog();
-            buildCategoryTree();
             
-            // НОВЕ: Перевіряємо посилання при завантаженні сторінки
+            // 3. Копіюємо у відфільтровані товари для початкового показу
+            filteredProducts = [...allProducts];
+
+            // 4. Оновлюємо інтерфейс
+            renderCatalog();       // Малюємо основну сітку
+            buildCategoryTree();   // Будуємо меню категорій
+            renderSaleCarousel();  // ЗАПУСКАЄМО КАРУСЕЛЬ SALE (НОВЕ)
+
+            // 5. Перевірка URL-параметрів (якщо хтось перейшов за посиланням на конкретний товар)
             const params = new URLSearchParams(window.location.search);
             const prodId = params.get('product');
             if (prodId !== null) {
-                // Відкриваємо товар, якщо хтось перейшов за прямим посиланням
+                // Невелика затримка, щоб все встигло провантажитись перед відкриттям модалки
                 setTimeout(() => openModal(parseInt(prodId), false), 300); 
             }
         },
-        error: function(err) { console.error("Помилка завантаження CSV:", err); }
+        error: function(err) { 
+            console.error("Помилка завантаження CSV:", err); 
+        }
     });
 }
 
@@ -418,3 +430,31 @@ window.addEventListener('popstate', () => {
         toggleCart(false);
     }
 });
+
+function renderSaleCarousel() {
+    const track = document.getElementById('sale-carousel-track');
+    if (!track) return; // Якщо блоку немає в HTML, нічого не робимо
+
+    // Беремо тільки товари з позначкою SALE
+    const saleItems = allProducts.filter(p => p.Badge === 'SALE');
+    
+    // Якщо акційних товарів немає — ховаємо всю секцію каруселі
+    if (saleItems.length === 0) {
+        const section = document.querySelector('.sale-carousel-section');
+        if (section) section.style.display = 'none';
+        return;
+    }
+
+    // Генеруємо картки для каруселі
+    track.innerHTML = saleItems.map(p => {
+        const mainPic = p.Pictures ? p.Pictures.split(',')[0].trim() : '';
+        return `
+        <div class="carousel-item" onclick="openModal(${p.myId})">
+            <img src="${mainPic}" class="carousel-img" alt="${p.Name}" loading="lazy">
+            <div class="carousel-info">
+                <h4>${p.Name.toUpperCase()}</h4>
+                <div class="carousel-price">${p.Price} грн</div>
+            </div>
+        </div>`;
+    }).join('');
+}

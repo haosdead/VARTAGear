@@ -682,3 +682,37 @@ input, textarea, .search-box input {
         font-size: 16px;
     }
 }
+
+.carousel-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.carousel-fire-icon {
+    color: var(--sale);
+    font-size: 20px;
+    filter: drop-shadow(0 0 8px rgba(255, 51, 0, 0.5));
+    animation: firePulse 1.5s infinite alternate;
+}
+
+@keyframes firePulse {
+    from { transform: scale(1); opacity: 0.8; }
+    to { transform: scale(1.2); opacity: 1; }
+}
+
+.ua-mini-flag {
+    font-size: 14px;
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
+/* Виправлення для мобільного: щоб карусель не "з'їдала" багато місця */
+@media (max-width: 767px) {
+    .sale-carousel-section {
+        margin: 15px auto;
+    }
+    .carousel-header h3 {
+        font-size: 15px;
+    }
+}
