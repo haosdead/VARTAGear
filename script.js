@@ -82,22 +82,28 @@ function loadCSV() {
 // ==========================================
 // 1. ОНОВЛЕНИЙ РЕНДЕР КАТАЛОГУ (Логіка приховування)
 // ==========================================
+// 1. ОНОВЛЕНИЙ РЕНДЕР КАТАЛОГУ (Логіка приховування SALE)
+// ==========================================
 function renderCatalog(page = 1) {
     const catalog = document.getElementById('catalog');
     const pagination = document.getElementById('pagination');
     const carouselSection = document.getElementById('main-sale-carousel');
     
-    // Перевіряємо, чи ми на ГОЛОВНІЙ сторінці (без пошуку і фільтрів)
-    const isMainPage = currentCategory === 'all' && currentSearchQuery === '' && currentBadgeFilter === 'all';
-    
     let productsToShow = [...filteredProducts];
+    
+    // ПЕРЕВІРКА: Чи ми на "Головній" сторінці?
+    // Тобто: не обрано категорію, не введено пошук, і не натиснуто фільтри (крім "Всі")
+    const isMainPage = 
+        (!window.currentCategory || window.currentCategory === 'all') && 
+        (!window.currentSearchQuery || window.currentSearchQuery === '') && 
+        (!window.currentBadgeFilter || window.currentBadgeFilter === 'all');
 
     if (isMainPage) {
-        // ЯКЩО ГОЛОВНА: Показуємо карусель, а з сітки ПРИБИРАЄМО товари SALE
+        // МИ НА ГОЛОВНІЙ: Показуємо 3D карусель, ховаємо SALE з сітки
         if (carouselSection) carouselSection.style.display = 'block';
         productsToShow = productsToShow.filter(p => p.Badge !== 'SALE');
     } else {
-        // ЯКЩО КАТЕГОРІЯ АБО ПОШУК: Ховаємо карусель, SALE залишаються в загальній сітці
+        // МИ В КАТЕГОРІЇ АБО ПОШУКУ: Ховаємо карусель, SALE залишаються в сітці
         if (carouselSection) carouselSection.style.display = 'none';
     }
 
@@ -107,6 +113,7 @@ function renderCatalog(page = 1) {
         return;
     }
 
+    const itemsPerPage = 12; // Скільки товарів на сторінку
     const start = (page - 1) * itemsPerPage;
     const end = start + itemsPerPage;
     const paginated = productsToShow.slice(start, end);
@@ -139,98 +146,8 @@ function renderCatalog(page = 1) {
 // ==========================================
 // 2. УЛЬОТНА 3D КАРУСЕЛЬ (Логіка)
 // ==========================================
-let carouselItemsData = [];
-let current3DIndex = 0;
 
-function renderSaleCarousel() {
-    const track = document.getElementById('sale-carousel-track');
-    if (!track) return;
 
-    carouselItemsData = allProducts.filter(p => p.Badge === 'SALE');
-    if (carouselItemsData.length === 0) return;
-
-    // Створюємо картки з усім стилем SALE
-    track.innerHTML = carouselItemsData.map((p, i) => {
-        const mainPic = p.Pictures ? p.Pictures.split(',')[0].trim() : '';
-        return `
-        <div class="carousel-3d-item" data-index="${i}" onclick="openModal(${p.myId})">
-            <div class="badge-sale" style="top:10px; left:10px;">🔥 SALE</div>
-            <img src="${mainPic}" class="carousel-img" alt="${p.Name}" loading="lazy">
-            <div class="carousel-info">
-                <h4>${p.Name.toUpperCase()}</h4>
-                <div class="price-box-sale">
-                    <span class="old-price" style="font-size:12px;">${p.OldPrice ? p.OldPrice + ' грн' : ''}</span>
-                    <span class="current-price" style="font-size:18px;">${p.Price} грн</span>
-                </div>
-            </div>
-        </div>`;
-    }).join('');
-
-    // Починаємо з середини списку
-    current3DIndex = Math.floor(carouselItemsData.length / 2);
-    update3DCarousel();
-    
-    // Запускаємо епічну анімацію появи
-    track.classList.add('epic-entrance');
-}
-
-function moveCarousel3D(direction) {
-    current3DIndex += direction;
-    // Зациклення
-    if (current3DIndex < 0) current3DIndex = carouselItemsData.length - 1;
-    if (current3DIndex >= carouselItemsData.length) current3DIndex = 0;
-    update3DCarousel();
-}
-
-function update3DCarousel() {
-    const items = document.querySelectorAll('.carousel-3d-item');
-    if (items.length === 0) return;
-
-    // Визначаємо ширину екрану для налаштування кута та відступу
-    const isMobile = window.innerWidth <= 767;
-    const offsetBase = isMobile ? 65 : 120; // % зміщення по осі X
-    const rotateBase = isMobile ? 35 : 45;  // градус повороту
-
-    items.forEach((item, index) => {
-        let offset = index - current3DIndex;
-        
-        // Робимо безкінечне коло (спрощена логіка)
-        if (offset > Math.floor(items.length / 2)) offset -= items.length;
-        if (offset < -Math.floor(items.length / 2)) offset += items.length;
-
-        item.style.transition = 'all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-
-        if (offset === 0) {
-            // Центральний активний елемент
-            item.style.transform = `translateX(0) scale(1) translateZ(50px)`;
-            item.style.zIndex = 10;
-            item.style.opacity = 1;
-            item.style.filter = 'blur(0px)';
-            item.classList.add('active-3d');
-        } else {
-            // Бокові елементи
-            const sign = Math.sign(offset);
-            const absOffset = Math.abs(offset);
-            
-            const translateZ = absOffset === 1 ? -100 : -200;
-            const scale = absOffset === 1 ? 0.8 : 0.6;
-            const opacity = absOffset === 1 ? 0.7 : 0; // Ховаємо далекі
-            
-            item.style.transform = `translateX(${sign * offsetBase * absOffset}%) scale(${scale}) translateZ(${translateZ}px) rotateY(${-sign * rotateBase}deg)`;
-            item.style.zIndex = 10 - absOffset;
-            item.style.opacity = opacity;
-            item.style.filter = absOffset === 1 ? 'blur(2px)' : 'blur(5px)';
-            item.classList.remove('active-3d');
-            
-            // Вимикаємо кліки по неактивних (щоб не відкривався товар збоку)
-            if(absOffset > 1) item.style.pointerEvents = 'none';
-            else item.style.pointerEvents = 'auto';
-        }
-    });
-}
-
-// Перемальовуємо при зміні розміру вікна
-window.addEventListener('resize', () => { if(document.getElementById('sale-carousel-track')) update3DCarousel(); });
 function buildCategoryTree() {
     const tree = document.getElementById('category-tree');
     const structure = {};
@@ -544,56 +461,95 @@ window.addEventListener('popstate', () => {
     }
 });
 
+
 function renderSaleCarousel() {
     const track = document.getElementById('sale-carousel-track');
-    if (!track) return; // Якщо блоку немає в HTML, нічого не робимо
+    if (!track) return;
 
-    // Беремо тільки товари з позначкою SALE
-    const saleItems = allProducts.filter(p => p.Badge === 'SALE');
+    // Беремо тільки SALE
+    carouselItemsData = allProducts.filter(p => p.Badge === 'SALE');
     
-    // Якщо акційних товарів немає — ховаємо всю секцію каруселі
-    if (saleItems.length === 0) {
-        const section = document.querySelector('.sale-carousel-section');
-        if (section) section.style.display = 'none';
+    if (carouselItemsData.length === 0) {
+        document.getElementById('main-sale-carousel').style.display = 'none';
         return;
     }
 
-    // Генеруємо картки для каруселі
-    track.innerHTML = saleItems.map(p => {
+    // Малюємо картки всередині треку
+    track.innerHTML = carouselItemsData.map((p, i) => {
         const mainPic = p.Pictures ? p.Pictures.split(',')[0].trim() : '';
         return `
-        <div class="carousel-item" onclick="openModal(${p.myId})">
-            <img src="${mainPic}" class="carousel-img" alt="${p.Name}" loading="lazy">
+        <div class="carousel-3d-item" onclick="openModal(${p.myId})">
+            <div class="badge-sale" style="top:10px; left:10px;">🔥 SALE</div>
+            <img src="${mainPic}" class="carousel-img" alt="${p.Name}">
             <div class="carousel-info">
                 <h4>${p.Name.toUpperCase()}</h4>
-                <div class="carousel-price">${p.Price} грн</div>
+                <div class="price-box-sale">
+                    <span class="old-price" style="font-size:12px;">${p.OldPrice ? p.OldPrice + ' грн' : ''}</span>
+                    <span class="current-price" style="font-size:18px; text-shadow:none;">${p.Price} грн</span>
+                </div>
             </div>
         </div>`;
     }).join('');
+
+    current3DIndex = 0; // Починаємо з першого товару
+    update3DCarousel();
 }
 
-function moveCarousel(direction) {
-    const track = document.getElementById('sale-carousel-track');
-    const items = document.querySelectorAll('.carousel-item');
+function moveCarousel3D(direction) {
+    if (carouselItemsData.length === 0) return;
+    current3DIndex += direction;
+    
+    // Зациклення: якщо дійшли до кінця - йдемо на початок і навпаки
+    if (current3DIndex < 0) current3DIndex = carouselItemsData.length - 1;
+    if (current3DIndex >= carouselItemsData.length) current3DIndex = 0;
+    
+    update3DCarousel();
+}
+
+function update3DCarousel() {
+    const items = document.querySelectorAll('.carousel-3d-item');
     if (items.length === 0) return;
 
-    const itemWidth = items[0].offsetWidth + 15; // Ширина + gap
-    const visibleWidth = document.querySelector('.carousel-viewport').offsetWidth;
-    const maxScroll = track.scrollWidth - visibleWidth;
-    
-    carouselIndex += direction;
-    
-    let targetTranslate = carouselIndex * itemWidth;
-    
-    // Перевірка межі
-    if (targetTranslate < 0) {
-        targetTranslate = 0;
-        carouselIndex = 0;
-    }
-    if (targetTranslate > maxScroll) {
-        targetTranslate = maxScroll;
-        carouselIndex = Math.ceil(maxScroll / itemWidth);
-    }
+    const isMobile = window.innerWidth <= 767;
+    // Налаштування відстані та кута для ПК і Мобілок
+    const offsetBase = isMobile ? 130 : 250; // Зміщення вліво/вправо (в пікселях)
+    const rotateBase = isMobile ? 35 : 45;   // Кут нахилу 3D
 
-    track.style.transform = `translateX(-${targetTranslate}px)`;
+    items.forEach((item, index) => {
+        // Рахуємо позицію відносно центрального (активного) елемента
+        let offset = index - current3DIndex;
+        
+        // Робимо так, щоб карусель горталася по колу (найкоротший шлях)
+        if (offset > Math.floor(items.length / 2)) offset -= items.length;
+        if (offset < -Math.floor(items.length / 2)) offset += items.length;
+
+        if (offset === 0) {
+            // ЦЕНТРАЛЬНА (АКТИВНА) КАРТКА
+            item.style.transform = `translateX(0px) scale(1) translateZ(50px) rotateY(0deg)`;
+            item.style.zIndex = 10;
+            item.style.opacity = 1;
+            item.style.filter = 'blur(0px)';
+            item.style.pointerEvents = 'auto'; // Можна клікати
+            item.classList.add('active-3d');
+        } else {
+            // БОКОВІ КАРТКИ
+            const sign = Math.sign(offset);     // -1 (зліва) або 1 (справа)
+            const absOffset = Math.abs(offset); // 1, 2, 3...
+            
+            // Чим далі картка, тим вона менша і темніша
+            const translateZ = absOffset === 1 ? -150 : -300;
+            const scale = absOffset === 1 ? 0.85 : 0.65;
+            const opacity = absOffset === 1 ? 0.7 : 0; // Ховаємо картки, які далі ніж 1 крок
+            
+            item.style.transform = `translateX(${sign * offsetBase * absOffset}px) scale(${scale}) translateZ(${translateZ}px) rotateY(${-sign * rotateBase}deg)`;
+            item.style.zIndex = 10 - absOffset;
+            item.style.opacity = opacity;
+            item.style.filter = absOffset === 1 ? 'blur(3px)' : 'blur(8px)';
+            item.style.pointerEvents = 'none'; // Не можна клікати бокові
+            item.classList.remove('active-3d');
+        }
+    });
 }
+
+// Якщо повертають екран телефону - перемальовуємо
+window.addEventListener('resize', update3DCarousel);

@@ -430,27 +430,25 @@ input, textarea, .search-box input {
 @media (max-width: 767px) { #scrollTopBtn { width: 45px; height: 45px; bottom: 20px; right: 15px; font-size: 18px; } }
 
 /* =================== SALE 3D CAROUSEL =================== */
+/* =================== SALE 3D CAROUSEL (ФІНАЛ) =================== */
 .sale-carousel-section {
     max-width: 1200px;
     margin: 30px auto;
     padding: 0 15px;
-    overflow: hidden; /* Щоб бокові картки не вилазили */
 }
 
 .carousel-header {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 20px; padding: 12px 20px;
+    margin-bottom: 10px; padding: 12px 20px;
     background: linear-gradient(90deg, rgba(255,51,0,0.1) 0%, transparent 100%);
     border-radius: 12px; border-left: 4px solid var(--sale);
 }
 
 .carousel-title-group { display: flex; align-items: center; gap: 12px; }
-.carousel-title-group h3 { font-size: 20px; color: #fff; margin: 0; text-transform: uppercase; font-weight: 800;}
+.carousel-title-group h3 { font-size: 20px; color: #fff; margin: 0; text-transform: uppercase; font-weight: 900;}
 .carousel-fire-icon { color: var(--sale); font-size: 22px; filter: drop-shadow(0 0 10px rgba(255, 51, 0, 0.8)); animation: firePulse 1.5s infinite alternate; }
-.ua-mini-flag { font-size: 16px; margin-left: 5px; }
 
-/* Кнопки поверх усього */
-.carousel-nav { display: flex; gap: 10px; position: relative; z-index: 50; }
+.carousel-nav { display: flex; gap: 10px; position: relative; z-index: 100; }
 .nav-arrow {
     background: #111; border: 1px solid #444; color: #fff;
     width: 44px; height: 44px; border-radius: 50%; cursor: pointer;
@@ -460,80 +458,67 @@ input, textarea, .search-box input {
 
 /* МАГІЯ 3D ПРОСТОРУ */
 .carousel-3d-viewport {
-    width: 100%;
-    height: 380px; /* Фіксована висота для абсолютних карток */
     position: relative;
-    perspective: 1200px; /* Глибина 3D */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transform-style: preserve-3d;
+    width: 100%;
+    height: 400px; /* Висота простору */
+    perspective: 1200px;
+    overflow: hidden; /* Ховаємо те, що вилазить */
+    margin-top: 20px;
 }
 
 .carousel-3d-track {
+    position: absolute;
     width: 100%;
     height: 100%;
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    top: 0; left: 0;
     transform-style: preserve-3d;
 }
 
-/* Епічна поява (Розь*бний ефект) */
-.epic-entrance .carousel-3d-item {
-    animation: epicFlyIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-@keyframes epicFlyIn {
-    0% { opacity: 0; transform: translateY(150px) scale(0.5) rotateX(60deg); filter: blur(20px); }
-    100% { /* Кінцеві значення задаються через JS */ }
-}
-
-/* 3D КАРТКА */
+/* 3D КАРТКА - ФІКС ВИПАДАННЯ ВНИЗ */
 .carousel-3d-item {
-    position: absolute; /* Всі картки в одній точці, розсуваються через JS */
+    position: absolute;
+    /* Збираємо всі картки рівно по центру! */
+    top: 50%; left: 50%;
+    margin-top: -170px; /* Половина висоти */
+    margin-left: -120px; /* Половина ширини */
     width: 240px;
     height: 340px;
+    
     background: var(--card-gray);
     border: 2px solid #333;
     border-radius: 16px;
     overflow: hidden;
     cursor: pointer;
-    display: flex;
-    flex-direction: column;
+    display: flex; flex-direction: column;
     box-shadow: 0 15px 35px rgba(0,0,0,0.8);
-    /* Тінь яка падає під картку */
-    -webkit-box-reflect: below 5px linear-gradient(transparent 70%, rgba(255,255,255,0.1));
+    
+    /* Плавність 3D переміщення */
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.6s, filter 0.6s;
+    
+    /* Віддзеркалення знизу (працює в Chrome/Safari) */
+    -webkit-box-reflect: below 5px linear-gradient(transparent 75%, rgba(255,255,255,0.2));
 }
 
-/* Активна картка світиться червоним */
 .carousel-3d-item.active-3d {
     border-color: var(--sale);
-    box-shadow: 0 0 30px rgba(255, 51, 0, 0.4), 0 15px 35px rgba(0,0,0,0.8);
+    box-shadow: 0 0 30px rgba(255, 51, 0, 0.5), 0 15px 35px rgba(0,0,0,0.8);
 }
 
-.carousel-3d-item .carousel-img {
-    width: 100%;
-    height: 220px;
-    object-fit: cover;
-    display: block;
-}
-
+.carousel-3d-item .carousel-img { width: 100%; height: 220px; object-fit: cover; display: block; }
 .carousel-3d-item .carousel-info {
-    padding: 10px;
-    text-align: center;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    padding: 10px; text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: center;
     background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(22,22,22,1));
 }
 
+.carousel-3d-item h4 { color: #fff; font-size: 13px; margin: 0 0 5px 0; text-transform: uppercase; }
+
 /* Адаптація під мобільні */
 @media (max-width: 767px) {
-    .carousel-3d-viewport { height: 320px; }
-    .carousel-3d-item { width: 190px; height: 290px; }
+    .carousel-3d-viewport { height: 350px; }
+    .carousel-3d-item { 
+        width: 200px; height: 300px;
+        margin-top: -150px; margin-left: -100px;
+    }
     .carousel-3d-item .carousel-img { height: 180px; }
     .carousel-header h3 { font-size: 16px; }
     .nav-arrow { width: 38px; height: 38px; font-size: 14px; }
