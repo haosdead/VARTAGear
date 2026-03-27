@@ -13,25 +13,29 @@
 html { scroll-behavior: smooth; }
 
 body {
-    background-color: #0c0c0c;
-    /* ЕФЕКТНИЙ ТАКТИЧНИЙ ФОН: Мультикам + М'який перелив кольорів */
+    background-color: #080808;
+    /* ПОТУЖНИЙ ТАКТИЧНИЙ ФОН: Яскраві неонові плями + чіткий камуфляж */
     background-image: 
-        /* Лаймове сяйво зліва зверху */
-        radial-gradient(circle at 15% 15%, rgba(162, 210, 74, 0.12) 0%, transparent 40%),
-        /* Оранжеве сяйво справа знизу */
-        radial-gradient(circle at 85% 85%, rgba(255, 60, 0, 0.1) 0%, transparent 40%),
-        /* Основне затемнення для читабельності тексту (70% прозорості) */
-        linear-gradient(rgba(12, 12, 12, 0.7), rgba(12, 12, 12, 0.8)),
-        /* Патерн мультикаму/тканини */
+        /* Яскравий Лайм зліва зверху (збільшено прозорість до 0.25) */
+        radial-gradient(circle at 10% 10%, rgba(162, 210, 74, 0.25) 0%, transparent 50%),
+        /* Яскравий Оранж справа знизу (збільшено прозорість до 0.2) */
+        radial-gradient(circle at 90% 90%, rgba(255, 51, 0, 0.2) 0%, transparent 50%),
+        /* Світліше затемнення (0.5), щоб було видно текстуру навіть на слабких екранах */
+        linear-gradient(rgba(10, 10, 10, 0.5), rgba(10, 10, 10, 0.7)),
+        /* Чіткий малюнок тканини/мультикаму */
         url('https://www.transparenttextures.com/patterns/fabric-of-the-nation.png');
     
-    background-size: 100% 100%, 100% 100%, 100% 100%, 250px 250px;
     background-attachment: fixed;
+    background-size: 100% 100%, 100% 100%, 100% 100%, 280px 280px;
     color: var(--text-white);
     margin: 0;
     font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    
+    /* ПОВНА ЗАБОРОНА КУРСОРУ-ПАЛИЧКИ */
     user-select: none;
     -webkit-user-select: none;
+    cursor: default;
 }
 
 /* =================== HEADER (ШАПКА) =================== */
@@ -59,33 +63,36 @@ body {
 }
 
 /* ГАРНИЙ ЗЕЛЕНИЙ ОВАЛ (ОБОЛОНКА ЛОГОТИПУ) */
-.brand-wrapper {
+/* ОБОЛОНКА ЛОГОТИПУ (Блокуємо синій колір на всіх пристроях) */
+.brand-wrapper, 
+.brand-wrapper:link, 
+.brand-wrapper:visited, 
+.brand-wrapper:hover, 
+.brand-wrapper:active {
     display: flex;
     align-items: center;
     gap: 12px;
-    text-decoration: none !important; /* Прибирає синю лінію браузера */
-    color: #fff !important; /* Прибирає синій колір посилання */
+    text-decoration: none !important; /* Жорстко прибираємо підкреслення */
+    color: #ffffff !important; /* Жорстко білий колір для всього тексту всередині */
     padding: 8px 25px;
-    border-radius: 50px; /* Створює овал */
-    border: 2px solid var(--mono-lime); /* Зелена тонка лінія */
-    background: rgba(162, 210, 74, 0.03); /* Ледь помітний зелений фон всередині */
-    box-shadow: 0 0 15px rgba(162, 210, 74, 0.1); /* М'яке світіння навколо */
+    border-radius: 50px;
+    border: 2px solid var(--mono-lime);
+    background: rgba(162, 210, 74, 0.05);
+    box-shadow: 0 0 15px rgba(162, 210, 74, 0.2);
     transition: all 0.3s ease;
-    user-select: none;
+    outline: none !important; /* Прибираємо рамку фокусу */
 }
 
 .brand-wrapper:hover {
-    background: rgba(162, 210, 74, 0.08);
-    box-shadow: 0 0 20px rgba(162, 210, 74, 0.3); /* Яскравіше світіння при наведенні */
-    transform: translateY(-1px);
+    background: rgba(162, 210, 74, 0.12);
+    box-shadow: 0 0 25px rgba(162, 210, 74, 0.4);
+    transform: translateY(-2px);
 }
 
-/* Текст всередині овалу */
-.brand-text {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+/* Додатковий фікс для iOS (Safari) */
+.brand-text * {
+    color: inherit !important;
+    text-decoration: none !important;
 }
 
 .logo-main {
@@ -552,12 +559,13 @@ body {
 /* =================== АДАПТАЦІЯ ДЛЯ МОБІЛОК =================== */
 @media (max-width: 900px) {
     .footer-inner {
-        flex-direction: column; /* На мобільних знову стають один під одним */
+        flex-direction: column; /* На телефонах - у стовпчик */
         align-items: center;
+        gap: 15px;
     }
     .footer-block {
         width: 100%;
-        max-width: 400px;
+        max-width: 350px;
     }
 }
 
