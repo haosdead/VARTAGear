@@ -555,3 +555,41 @@ function update3DCarousel() {
 
 // Якщо повертають екран телефону - перемальовуємо
 window.addEventListener('resize', update3DCarousel);
+
+
+// ==========================================
+// 3. УПРАВЛІННЯ КАРУСЕЛЛЮ: СВАЙП (ТАЧ) + СТРІЛКИ
+// ==========================================
+let touchStartX = 0;
+let touchEndX = 0;
+
+// Чекаємо завантаження сторінки
+document.addEventListener('DOMContentLoaded', () => {
+    const carouselViewport = document.querySelector('.carousel-3d-viewport');
+    
+    if (carouselViewport) {
+        // Засікаємо, де палець торкнувся екрану
+        carouselViewport.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        // Засікаємо, де палець відірвався від екрану
+        carouselViewport.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleCarouselSwipe();
+        }, { passive: true });
+    }
+});
+
+// Перевіряємо напрямок свайпу і крутимо карусель
+function handleCarouselSwipe() {
+    const swipeThreshold = 45; // Чутливість свайпу (мінімальна відстань у пікселях)
+    
+    if (touchEndX < touchStartX - swipeThreshold) {
+        moveCarousel3D(1); // Свайпнули вліво -> Наступний товар
+    }
+    
+    if (touchEndX > touchStartX + swipeThreshold) {
+        moveCarousel3D(-1); // Свайпнули вправо -> Попередній товар
+    }
+}

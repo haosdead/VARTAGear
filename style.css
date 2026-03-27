@@ -624,3 +624,30 @@ input, textarea, .search-box input {
     .carousel-3d-item .carousel-img { height: 170px; }
     .carousel-header h3 { font-size: 16px; }
 }
+
+/* =================== ЕФЕКТ ДОТИКУ (ТАЧ) НА КНОПКИ КУПИТИ =================== */
+/* Звичайна кнопка в сітці та каруселі */
+.buy-btn-card:active,
+.carousel-3d-item.active-3d .btn-buy-carousel:active {
+    background: var(--mono-lime) !important;
+    color: #000 !important;
+    border-color: var(--mono-lime) !important;
+    transform: scale(0.95) !important; /* Кнопка трохи "протискається" */
+    box-shadow: 0 0 25px rgba(162, 210, 74, 0.9) !important;
+    transition: 0.05s !important; /* Миттєва реакція на палець */
+}
+
+/* Кнопка на товарах SALE (світиться червоним-оранжевим) */
+.buy-btn-sale:active {
+    background: var(--sale) !important;
+    color: #fff !important;
+    border-color: var(--sale) !important;
+    transform: scale(0.95) !important;
+    box-shadow: 0 0 25px rgba(255, 51, 0, 0.9) !important;
+    transition: 0.05s !important;
+}
+
+/* Фікс для iPhone, щоб :active працював завжди коректно */
+body {
+    -webkit-tap-highlight-color: transparent;
+}
