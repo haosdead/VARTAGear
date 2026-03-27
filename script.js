@@ -1,4 +1,4 @@
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTba0F9SbTUxpjBJ2uggBkP6iPNuEoWcc6-PhBRvQosa1sAqvJvEye_fQmeMFgoUl_6VCvq0WX8W--3/pub?gid=859081876&single=true&output=csv';
+const CSV_URL = 'data.csv';
 const ITEMS_PER_PAGE = 10;
 
 let allProducts = [], filteredProducts = [], cart = [], currentPage = 1;
@@ -130,14 +130,60 @@ function resetPageAndFilter() {
     currentPage = 1; renderCatalog();
 }
 
+// Замініть функцію renderPagination на цю:
 function renderPagination() {
     const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
     const container = document.getElementById('pagination');
+    if (totalPages <= 1) { container.innerHTML = ''; return; }
+
     let html = '';
+    const maxVisible = 3; // Скільки кнопок показувати біля поточної
+
     for (let i = 1; i <= totalPages; i++) {
-        html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="currentPage=${i}; renderCatalog(); window.scrollTo(0,0)">${i}</button>`;
+        if (
+            i === 1 || // Завжди перша
+            i === totalPages || // Завжди остання
+            (i >= currentPage - 1 && i <= currentPage + 1) // Сусідні
+        ) {
+            html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" 
+                     onclick="goToPage(${i})">${i}</button>`;
+        } else if (i === currentPage - 2 || i === currentPage + 2) {
+            html += `<span style="color: #444">...</span>`;
+        }
     }
     container.innerHTML = html;
+}
+
+function goToPage(page) {
+    currentPage = page;
+    renderCatalog();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Функції для фіксації екрана (щоб не крутилося в темряву)
+function toggleMobileMenu(open) {
+    document.getElementById('mobile-menu').classList.toggle('active', open);
+    document.getElementById('body-overlay').classList.toggle('active', open);
+    document.body.style.overflow = open ? 'hidden' : 'auto';
+}
+
+function toggleCart(open) {
+    document.getElementById('cart-sidebar').classList.toggle('active', open);
+    document.getElementById('body-overlay').classList.toggle('active', open);
+    document.body.style.overflow = open ? 'hidden' : 'auto';
+}
+
+function closeModal() {
+    document.getElementById('product-modal').style.display = 'none';
+    document.getElementById('body-overlay').classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+// Закриття всього
+function closeAllPanels() {
+    toggleMobileMenu(false);
+    toggleCart(false);
+    closeModal();
 }
 
 function updateCartUI() {
