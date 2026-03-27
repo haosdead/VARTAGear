@@ -674,3 +674,51 @@ body {
 }
 .toast i { color: var(--mono-lime); font-size: 18px; }
 .toast.show { bottom: 30px; } /* Виїжджає вгору на 30px від низу екрану */
+
+/* =================== ТОВАРИ: НОВИНКИ (NEW) =================== */
+:root {
+    --new-color: #FFD700; /* Золотий / Жовтий */
+    --new-glow: rgba(255, 215, 0, 0.4);
+}
+
+/* Золота рамка та світіння для картки */
+.new-card { 
+    border: 2px solid var(--new-color); 
+    box-shadow: 0 0 15px var(--new-glow); 
+    z-index: 2; 
+}
+.new-card:hover { 
+    border-color: #ffea00; 
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.6); 
+    transform: translateY(-6px) scale(1.02); 
+}
+
+/* Жовтий бейдж (НОВИНКА) */
+.badge-new { 
+    position: absolute; top: 10px; left: 10px; 
+    background: var(--new-color); color: #000; 
+    font-weight: 900; padding: 6px 12px; border-radius: 8px; font-size: 13px; z-index: 5; 
+    text-transform: uppercase; box-shadow: 0 4px 10px var(--new-glow); 
+    display: flex; align-items: center; gap: 6px; 
+    animation: pulseNew 2s infinite; 
+}
+@keyframes pulseNew { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
+
+/* Ціна для новинок */
+.price-box-new { display: flex; flex-direction: column; gap: 2px; }
+.price-box-new .old-price { color: #888; font-size: 14px; font-weight: 600; text-decoration: line-through; }
+.price-box-new .current-price { color: var(--new-color); font-size: 24px; font-weight: 900; text-shadow: 0 0 10px var(--new-glow); }
+
+/* Кнопка КУПИТИ для новинок */
+.buy-btn-new { 
+    background: rgba(255, 215, 0, 0.1); 
+    border: 1px solid var(--new-color); 
+    color: var(--new-color); 
+}
+.buy-btn-new:hover, .buy-btn-new:active { 
+    background: var(--new-color) !important; 
+    color: #000 !important; 
+    border-color: var(--new-color) !important; 
+    transform: scale(0.95) !important;
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.8) !important;
+}

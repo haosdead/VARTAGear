@@ -81,12 +81,7 @@ function loadCSV() {
 }
 
 // ==========================================
-// 1. ОНОВЛЕНИЙ РЕНДЕР КАТАЛОГУ (Логіка приховування)
-// ==========================================
-// 1. ОНОВЛЕНИЙ РЕНДЕР КАТАЛОГУ (Логіка приховування SALE)
-// ==========================================
-// ==========================================
-// 1. ОНОВЛЕНИЙ РЕНДЕР КАТАЛОГУ (Повернули кнопку КУПИТИ)
+// 1. ОНОВЛЕНИЙ РЕНДЕР КАТАЛОГУ (НОВИНКИ + СЕЙЛ У КАРУСЕЛІ)
 // ==========================================
 function renderCatalog(page = 1) {
     const catalog = document.getElementById('catalog');
@@ -95,16 +90,19 @@ function renderCatalog(page = 1) {
     
     let productsToShow = [...filteredProducts];
     
+    // Перевіряємо, чи ми на самій першій сторінці (без фільтрів і категорій)
     const isMainPage = 
         (!window.currentCategory || window.currentCategory === 'all') && 
         (!window.currentSearchQuery || window.currentSearchQuery === '') && 
         (!window.currentBadgeFilter || window.currentBadgeFilter === 'all');
 
     if (isMainPage) {
-        if (carouselSection) carouselSection.style.display = 'block';
-        productsToShow = productsToShow.filter(p => p.Badge !== 'SALE');
+        if (carouselSection) carouselSection.style.display = 'block'; // Карусель показуємо
+        
+        // ХОВАЄМО з сітки і SALE (бо вони в каруселі), і NEW (бо вони чекають на клік по кнопці)
+        productsToShow = productsToShow.filter(p => p.Badge !== 'SALE' && p.Badge !== 'NEW');
     } else {
-        if (carouselSection) carouselSection.style.display = 'none';
+        if (carouselSection) carouselSection.style.display = 'none'; // Ховаємо карусель
     }
 
     if (productsToShow.length === 0) {
@@ -119,18 +117,34 @@ function renderCatalog(page = 1) {
     const paginated = productsToShow.slice(start, end);
 
     catalog.innerHTML = paginated.map(p => {
+        // Визначаємо статуси
         const isSale = p.Badge === 'SALE';
-        const cardClass = isSale ? 'card sale-card' : 'card';
-        const badgeHTML = isSale ? `<div class="badge-sale">🔥 SALE</div>` : (p.Badge ? `<div class="badge-top">⭐ ТОП</div>` : '');
+        const isNew = p.Badge === 'NEW';
         
-        const priceHTML = isSale ? 
-            `<div class="price-box-sale"><span class="old-price">${p.OldPrice} грн</span><span class="current-price">${p.Price} грн</span></div>` :
-            `<div class="price-box"><span class="current-price">${p.Price} грн</span></div>`;
-            
+        // Базові класи (Зелений дизайн)
+        let cardClass = 'card';
+        let badgeHTML = '';
+        let priceHTML = `<div class="price-box"><span class="current-price">${p.Price} грн</span></div>`;
+        let btnClass = 'buy-btn-card';
+
+        // Якщо це SALE (і ми зараз у категорії або пошуку)
+        if (isSale) {
+            cardClass = 'card sale-card';
+            badgeHTML = `<div class="badge-sale">🔥 SALE</div>`;
+            priceHTML = `<div class="price-box-sale"><span class="old-price">${p.OldPrice ? p.OldPrice + ' грн' : ''}</span><span class="current-price">${p.Price} грн</span></div>`;
+            btnClass = 'buy-btn-card buy-btn-sale';
+        } 
+        // Якщо це НОВИНКА (Золотий дизайн)
+        else if (isNew) {
+            cardClass = 'card new-card';
+            badgeHTML = `<div class="badge-new">✨ НОВИНКА</div>`;
+            priceHTML = p.OldPrice ? 
+                `<div class="price-box-new"><span class="old-price">${p.OldPrice} грн</span><span class="current-price">${p.Price} грн</span></div>` :
+                `<div class="price-box-new"><span class="current-price">${p.Price} грн</span></div>`;
+            btnClass = 'buy-btn-card buy-btn-new';
+        }
+
         const mainPic = p.Pictures ? p.Pictures.split(',')[0].trim() : '';
-        
-        // Визначаємо стиль кнопки (зелена для звичайних, червона для SALE)
-        const btnClass = isSale ? 'buy-btn-card buy-btn-sale' : 'buy-btn-card';
         
         return `
         <div class="${cardClass}" onclick="openModal(${p.myId})">
@@ -148,7 +162,6 @@ function renderCatalog(page = 1) {
 
     renderPagination(productsToShow.length, page);
 }
-
 // ==========================================
 // 2. УЛЬОТНА 3D КАРУСЕЛЬ (Логіка)
 // ==========================================
@@ -273,30 +286,49 @@ function resetPageAndFilter() {
     currentPage = 1; renderCatalog();
 }
 
-function renderPagination() {
-    const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
-    const container = document.getElementById('pagination');
-    
-    if (totalPages <= 1) { 
-        container.innerHTML = ''; 
-        return; 
+// ==========================================
+// ПАГІНАЦІЯ ТА ПЕРЕХІД МІЖ СТОРІНКАМИ
+// ==========================================
+function renderPagination(totalItems, currentPage) {
+    const itemsPerPage = 12; // Має співпадати з цифрою в renderCatalog
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const paginationBar = document.getElementById('pagination');
+
+    // Якщо сторінка лише одна (або товарів нуль) - ховаємо пагінацію
+    if (totalPages <= 1) {
+        paginationBar.innerHTML = '';
+        return;
     }
 
     let html = '';
-    if (currentPage > 1) {
-        html += `<button class="page-btn" onclick="changePage(${currentPage - 1})">❮</button>`;
-    }
     for (let i = 1; i <= totalPages; i++) {
-        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-            html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
-        } else if (i === currentPage - 2 || i === currentPage + 2) {
-            html += `<span class="page-dots">...</span>`;
-        }
+        // Якщо це поточна сторінка - робимо кнопку активною (зеленою)
+        const activeClass = (i === currentPage) ? 'active' : '';
+        
+        // Викликаємо нову функцію goToPage при кліку
+        html += `<button class="page-btn ${activeClass}" onclick="goToPage(${i})">${i}</button>`;
     }
-    if (currentPage < totalPages) {
-        html += `<button class="page-btn" onclick="changePage(${currentPage + 1})">❯</button>`;
+    
+    paginationBar.innerHTML = html;
+}
+
+// Функція для плавного перемикання та правильного скролу
+function goToPage(pageNumber) {
+    // 1. Малюємо нову сторінку з товарами
+    renderCatalog(pageNumber); 
+    
+    // 2. Шукаємо блок фільтрів або пошуку, щоб прокрутити екран до нього
+    const filtersBlock = document.querySelector('.quick-filters');
+    const searchBlock = document.querySelector('.main-search-wrapper');
+    
+    // Плавний скрол (щоб клієнт не губився, а бачив початок списку товарів)
+    if (filtersBlock) {
+        filtersBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (searchBlock) {
+        searchBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    container.innerHTML = html;
 }
 
 function changePage(page) {
