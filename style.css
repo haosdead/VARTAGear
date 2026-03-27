@@ -149,7 +149,12 @@ body {
 .card h4 { margin: 0 0 8px 0; font-size: 14px; height: 40px; overflow: hidden; line-height: 1.4; font-weight: 600; text-transform: uppercase; }
 .price-box { font-size: 18px; font-weight: 800; color: var(--mono-lime); margin-bottom: 12px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .old-price { text-decoration: line-through; color: #777; font-size: 13px; font-weight: 500; }
-.current-price { font-size: inherit; }
+.current-price {
+    font-size: 20px; /* Було 18px */
+    font-weight: 800;
+    color: var(--mono-lime);
+    transition: 0.3s ease;
+}
 
 .buy-btn-card {
     background: transparent; border: 1px solid var(--border-gray); color: #fff;
@@ -161,7 +166,20 @@ body {
 /* =================== ТОВАРИ SALE (АКЦЕНТ) =================== */
 .sale-card { border: 2px solid var(--sale); box-shadow: 0 0 15px rgba(255, 60, 0, 0.1); z-index: 2; }
 .sale-card:hover { border-color: #ff5500; box-shadow: 0 8px 25px rgba(255, 60, 0, 0.3); transform: translateY(-6px) scale(1.02); }
-@media (max-width: 767px) { .sale-card { grid-column: span 2; } .sale-card h4 { font-size: 16px; height: auto; } }
+@media (max-width: 767px) {
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr) !important; /* Жорстка фіксація 2 колонок */
+    }
+    .sale-card {
+        grid-column: span 1 !important; /* Прибираємо розтягування на 2 колонки */
+    }
+    .sale-card h4 {
+        font-size: 13px; /* Повертаємо стандартний розмір шрифту */
+    }
+    .price-box-sale .current-price {
+        font-size: 20px; /* Уніфікуємо розмір, щоб не "пливло" */
+    }
+}
 
 .badge-sale {
     position: absolute; top: 10px; left: 10px; background: var(--sale); color: #fff;
@@ -420,3 +438,27 @@ body {
     transition: 0.3s;
 }
 .current-price { transition: 0.3s; } /* Плавне повернення */
+
+
+.brand {
+    cursor: pointer;
+    transition: 0.3s;
+    user-select: none;
+    text-decoration: none;
+    color: inherit;
+    display: inline-block;
+}
+.brand:hover {
+    text-shadow: 0 0 10px var(--mono-lime), 0 0 20px rgba(162, 210, 74, 0.5);
+    transform: scale(1.02);
+}
+
+/* 4. Заборона виділення тексту (паличка-курсор) для всього сайту, крім поштуку */
+html, body {
+    user-select: none;
+    -webkit-user-select: none;
+}
+input, textarea, .search-box input {
+    user-select: text;
+    -webkit-user-select: text;
+}

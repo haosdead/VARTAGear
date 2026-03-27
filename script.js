@@ -4,7 +4,40 @@ const ITEMS_PER_PAGE = 21;
 let allProducts = [], filteredProducts = [], cart = [], currentPage = 1;
 let currentModalPics = [], currentModalPicIndex = 0;
 
-document.addEventListener('DOMContentLoaded', loadCSV);
+document.addEventListener('DOMContentLoaded', () => {
+    // Спочатку дістаємо дані з пам'яті браузера
+    const savedCart = localStorage.getItem('varta_cart');
+    if (savedCart) {
+        cart = JSON.parse(savedCart);
+    }
+    
+    // Оновлюємо інтерфейс (лічильник та список)
+    updateCartUI();
+    
+    // Завантажуємо товари
+    loadCSV();
+});
+
+// ========================================================
+// 2. ДОДАВАННЯ: Оновлена функція з записом у пам'ять
+// ========================================================
+// Примітка: переконайтеся, що всередині вашої функції openModal 
+// код натискання на кнопку виглядає саме так:
+function setupAddToCart(p, sel) {
+    document.getElementById('modal-add-btn').onclick = () => {
+        if (!sel.value) return alert('Оберіть розмір!');
+        
+        // Додаємо товар у масив
+        cart.push({ ...p, selectedSize: sel.value });
+        
+        // ЗБЕРІГАЄМО ОНОВЛЕНИЙ МАСИВ У ПАМ'ЯТЬ
+        localStorage.setItem('varta_cart', JSON.stringify(cart));
+        
+        updateCartUI();
+        closeModal();
+        toggleCart(true);
+    };
+}
 
 function loadCSV() {
     Papa.parse(CSV_URL, {
@@ -255,23 +288,29 @@ function changePage(page) {
 
 // =================== ЛОГІКА КОШИКА ТА ОФОРМЛЕННЯ ===================
 function updateCartUI() {
-    document.getElementById('cart-count').innerText = cart.length;
+    // Оновлюємо число на іконці кошика
+    const cartCount = document.getElementById('cart-count');
+    if (cartCount) cartCount.innerText = cart.length;
+
     const content = document.getElementById('cart-content');
     const footer = document.getElementById('cart-footer');
     
     if (cart.length === 0) {
-        content.innerHTML = '<div style="text-align:center; padding:50px 0; color:#666;"><i class="fas fa-shopping-cart" style="font-size:40px; margin-bottom:15px; opacity:0.3"></i><br>Кошик порожній</div>';
-        footer.style.display = 'none';
-        hideCheckoutForm();
+        content.innerHTML = '<div style="text-align:center; padding:50px 0; color:#666; user-select:none;">Кошик порожній</div>';
+        if (footer) footer.style.display = 'none';
+        
+        // Видаляємо ключ з пам'яті зовсім, якщо кошик порожній
+        localStorage.removeItem('varta_cart');
     } else {
-        footer.style.display = 'block';
+        if (footer) footer.style.display = 'block';
         let total = 0;
+        
         content.innerHTML = cart.map((it, i) => {
             total += parseFloat(it.Price);
             return `
             <div class="cart-item">
                 <div class="cart-item-info">
-                    <span class="cart-item-title">${it.Name}</span>
+                    <span class="cart-item-title">${it.Name.toUpperCase()}</span>
                     <span class="cart-item-meta">Розмір: ${it.selectedSize}</span>
                     <span class="cart-item-price">${it.Price} грн</span>
                 </div>
@@ -279,12 +318,24 @@ function updateCartUI() {
             </div>`;
         }).join('');
         
-        document.getElementById('cart-total-price').innerText = total;
-        document.getElementById('final-total-price').innerText = total;
+        // Оновлюємо ціни в усіх блоках
+        const totalPriceEl = document.getElementById('cart-total-price');
+        const finalPriceEl = document.getElementById('final-total-price');
+        
+        if (totalPriceEl) totalPriceEl.innerText = total;
+        if (finalPriceEl) finalPriceEl.innerText = total;
     }
 }
 
-function removeFromCart(i) { cart.splice(i, 1); updateCartUI(); }
+function removeFromCart(i) {
+    // Видаляємо елемент з масиву
+    cart.splice(i, 1);
+    
+    // Оновлюємо пам'ять (якщо масив порожній, запишеться [])
+    localStorage.setItem('varta_cart', JSON.stringify(cart));
+    
+    updateCartUI();
+}
 
 function showCheckoutForm() {
     document.getElementById('cart-items-container').style.display = 'none';
