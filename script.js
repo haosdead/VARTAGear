@@ -79,45 +79,158 @@ function loadCSV() {
     });
 }
 
-function renderCatalog() {
-    const container = document.getElementById('catalog');
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    const items = filteredProducts.slice(start, start + ITEMS_PER_PAGE);
+// ==========================================
+// 1. ОНОВЛЕНИЙ РЕНДЕР КАТАЛОГУ (Логіка приховування)
+// ==========================================
+function renderCatalog(page = 1) {
+    const catalog = document.getElementById('catalog');
+    const pagination = document.getElementById('pagination');
+    const carouselSection = document.getElementById('main-sale-carousel');
+    
+    // Перевіряємо, чи ми на ГОЛОВНІЙ сторінці (без пошуку і фільтрів)
+    const isMainPage = currentCategory === 'all' && currentSearchQuery === '' && currentBadgeFilter === 'all';
+    
+    let productsToShow = [...filteredProducts];
 
-    if (items.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding: 50px; width: 100%; grid-column: 1/-1; color: #888;">Товарів не знайдено</div>';
+    if (isMainPage) {
+        // ЯКЩО ГОЛОВНА: Показуємо карусель, а з сітки ПРИБИРАЄМО товари SALE
+        if (carouselSection) carouselSection.style.display = 'block';
+        productsToShow = productsToShow.filter(p => p.Badge !== 'SALE');
+    } else {
+        // ЯКЩО КАТЕГОРІЯ АБО ПОШУК: Ховаємо карусель, SALE залишаються в загальній сітці
+        if (carouselSection) carouselSection.style.display = 'none';
+    }
+
+    if (productsToShow.length === 0) {
+        catalog.innerHTML = '<p style="text-align:center; grid-column:1/-1; color:#888;">Товарів не знайдено.</p>';
+        pagination.innerHTML = '';
         return;
     }
 
-    container.innerHTML = items.map(p => {
-        const pics = p.Pictures ? p.Pictures.split(',').map(s => s.trim()) : [];
-        const mainPic = pics[0] || '';
+    const start = (page - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const paginated = productsToShow.slice(start, end);
+
+    catalog.innerHTML = paginated.map(p => {
         const isSale = p.Badge === 'SALE';
+        const cardClass = isSale ? 'card sale-card' : 'card';
+        const badgeHTML = isSale ? `<div class="badge-sale">🔥 SALE</div>` : (p.Badge ? `<div class="badge-top">⭐ ТОП</div>` : '');
+        const priceHTML = isSale ? 
+            `<div class="price-box-sale"><span class="old-price">${p.OldPrice} грн</span><span class="current-price">${p.Price} грн</span></div>` :
+            `<div class="price-box"><span class="current-price">${p.Price} грн</span></div>`;
+        const mainPic = p.Pictures ? p.Pictures.split(',')[0].trim() : '';
         
         return `
-        <div class="card ${isSale ? 'sale-card' : ''}" onclick="openModal(${p.myId})">
+        <div class="${cardClass}" onclick="openModal(${p.myId})">
             <div class="card-img-wrap">
-                ${isSale ? '<div class="badge-sale"><i class="fas fa-fire"></i> SALE</div>' : ''}
-                <img src="${mainPic}" loading="lazy" alt="${p.Name}">
+                ${badgeHTML}
+                <img src="${mainPic}" alt="${p.Name}" loading="lazy">
             </div>
             <div class="card-info">
-                <div>
-                    <small>${p.SubCategory || p.Category}</small>
-                    <h4>${p.Name}</h4>
-                    <div class="price-box ${isSale ? 'price-box-sale' : ''}">
-                        ${p.OldPrice ? `<span class="old-price">${p.OldPrice} грн</span>` : ''}
-                        <span class="current-price">${p.Price} грн</span>
-                    </div>
-                </div>
-                <button class="buy-btn-card ${isSale ? 'buy-btn-sale' : ''}" onclick="event.stopPropagation(); openModal(${p.myId})">
-                    <i class="fas fa-shopping-cart"></i> КУПИТИ
-                </button>
+                <h4>${p.Name}</h4>
+                ${priceHTML}
             </div>
         </div>`;
     }).join('');
-    renderPagination();
+
+    renderPagination(productsToShow.length, page);
 }
 
+// ==========================================
+// 2. УЛЬОТНА 3D КАРУСЕЛЬ (Логіка)
+// ==========================================
+let carouselItemsData = [];
+let current3DIndex = 0;
+
+function renderSaleCarousel() {
+    const track = document.getElementById('sale-carousel-track');
+    if (!track) return;
+
+    carouselItemsData = allProducts.filter(p => p.Badge === 'SALE');
+    if (carouselItemsData.length === 0) return;
+
+    // Створюємо картки з усім стилем SALE
+    track.innerHTML = carouselItemsData.map((p, i) => {
+        const mainPic = p.Pictures ? p.Pictures.split(',')[0].trim() : '';
+        return `
+        <div class="carousel-3d-item" data-index="${i}" onclick="openModal(${p.myId})">
+            <div class="badge-sale" style="top:10px; left:10px;">🔥 SALE</div>
+            <img src="${mainPic}" class="carousel-img" alt="${p.Name}" loading="lazy">
+            <div class="carousel-info">
+                <h4>${p.Name.toUpperCase()}</h4>
+                <div class="price-box-sale">
+                    <span class="old-price" style="font-size:12px;">${p.OldPrice ? p.OldPrice + ' грн' : ''}</span>
+                    <span class="current-price" style="font-size:18px;">${p.Price} грн</span>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+
+    // Починаємо з середини списку
+    current3DIndex = Math.floor(carouselItemsData.length / 2);
+    update3DCarousel();
+    
+    // Запускаємо епічну анімацію появи
+    track.classList.add('epic-entrance');
+}
+
+function moveCarousel3D(direction) {
+    current3DIndex += direction;
+    // Зациклення
+    if (current3DIndex < 0) current3DIndex = carouselItemsData.length - 1;
+    if (current3DIndex >= carouselItemsData.length) current3DIndex = 0;
+    update3DCarousel();
+}
+
+function update3DCarousel() {
+    const items = document.querySelectorAll('.carousel-3d-item');
+    if (items.length === 0) return;
+
+    // Визначаємо ширину екрану для налаштування кута та відступу
+    const isMobile = window.innerWidth <= 767;
+    const offsetBase = isMobile ? 65 : 120; // % зміщення по осі X
+    const rotateBase = isMobile ? 35 : 45;  // градус повороту
+
+    items.forEach((item, index) => {
+        let offset = index - current3DIndex;
+        
+        // Робимо безкінечне коло (спрощена логіка)
+        if (offset > Math.floor(items.length / 2)) offset -= items.length;
+        if (offset < -Math.floor(items.length / 2)) offset += items.length;
+
+        item.style.transition = 'all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+
+        if (offset === 0) {
+            // Центральний активний елемент
+            item.style.transform = `translateX(0) scale(1) translateZ(50px)`;
+            item.style.zIndex = 10;
+            item.style.opacity = 1;
+            item.style.filter = 'blur(0px)';
+            item.classList.add('active-3d');
+        } else {
+            // Бокові елементи
+            const sign = Math.sign(offset);
+            const absOffset = Math.abs(offset);
+            
+            const translateZ = absOffset === 1 ? -100 : -200;
+            const scale = absOffset === 1 ? 0.8 : 0.6;
+            const opacity = absOffset === 1 ? 0.7 : 0; // Ховаємо далекі
+            
+            item.style.transform = `translateX(${sign * offsetBase * absOffset}%) scale(${scale}) translateZ(${translateZ}px) rotateY(${-sign * rotateBase}deg)`;
+            item.style.zIndex = 10 - absOffset;
+            item.style.opacity = opacity;
+            item.style.filter = absOffset === 1 ? 'blur(2px)' : 'blur(5px)';
+            item.classList.remove('active-3d');
+            
+            // Вимикаємо кліки по неактивних (щоб не відкривався товар збоку)
+            if(absOffset > 1) item.style.pointerEvents = 'none';
+            else item.style.pointerEvents = 'auto';
+        }
+    });
+}
+
+// Перемальовуємо при зміні розміру вікна
+window.addEventListener('resize', () => { if(document.getElementById('sale-carousel-track')) update3DCarousel(); });
 function buildCategoryTree() {
     const tree = document.getElementById('category-tree');
     const structure = {};
