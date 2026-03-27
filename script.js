@@ -34,22 +34,24 @@ function renderCatalog() {
     container.innerHTML = items.map(p => {
         const pics = p.Pictures ? p.Pictures.split(',').map(s => s.trim()) : [];
         const mainPic = pics[0] || '';
+        const isSale = p.Badge === 'SALE'; // Перевіряємо, чи це розпродаж
+        
         return `
-        <div class="card" onclick="openModal(${p.myId})">
+        <div class="card ${isSale ? 'sale-card' : ''}" onclick="openModal(${p.myId})">
             <div class="card-img-wrap">
-                ${p.Badge === 'SALE' ? '<div class="badge-sale">SALE</div>' : ''}
+                ${isSale ? '<div class="badge-sale"><i class="fas fa-fire"></i> SALE</div>' : ''}
                 <img src="${mainPic}" loading="lazy" alt="${p.Name}">
             </div>
             <div class="card-info">
                 <div>
                     <small>${p.SubCategory || p.Category}</small>
                     <h4>${p.Name}</h4>
-                    <div class="price-box">
+                    <div class="price-box ${isSale ? 'price-box-sale' : ''}">
                         ${p.OldPrice ? `<span class="old-price">${p.OldPrice} грн</span>` : ''}
-                        ${p.Price} грн
+                        <span class="current-price">${p.Price} грн</span>
                     </div>
                 </div>
-                <button class="buy-btn-card" onclick="event.stopPropagation(); openModal(${p.myId})">
+                <button class="buy-btn-card ${isSale ? 'buy-btn-sale' : ''}" onclick="event.stopPropagation(); openModal(${p.myId})">
                     <i class="fas fa-shopping-cart"></i> КУПИТИ
                 </button>
             </div>
