@@ -307,12 +307,19 @@ function filterByBadge(badge, btn) {
     document.querySelectorAll('.filter-tag').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     
-    // ДОДАНО: запам'ятовуємо, який саме фільтр зараз активний
+    // Запам'ятовуємо фільтр
     window.currentBadgeFilter = badge; 
     
-    filteredProducts = badge === 'all' ? [...allProducts] : allProducts.filter(p => p.Badge === badge);
+    // Якщо це не 'all', примусово робимо текст великими літерами для порівняння
+    const badgeToCompare = badge === 'all' ? 'all' : badge.toUpperCase();
+    
+    filteredProducts = badge === 'all' ? 
+        [...allProducts] : 
+        allProducts.filter(p => p.Badge === badgeToCompare);
+        
     currentPage = 1; 
-    renderCatal
+    renderCatalog();
+}
 
 function resetPageAndFilter() {
     const q = document.getElementById('search-input').value.toLowerCase().trim();
