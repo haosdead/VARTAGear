@@ -288,21 +288,47 @@ function changeModalPic(step) {
 }
 
 function filterBy(type, val) {
+    // 1. Повідомляємо системі, що ми в категорії
+    window.currentCategory = val;
+    // 2. Скидаємо інші фільтри, щоб вони не перетиналися
+    window.currentSearchQuery = ''; 
+    window.currentBadgeFilter = 'all'; 
+
+    // 3. Фільтруємо масив товарів
     filteredProducts = allProducts.filter(p => type === 'cat' ? p.Category === val : p.SubCategory === val);
-    currentPage = 1; renderCatalog(); toggleMobileMenu(false);
+    
+    // 4. Оновлюємо інтерфейс
+    currentPage = 1; 
+    renderCatalog(); 
+    toggleMobileMenu(false);
 }
 
 function filterByBadge(badge, btn) {
     document.querySelectorAll('.filter-tag').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    
+    // ДОДАНО: запам'ятовуємо, який саме фільтр зараз активний
+    window.currentBadgeFilter = badge; 
+    
     filteredProducts = badge === 'all' ? [...allProducts] : allProducts.filter(p => p.Badge === badge);
-    currentPage = 1; renderCatalog();
-}
+    currentPage = 1; 
+    renderCatal
 
 function resetPageAndFilter() {
     const q = document.getElementById('search-input').value.toLowerCase().trim();
+    
+    // 1. Повідомляємо системі, що ми шукаємо текст
+    window.currentSearchQuery = q;
+    // 2. Скидаємо категорії та бейджі
+    window.currentCategory = 'all'; 
+    window.currentBadgeFilter = 'all'; 
+
+    // 3. Шукаємо по назві або артикулу
     filteredProducts = allProducts.filter(p => p.Name.toLowerCase().includes(q) || (p.VendorCode || "").toLowerCase().includes(q));
-    currentPage = 1; renderCatalog();
+    
+    // 4. Малюємо результати
+    currentPage = 1; 
+    renderCatalog();
 }
 
 // ==========================================
