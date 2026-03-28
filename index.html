@@ -4,23 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VARTA GEAR | Магазин тактичного одягу та амуніції</title>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-RCEEK505XF"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-RCEEK505XF');
+    </script>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-RCEEK505XF"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+   
 
-  gtag('config', 'G-RCEEK505XF');
-</script>
+### 💡 Чек-лист для перевірки:
+1. **ID вірний:** Ваш ідентифікатор `G-RCEEK505XF` прописаний у двох місцях (у посиланні `src` та в рядку `gtag('config'...)`). Все вірно.
+2. **Real-time перевірка:** Коли заллєте файл на сайт, зайдіть у Google Analytics у розділ **"Звіти -> У реальному часі"**. Відкрийте сайт з телефону — ви маєте миттєво побачити 1 активного користувача на карті.
+
+**Чи потрібно допомогти налаштувати відстеження кліків по кнопці "Купити" через цей код, щоб ви бачили не просто візити, а саме продажі в аналітиці?**
 <div id="body-overlay" onclick="closeAllPanels()"></div>
 
 <header class="header">
@@ -155,10 +160,16 @@
                 </label>
             </div>
             <div class="checkout-actions">
-                <p class="final-sum">До сплати: <span id="final-total-price">0</span> грн</p>
-                <button class="btn-tg" onclick="submitOrder('tg')"><i class="fab fa-telegram"></i> Telegram</button>
-                <button class="btn-wa" onclick="submitOrder('wa')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-            </div>
+    <p class="final-sum">До сплати: <span id="final-total-price">0</span> грн</p>
+    
+    <button type="button" class="btn-tg" onclick="submitOrder('tg', event)">
+        <i class="fab fa-telegram-plane"></i> Замовити в Телеграм
+    </button>
+    
+    <button type="button" class="btn-wa" onclick="submitOrder('wa', event)">
+        <i class="fab fa-whatsapp"></i> Замовити в Вотсап
+    </button>
+</div>
         </div>
     </div>
 </aside>

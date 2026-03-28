@@ -468,40 +468,70 @@ function hideCheckoutForm() {
     document.getElementById('checkout-form-container').style.display = 'none';
 }
 
-function submitOrder(platform) {
-    if (cart.length === 0) return;
-    
-    const name = document.getElementById('order-name').value.trim();
-    const phone = document.getElementById('order-phone').value.trim();
-    const city = document.getElementById('order-city').value.trim();
-    const np = document.getElementById('order-np').value.trim();
-    const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+function submitOrder(platform, event) {
+    // Зупиняємо стандартну поведінку кнопки, щоб не кидало в порожній чат при помилках
+    if (event) event.preventDefault(); 
 
-    if (!name || !phone || !city || !np) {
-        alert('Будь ласка, заповніть всі поля для доставки!');
-        return;
-    }
+    try {
+        if (cart.length === 0) {
+            alert("Кошик порожній!");
+            return;
+        }
+        
+        // Перевіряємо, чи всі текстові поля існують
+        const nameEl = document.getElementById('order-name');
+        const phoneEl = document.getElementById('order-phone');
+        const cityEl = document.getElementById('order-city');
+        const npEl = document.getElementById('order-np');
 
-    let txt = "🪖 НОВЕ ЗАМОВЛЕННЯ VARTA GEAR:\n\n";
-    cart.forEach((it, i) => { 
-        txt += `${i+1}. ${it.Name} (Розмір: ${it.selectedSize}) - ${it.Price} грн\n`; 
-    });
-    
-    const total = document.getElementById('cart-total-price').innerText;
-    txt += `\n💰 РАЗОМ: ${total} грн\n\n`;
-    
-    txt += `📦 ДАНІ ДОСТАВКИ:\n`;
-    txt += `👤 ПІБ: ${name}\n`;
-    txt += `📞 Тел: ${phone}\n`;
-    txt += `🏙 Місто: ${city}\n`;
-    txt += `📮 Відділення НП: ${np}\n`;
-    txt += `💳 Оплата: ${paymentMethod}\n`;
+        if (!nameEl || !phoneEl || !cityEl || !npEl) {
+            alert("Системна помилка: Не знайдено поля форми в HTML.");
+            return;
+        }
 
-    const encoded = encodeURIComponent(txt);
-    if(platform === 'tg') {
-        window.open(`https://t.me/vartagear?text=${encoded}`);
-    } else {
-        window.open(`https://wa.me/+380933923810?text=${encoded}`);
+        const name = nameEl.value.trim();
+        const phone = phoneEl.value.trim();
+        const city = cityEl.value.trim();
+        const np = npEl.value.trim();
+        
+        // БЕЗПЕЧНЕ отримання оплати (фікс для повної оплати)
+        const paymentRadio = document.querySelector('input[name="payment-method"]:checked');
+        const paymentMethod = paymentRadio ? paymentRadio.value : "Не вказано";
+
+        if (!name || !phone || !city || !np) {
+            alert('Будь ласка, заповніть всі поля для доставки!');
+            return;
+        }
+
+        let txt = "🪖 НОВЕ ЗАМОВЛЕННЯ VARTA GEAR:\n\n";
+        cart.forEach((it, i) => { 
+            txt += `${i+1}. ${it.Name} (Розмір: ${it.selectedSize}) - ${it.Price} грн\n`; 
+        });
+        
+        const totalEl = document.getElementById('cart-total-price');
+        const total = totalEl ? totalEl.innerText : "0";
+
+        txt += `\n💰 РАЗОМ: ${total} грн\n\n`;
+        
+        txt += `📦 ДАНІ ДОСТАВКИ:\n`;
+        txt += `👤 ПІБ: ${name}\n`;
+        txt += `📞 Тел: ${phone}\n`;
+        txt += `🏙 Місто: ${city}\n`;
+        txt += `📮 Відділення НП: ${np}\n`;
+        txt += `💳 Оплата: ${paymentMethod}\n`;
+
+        const encoded = encodeURIComponent(txt);
+        
+        // Відправляємо тільки в TG або WA
+        if (platform === 'tg') {
+            window.open(`https://t.me/vartagear?text=${encoded}`);
+        } else if (platform === 'wa') {
+            window.open(`https://wa.me/+380933923810?text=${encoded}`);
+        }
+    } catch (error) {
+        // Якщо стається якась помилка, ми побачимо її тут!
+        console.error("Помилка формування замовлення:", error);
+        alert("Сталася помилка: " + error.message);
     }
 }
 
