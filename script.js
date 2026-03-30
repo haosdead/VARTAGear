@@ -790,3 +790,44 @@ function showToast(productName) {
         toast.classList.remove('show');
     }, 3000);
 }
+
+// ==========================================
+// БЕЗКІНЕЧНА СТРІЧКА ВІДГУКІВ
+// ==========================================
+const customerReviews = [
+    { name: "Олександр", text: "Замовляв фліску та штани. Якість топ, розмір підійшов ідеально. Відправили в той же день. Рекомендую!", rating: 5 },
+    { name: "Максим", text: "Дуже зручна амуніція. Матеріали міцні, шви надійні. Окрема подяка менеджеру за детальну консультацію.", rating: 5 },
+    { name: "Андрій", text: "Брав тактичні кросівки. Вже місяць в жорстких умовах - політ нормальний. Ноги не парять і не промокають.", rating: 5 },
+    { name: "Дмитро", text: "Швидка доставка. Якість форми перевершила очікування, тканина ріп-стоп дійсно міцна. Слава Україні!", rating: 5 },
+    { name: "Віталій", text: "Замовляв рюкзак і пару підсумків. Все прийшло швидко, фурнітура якісна. Буду замовляти тут ще.", rating: 5 },
+    { name: "Сергій", text: "Куртка супер, не продувається і добре тримає тепло. Дякую магазину Varta Gear за вашу надійну роботу.", rating: 5 },
+    { name: "Ігор", text: "Відмінний магазин тактичного спорядження. Адекватні ціни і дійсно якісний товар, який не підведе.", rating: 5 }
+];
+
+function renderReviews() {
+    const track = document.getElementById('reviews-track');
+    if (!track) return;
+
+    // Створюємо HTML для карток
+    const cardsHTML = customerReviews.map(r => `
+        <div class="review-card">
+            <div class="review-header">
+                <div class="reviewer-avatar"><i class="fas fa-user-shield"></i></div>
+                <div class="reviewer-info">
+                    <h4>${r.name}</h4>
+                    <div class="stars">${'★'.repeat(r.rating)}</div>
+                </div>
+                <i class="fas fa-quote-right quote-icon"></i>
+            </div>
+            <p class="review-text">"${r.text}"</p>
+        </div>
+    `).join('');
+
+    // ДУБЛЮЄМО контент (вставляємо двічі), щоб стрічка крутилася безкінечно без ривків
+    track.innerHTML = cardsHTML + cardsHTML;
+}
+
+// Запускаємо рендер відгуків при завантаженні сторінки
+document.addEventListener('DOMContentLoaded', () => {
+    renderReviews(); // Викликаємо нашу функцію
+});

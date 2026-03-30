@@ -754,3 +754,124 @@ body {
     color: var(--mono-lime);
     text-shadow: 0 0 12px rgba(162, 210, 74, 0.5);
 }
+
+/* =================== СЕКЦІЯ ВІДГУКІВ =================== */
+.reviews-section {
+    padding: 50px 0;
+    margin-top: 30px;
+    background: linear-gradient(to bottom, transparent, rgba(162, 210, 74, 0.03), transparent);
+    overflow: hidden; /* Важливо, щоб ховати те, що виїхало за екран */
+}
+
+.section-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 35px;
+}
+
+.section-title h3 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--text-white);
+}
+
+/* Контейнер, який створює ефект розчинення країв у темряві */
+.reviews-marquee-container {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+/* Сама стрічка, що рухається */
+.reviews-marquee {
+    display: flex;
+    gap: 20px;
+    width: max-content;
+    /* 40s - це швидкість. Можеш зробити більше або менше */
+    animation: marqueeScroll 40s linear infinite; 
+    padding: 10px 0;
+}
+
+/* Зупиняємо стрічку, якщо клієнт навів мишку/тримає палець */
+.reviews-marquee:hover {
+    animation-play-state: paused;
+}
+
+@keyframes marqueeScroll {
+    0% { transform: translateX(0); }
+    /* Зсуваємо рівно на половину (бо ми дублювали відгуки в JS) */
+    100% { transform: translateX(calc(-50% - 10px)); } 
+}
+
+/* Дизайн самої картки відгуку */
+.review-card {
+    background: #111111;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 20px;
+    width: 320px; /* Фіксована ширина карток */
+    flex-shrink: 0;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Ефект підсвітки при наведенні */
+.review-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--mono-lime);
+    box-shadow: 0 8px 25px rgba(162, 210, 74, 0.15);
+}
+
+.review-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.reviewer-avatar {
+    width: 45px;
+    height: 45px;
+    background: rgba(162, 210, 74, 0.1);
+    color: var(--mono-lime);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.reviewer-info h4 {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+    color: #fff;
+}
+
+.stars {
+    color: #ffcc00; /* Золоті зірки */
+    font-size: 15px;
+    letter-spacing: 2px;
+}
+
+.quote-icon {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 30px;
+    color: rgba(255,255,255,0.03); /* Величезні напівпрозорі лапки на фоні */
+}
+
+.review-text {
+    color: #aaaaaa;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+    font-style: italic;
+}
