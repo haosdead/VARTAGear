@@ -730,3 +730,27 @@ body {
     display: flex;
     align-items: center;
 }
+
+/* Стилізація блоку опису в модальному вікні */
+#modal-desc {
+    font-family: 'Inter', sans-serif; /* Шрифт як у всього сайту */
+    font-weight: 600;                /* Робимо шрифт трохи товстішим */
+    letter-spacing: 1px;             /* Додаємо простір між літерами для читабельності */
+    line-height: 1.6;                /* Збільшуємо міжрядковий інтервал */
+    color: #e0e0e0;                  /* Світло-сірий колір тексту */
+    
+    /* Ефект підсвітки тексту (м'яке неонове сяйво) */
+    text-shadow: 0 0 8px rgba(162, 210, 74, 0.3); 
+    
+    /* Додаткова підсвітка самого блоку */
+    background: rgba(162, 210, 74, 0.03);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 3px solid var(--mono-lime); /* Зелена лінія збоку */
+}
+
+/* Якщо текст занадто яскравий, можна додати легкий градієнт */
+#modal-desc b, #modal-desc strong {
+    color: var(--mono-lime);
+    text-shadow: 0 0 12px rgba(162, 210, 74, 0.5);
+}

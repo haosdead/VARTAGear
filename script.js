@@ -224,7 +224,9 @@ function openModal(id, updateUrl = true) {
     document.getElementById('modal-name').innerText = p.Name;
     document.getElementById('modal-price').innerText = `${p.Price} грн`;
     document.getElementById('modal-old-price').innerText = p.OldPrice ? `${p.OldPrice} грн` : '';
-    document.getElementById('modal-desc').innerHTML = p.Description || 'Опис очікується...';
+    // Беремо опис, і якщо він є — робимо всі літери ВЕЛИКИМИ
+const descriptionText = p.Description || 'Опис очікується...';
+document.getElementById('modal-desc').innerHTML = descriptionText.toUpperCase();
     document.getElementById('modal-vendor').innerText = `Артикул: ${p.VendorCode}`;
 
     currentModalPics = p.Pictures ? p.Pictures.split(',').map(s => s.trim()) : [];
