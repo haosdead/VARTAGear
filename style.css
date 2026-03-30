@@ -875,3 +875,181 @@ body {
     margin: 0;
     font-style: italic;
 }
+
+/* =================== СТИЛІЗАЦІЯ ОПИСУ ТОВАРУ (HTML з таблицями) =================== */
+
+/* Базовий текст */
+#modal-desc {
+    font-family: 'Inter', sans-serif;
+    color: #d1d1d1;
+    font-size: 15px;
+    line-height: 1.6;
+    background: transparent;
+    padding: 0;
+    border: none;
+    text-shadow: none; 
+}
+
+/* Абзаци */
+#modal-desc p {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+/* Виділений текст */
+#modal-desc strong, #modal-desc b {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+/* ЗАГОЛОВКИ (Тільки вони будуть ВЕЛИКИМИ та ЗЕЛЕНИМИ) */
+#modal-desc h2, #modal-desc h3 {
+    color: var(--mono-lime);
+    text-transform: uppercase; 
+    font-size: 18px;
+    font-weight: 800;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(162, 210, 74, 0.3);
+    padding-bottom: 8px;
+    letter-spacing: 1px;
+}
+
+/* СПИСКИ (тактичні стрілочки) */
+#modal-desc ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 20px;
+}
+
+#modal-desc ul li {
+    position: relative;
+    padding-left: 22px;
+    margin-bottom: 10px;
+    color: #e0e0e0;
+}
+
+#modal-desc ul li::before {
+    content: '▹'; 
+    position: absolute;
+    left: 0;
+    top: -1px;
+    color: var(--mono-lime);
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* =================== ТАБЛИЦЯ РОЗМІРІВ =================== */
+#modal-desc figure.table {
+    margin: 0;
+    width: 100%;
+    overflow-x: auto; /* Скрол таблиці на малих екранах */
+}
+
+#modal-desc table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    margin-bottom: 25px;
+    background: #111111;
+    border-radius: 8px;
+    border: 1px solid #222;
+}
+
+#modal-desc th {
+    background: rgba(162, 210, 74, 0.1); 
+    color: var(--mono-lime);
+    padding: 12px 10px;
+    text-align: center;
+    font-weight: 700;
+    border: 1px solid #222;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+}
+
+#modal-desc td {
+    padding: 12px 10px;
+    border: 1px solid #222;
+    color: #ccc;
+    text-align: center; 
+    font-size: 14px;
+}
+
+#modal-desc td:first-child {
+    font-weight: 800;
+    color: #fff;
+    background: #161616;
+}
+
+#modal-desc tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* =================== ФІКС ДЛЯ ДОВГИХ ОПИСІВ НА МОБІЛЬНИХ =================== */
+.modal-content {
+    max-height: 90vh !important; 
+    overflow-y: auto !important; 
+    overflow-x: hidden;
+}
+
+#modal-desc.expanded {
+    max-height: none !important; 
+    overflow: visible !important;
+    padding-bottom: 40px !important; 
+}
+
+#modal-desc-container {
+    padding-bottom: 20px;
+}
+
+/* =================== ДИЗАЙН ДЛЯ "ТОП" =================== */
+.badge-top { 
+    position: absolute; top: 10px; left: 10px; 
+    /* Елітний градієнт синього */
+    background: linear-gradient(45deg, #0052D4, #4364F7, #6FB1FC); 
+    color: #fff; 
+    font-weight: 900; padding: 6px 12px; border-radius: 8px; font-size: 13px; z-index: 5; 
+    text-transform: uppercase; 
+    box-shadow: 0 4px 15px rgba(67, 100, 247, 0.5); 
+    display: flex; align-items: center; gap: 6px; 
+    animation: pulseTop 2s infinite; 
+}
+
+@keyframes pulseTop { 
+    0% { transform: scale(1); } 
+    50% { transform: scale(1.06); box-shadow: 0 6px 20px rgba(67, 100, 247, 0.8); } 
+    100% { transform: scale(1); } 
+}
+
+.card.top-card {
+    border: 1px solid #4364F7;
+    box-shadow: 0 5px 15px rgba(67, 100, 247, 0.1);
+}
+
+.buy-btn-top {
+    background: linear-gradient(45deg, #0052D4, #4364F7);
+    color: white; 
+    border: none;
+}
+
+.buy-btn-top:hover {
+    box-shadow: 0 5px 15px rgba(67, 100, 247, 0.5);
+}
+
+/* =================== УНІВЕРСАЛЬНА СТАРА ЦІНА (ЧЕРВОНА) =================== */
+.global-price-box { 
+    display: flex; flex-direction: column; gap: 2px; align-items: center;
+}
+
+.old-price-global, #modal-old-price { 
+    color: #ff3300 !important; /* Яскраво-червоний */
+    font-size: 14px; 
+    font-weight: 700; 
+    text-decoration: line-through; /* Закреслення */
+}
+
+#modal-old-price {
+    margin-right: 10px;
+    font-size: 16px;
+}

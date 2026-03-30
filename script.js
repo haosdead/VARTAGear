@@ -77,13 +77,18 @@ function loadCSV() {
             }));
 
             // 2. Розумне сортування
+            // 2. Розумне сортування (SALE -> TOP -> Пріоритет 1,2...)
             allProducts.sort((a, b) => {
-                // Спочатку сортуємо за пріоритетом (1, 2, 3...)
-                if (a.Priority !== b.Priority) {
-                    return a.Priority - b.Priority;
-                }
-                // Якщо пріоритет однаковий, піднімаємо SALE вище за інші
-                return (b.Badge === 'SALE') - (a.Badge === 'SALE');
+                // 1. Спочатку перевіряємо SALE (він найголовніший)
+                if (a.Badge === 'SALE' && b.Badge !== 'SALE') return -1;
+                if (b.Badge === 'SALE' && a.Badge !== 'SALE') return 1;
+                
+                // 2. Далі йде TOP
+                if (a.Badge === 'TOP' && b.Badge !== 'TOP') return -1;
+                if (b.Badge === 'TOP' && a.Badge !== 'TOP') return 1;
+
+                // 3. Якщо статуси однакові або їх немає — сортуємо за цифрами (1, 2, 3...)
+                return a.Priority - b.Priority;
             });
             
             // 3. Копіюємо у відфільтровані товари для початкового показу
@@ -146,28 +151,40 @@ function renderCatalog(page = 1) {
         // Визначаємо статуси
         const isSale = p.Badge === 'SALE';
         const isNew = p.Badge === 'NEW';
+        const isTop = p.Badge === 'TOP';
         
-        // Базові класи (Зелений дизайн)
         let cardClass = 'card';
         let badgeHTML = '';
-        let priceHTML = `<div class="price-box"><span class="current-price">${p.Price} грн</span></div>`;
         let btnClass = 'buy-btn-card';
 
-        // Якщо це SALE (і ми зараз у категорії або пошуку)
+        // Призначаємо дизайн залежно від бейджа
         if (isSale) {
             cardClass = 'card sale-card';
             badgeHTML = `<div class="badge-sale">🔥 SALE</div>`;
-            priceHTML = `<div class="price-box-sale"><span class="old-price">${p.OldPrice ? p.OldPrice + ' грн' : ''}</span><span class="current-price">${p.Price} грн</span></div>`;
             btnClass = 'buy-btn-card buy-btn-sale';
-        } 
-        // Якщо це НОВИНКА (Золотий дизайн)
-        else if (isNew) {
+        } else if (isNew) {
             cardClass = 'card new-card';
             badgeHTML = `<div class="badge-new">✨ НОВИНКА</div>`;
-            priceHTML = p.OldPrice ? 
-                `<div class="price-box-new"><span class="old-price">${p.OldPrice} грн</span><span class="current-price">${p.Price} грн</span></div>` :
-                `<div class="price-box-new"><span class="current-price">${p.Price} грн</span></div>`;
             btnClass = 'buy-btn-card buy-btn-new';
+        } else if (isTop) {
+            cardClass = 'card top-card';
+            badgeHTML = `<div class="badge-top">🏆 ТОП ПРОДАЖІВ</div>`;
+            btnClass = 'buy-btn-card buy-btn-top';
+        }
+
+        // УНІВЕРСАЛЬНА ЦІНА (з червоним закресленням для ВСІХ товарів, якщо є OldPrice)
+        let priceHTML = '';
+        if (p.OldPrice) {
+            priceHTML = `
+            <div class="global-price-box">
+                <span class="old-price-global">${p.OldPrice} грн</span>
+                <span class="current-price" ${isSale ? 'style="color: var(--sale);"' : ''}>${p.Price} грн</span>
+            </div>`;
+        } else {
+            priceHTML = `
+            <div class="global-price-box">
+                <span class="current-price" ${isSale ? 'style="color: var(--sale);"' : ''}>${p.Price} грн</span>
+            </div>`;
         }
 
         const mainPic = p.Pictures ? p.Pictures.split(',')[0].trim() : '';
@@ -225,8 +242,16 @@ function openModal(id, updateUrl = true) {
     document.getElementById('modal-price').innerText = `${p.Price} грн`;
     document.getElementById('modal-old-price').innerText = p.OldPrice ? `${p.OldPrice} грн` : '';
     // Беремо опис, і якщо він є — робимо всі літери ВЕЛИКИМИ
-const descriptionText = p.Description || 'Опис очікується...';
-document.getElementById('modal-desc').innerHTML = descriptionText.toUpperCase();
+// Беремо опис товару
+    let descriptionText = p.Description || 'Опис очікується...';
+
+    // Прибираємо артефакти &nbsp; та замінюємо їх на звичайний пробіл
+    descriptionText = descriptionText.replace(/&nbsp;/g, ' ');
+
+    // Вставляємо чистий HTML (заголовки стануть великими завдяки CSS)
+    document.getElementById('modal-desc').innerHTML = descriptionText;
+    
+    // Залишаємо артикул без змін
     document.getElementById('modal-vendor').innerText = `Артикул: ${p.VendorCode}`;
 
     currentModalPics = p.Pictures ? p.Pictures.split(',').map(s => s.trim()) : [];
