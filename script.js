@@ -71,11 +71,20 @@ function loadCSV() {
                 myId: i,
                 Price: parseFloat(p.Price) || 0,
                 OldPrice: p.OldPrice ? parseFloat(p.OldPrice) || null : null,
-                Badge: p.Badge ? p.Badge.trim().toUpperCase() : ""
+                Badge: p.Badge ? p.Badge.trim().toUpperCase() : "",
+                // Перетворюємо пріоритет у число (якщо пусто — буде 999)
+                Priority: parseInt(p.Priority) || 999 
             }));
 
-            // 2. Сортування (SALE завжди вище в загальному списку)
-            allProducts.sort((a, b) => (b.Badge === 'SALE') - (a.Badge === 'SALE'));
+            // 2. Розумне сортування
+            allProducts.sort((a, b) => {
+                // Спочатку сортуємо за пріоритетом (1, 2, 3...)
+                if (a.Priority !== b.Priority) {
+                    return a.Priority - b.Priority;
+                }
+                // Якщо пріоритет однаковий, піднімаємо SALE вище за інші
+                return (b.Badge === 'SALE') - (a.Badge === 'SALE');
+            });
             
             // 3. Копіюємо у відфільтровані товари для початкового показу
             filteredProducts = [...allProducts];
@@ -83,13 +92,12 @@ function loadCSV() {
             // 4. Оновлюємо інтерфейс
             renderCatalog();       // Малюємо основну сітку
             buildCategoryTree();   // Будуємо меню категорій
-            renderSaleCarousel();  // ЗАПУСКАЄМО КАРУСЕЛЬ SALE (НОВЕ)
+            renderSaleCarousel();  // ЗАПУСКАЄМО КАРУСЕЛЬ SALE
 
-            // 5. Перевірка URL-параметрів (якщо хтось перейшов за посиланням на конкретний товар)
+            // 5. Перевірка URL-параметрів
             const params = new URLSearchParams(window.location.search);
             const prodId = params.get('product');
             if (prodId !== null) {
-                // Невелика затримка, щоб все встигло провантажитись перед відкриттям модалки
                 setTimeout(() => openModal(parseInt(prodId), false), 300); 
             }
         },
@@ -98,7 +106,6 @@ function loadCSV() {
         }
     });
 }
-
 // ==========================================
 // 1. ОНОВЛЕНИЙ РЕНДЕР КАТАЛОГУ (НОВИНКИ + СЕЙЛ У КАРУСЕЛІ)
 // ==========================================
