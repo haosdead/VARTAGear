@@ -171,7 +171,14 @@
             <button class="add-to-cart-btn" style="width:100%" onclick="showCheckoutForm()">ОФОРМИТИ ЗАМОВЛЕННЯ</button>
         </div>
     </div>
-
+    <div id="cart-footer" class="cart-footer">
+            <div class="cart-total-wrap">
+                Разом: <span id="cart-total-price">0</span> грн
+            </div>
+            <button class="checkout-btn" onclick="openCheckoutModal()">ОФОРМИТИ ЗАМОВЛЕННЯ</button>
+            
+            <button class="continue-btn" onclick="toggleCart(false)">ПРОДОВЖИТИ ПОКУПКИ</button>
+        </div>
     <div id="checkout-form-container" style="display: none;">
         <button class="back-to-cart-btn" onclick="hideCheckoutForm()">❮ Назад до кошика</button>
         <div class="checkout-form">

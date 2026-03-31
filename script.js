@@ -1111,23 +1111,71 @@ function addToRecentlyViewed(p) {
     renderRecentlyViewedUI();
 }
 
+// --- 2. НЕЩОДАВНО ПЕРЕГЛЯНУТІ (ОНОВЛЕНИЙ ІДЕАЛЬНИЙ ВИГЛЯД) ---
 function renderRecentlyViewedUI() {
     const section = document.getElementById('recently-viewed-section');
     const grid = document.getElementById('recently-viewed-grid');
     if (!section || recentlyViewed.length === 0) return;
 
     section.style.display = 'block';
+    
+    // Малюємо точно такі ж картки, як у головному каталозі
     grid.innerHTML = recentlyViewed.map(p => {
-        const pic = p.Pictures ? p.Pictures.split(',')[0].trim() : '';
+        const isSale = p.Badge === 'SALE';
+        const isNew = p.Badge === 'NEW';
+        const isTop = p.Badge === 'TOP';
+        
+        let cardClass = 'card';
+        let badgeHTML = '';
+        let btnClass = 'buy-btn-card';
+
+        if (isSale) {
+            cardClass = 'card sale-card';
+            badgeHTML = `<div class="badge-sale">🔥 SALE</div>`;
+            btnClass = 'buy-btn-card buy-btn-sale';
+        } else if (isNew) {
+            cardClass = 'card new-card';
+            badgeHTML = `<div class="badge-new">✨ НОВИНКА</div>`;
+            btnClass = 'buy-btn-card buy-btn-new';
+        } else if (isTop) {
+            cardClass = 'card top-card';
+            badgeHTML = `<div class="badge-top">🏆 ТОП ПРОДАЖІВ</div>`;
+            btnClass = 'buy-btn-card buy-btn-top';
+        }
+
+        const isWish = wishlist.some(x => x.myId === p.myId);
+
+        let priceHTML = '';
+        if (p.OldPrice) {
+            priceHTML = `
+            <div class="global-price-box">
+                <span class="old-price-global">${p.OldPrice} грн</span>
+                <span class="current-price" ${isSale ? 'style="color: var(--sale);"' : ''}>${p.Price} грн</span>
+            </div>`;
+        } else {
+            priceHTML = `
+            <div class="global-price-box">
+                <span class="current-price" ${isSale ? 'style="color: var(--sale);"' : ''}>${p.Price} грн</span>
+            </div>`;
+        }
+
+        const mainPic = p.Pictures ? p.Pictures.split(',')[0].trim() : '';
+
         return `
-            <div class="cs-card" onclick="openModal(${p.myId})">
-                <div class="cs-img-wrap"><img src="${pic}"></div>
-                <div class="cs-info">
-                    <h4>${p.Name}</h4>
-                    <div class="cs-price">${p.Price} грн</div>
-                </div>
+        <div class="${cardClass}" onclick="openModal(${p.myId})">
+            <div class="card-img-wrap">
+                ${badgeHTML}
+                <img src="${mainPic}" alt="${p.Name}" loading="lazy">
+                <button class="wishlist-btn-card ${isWish ? 'active' : ''}" onclick="toggleWishlistProduct(${p.myId}, event)">
+                    <i class="${isWish ? 'fas' : 'far'} fa-heart"></i>
+                </button>
             </div>
-        `;
+            <div class="card-info">
+                <h4>${p.Name}</h4>
+                ${priceHTML}
+                <button class="${btnClass}"><i class="fas fa-shopping-cart"></i> КУПИТИ</button>
+            </div>
+        </div>`;
     }).join('');
 }
 
