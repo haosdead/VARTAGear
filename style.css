@@ -1911,15 +1911,16 @@ html, body {
 /* ================= ІДЕАЛЬНІ ВІДСТУПИ: КАРУСЕЛЬ ТА ФІЛЬТРИ ================= */
 
 /* 1. Відриваємо заголовок "Гарячі пропозиції" від закріпленої шапки */
+/* 1. Відриваємо карусель від шапки */
 #main-sale-carousel { 
-    margin-top: 50px !important; /* Було 25px, зробили 50px (опускаємо вниз) */
+    margin-top: 50px !important; 
     margin-bottom: 0 !important; 
     padding-bottom: 0 !important; 
 }
-/* 2. Зменшуємо "чорну діру" (висоту 3D-сцени) */
-/* Зазвичай контейнер 3D має клас .scene або .carousel-container */
-.scene, .carousel-container {
-    height: 300px !important; /* Підрізаємо висоту, щоб фільтри підтягнулися вгору */
+
+/* 2. Зменшуємо "чорну діру" (ДОДАНО ПРАВИЛЬНИЙ КЛАС .carousel-3d-viewport) */
+.carousel-3d-viewport, .scene, .carousel-container {
+    height: 330px !important; 
     min-height: auto !important;
     margin-bottom: 10px !important;
 }
@@ -1932,11 +1933,12 @@ html, body {
 /* ================= АДАПТАЦІЯ ДЛЯ ТЕЛЕФОНІВ ================= */
 @media (max-width: 768px) {
     #main-sale-carousel {
-        margin-top: 15px !important; /* На телефоні трохи менший відступ зверху */
+        margin-top: 40px !important; /* Збільшили з 15px до 40px, щоб точно вилізло з-під шапки */
     }
     
-    .scene, .carousel-container {
-        height: 300px !important; /* Картки на телефоні менші, тому підрізаємо ще більше */
+    /* ДОДАНО ПРАВИЛЬНИЙ КЛАС ДЛЯ ТЕЛЕФОНУ */
+    .carousel-3d-viewport, .scene, .carousel-container {
+        height: 300px !important; /* Робимо блок ще меншим для екрану телефона */
         margin-bottom: 5px !important;
     }
 }
