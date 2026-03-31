@@ -105,9 +105,23 @@ function loadCSV() {
             if (prodId !== null) {
                 setTimeout(() => openModal(parseInt(prodId), false), 300); 
             }
+
+            // ==========================================
+            // 6. ХОВАЄМО ПРЕЛОАДЕР ПІСЛЯ ЗАВАНТАЖЕННЯ
+            // ==========================================
+            const loader = document.getElementById('premium-loader');
+            if (loader) {
+                loader.classList.remove('active');
+            }
         },
         error: function(err) { 
             console.error("Помилка завантаження CSV:", err); 
+            
+            // Ховаємо прелоадер навіть при помилці, щоб екран не зависав
+            const loader = document.getElementById('premium-loader');
+            if (loader) {
+                loader.classList.remove('active');
+            }
         }
     });
 }
