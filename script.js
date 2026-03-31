@@ -947,11 +947,45 @@ function renderCrossSell(currentProduct) {
 }
 
 // Миттєвий перехід на головну без перезавантаження сторінки
+// Миттєвий перехід на головну без перезавантаження сторінки (З ФІКСОМ КАРУСЕЛІ)
 function goHome(e) {
     if(e) e.preventDefault();
-    // Очищаємо URL (щоб прибрати ?product= якщо він є)
+    
+    // 1. Очищаємо URL (щоб прибрати ?product= якщо він є)
     window.history.pushState({}, '', window.location.pathname); 
-    resetFilters(); // Скидаємо пошук і фільтри
-    closeAllPanels(); // Ховаємо бокові меню
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // Плавний скрол наверх
+    
+    // 2. Скидаємо глобальні змінні фільтрів
+    window.currentSearchQuery = '';
+    window.currentCategory = 'all';
+    window.currentBadgeFilter = 'all';
+    
+    // 3. Очищаємо поле пошуку візуально
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) searchInput.value = '';
+    
+    // 4. Робимо активною кнопку "Всі"
+    document.querySelectorAll('.filter-tag').forEach(b => b.classList.remove('active'));
+    const allBtn = document.querySelector('.filter-tag'); // Перша кнопка - це "Всі"
+    if (allBtn) allBtn.classList.add('active');
+    
+    // 5. Повертаємо всі товари
+    filteredProducts = [...allProducts];
+    currentPage = 1;
+    
+    // 6. ПРИМУСОВО ВМИКАЄМО КАРУСЕЛЬ І ОНОВЛЮЄМО ЇЇ КООРДИНАТИ
+    const carouselSection = document.getElementById('main-sale-carousel');
+    if (carouselSection) {
+        carouselSection.style.display = 'block';
+        // Даємо браузеру 10 мілісекунд, щоб блок з'явився, і перераховуємо 3D-математику
+        setTimeout(() => {
+            if (typeof update3DCarousel === 'function') {
+                update3DCarousel();
+            }
+        }, 10);
+    }
+    
+    // 7. Оновлюємо інтерфейс
+    renderCatalog(); 
+    closeAllPanels(); 
+    window.scrollTo({ top: 0, behavior: 'smooth' }); 
 }
