@@ -1919,7 +1919,7 @@ html, body {
 /* 2. Зменшуємо "чорну діру" (висоту 3D-сцени) */
 /* Зазвичай контейнер 3D має клас .scene або .carousel-container */
 .scene, .carousel-container {
-    height: 330px !important; /* Підрізаємо висоту, щоб фільтри підтягнулися вгору */
+    height: 300px !important; /* Підрізаємо висоту, щоб фільтри підтягнулися вгору */
     min-height: auto !important;
     margin-bottom: 10px !important;
 }
@@ -1936,7 +1936,7 @@ html, body {
     }
     
     .scene, .carousel-container {
-        height: 330px !important; /* Картки на телефоні менші, тому підрізаємо ще більше */
+        height: 300px !important; /* Картки на телефоні менші, тому підрізаємо ще більше */
         margin-bottom: 5px !important;
     }
 }
