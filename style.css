@@ -49,42 +49,37 @@ input, textarea, .search-box input {
 }
 /* =================== ШАПКА (HEADER) ТА ЛОГОТИП =================== */
 /* ================= ЗАКРІПЛЕНА ШАПКА (FIXED HEADER) ================= */
+/* ================= ФІКС ЗАКРІПЛЕНОЇ ШАПКИ (ГОТОВИЙ БЛОК) ================= */
 .header {
     background: #000;
     height: 90px;
     border-bottom: 2px solid var(--border-gray);
-    /* Змінюємо на fixed, щоб точно трималося */
-    position: fixed; 
+    position: fixed; /* Закріплено намертво */
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 2000; /* Піднімаємо вище за все */
+    z-index: 2000;
     display: flex;
     align-items: center;
     box-shadow: 0 4px 20px rgba(0,0,0,0.8);
 }
 
-/* ВАЖЛИВО: Оскільки шапка тепер "літає" над сайтом, 
-   нам треба відштовхнути контент вниз на висоту шапки (90px) */
-.main-container {
-    padding-top: 110px; /* 90px шапка + 20px відступ */
+.header-inner {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between; /* Розносить іконки по краях */
+    align-items: center;
+    padding: 0 15px;
+    position: relative; /* Щоб логотип міг зачепитися за центр */
 }
 
-@media (max-width: 768px) {
-    .header {
-        height: 70px; /* Робимо шапку на телефоні трохи нижчою */
-    }
-    .main-container {
-        padding-top: 85px; /* Коригуємо відступ для телефону */
-    }
-}
-
-/* ГАРНИЙ ЗЕЛЕНИЙ ОВАЛ (ОБОЛОНКА ЛОГОТИПУ) - Без синього кольору */
-.brand-wrapper, 
-.brand-wrapper:link, 
-.brand-wrapper:visited, 
-.brand-wrapper:hover, 
-.brand-wrapper:active {
+/* ЦЕНТРУВАННЯ ЛОГОТИПУ ПРЯМО ПО ЦЕНТРУ ЕКРАНА */
+.brand-wrapper {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     align-items: center;
     gap: 12px;
@@ -96,20 +91,54 @@ input, textarea, .search-box input {
     background: rgba(162, 210, 74, 0.05);
     box-shadow: 0 0 15px rgba(162, 210, 74, 0.2);
     transition: all 0.3s ease;
-    outline: none !important;
+    white-space: nowrap; /* Щоб назва не переносилася */
 }
 
+/* Блок іконок справа (Обране + Кошик) */
+.header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* ВІДСТУП КОНТЕНТУ (Щоб товари не ховалися під шапку) */
+.main-container {
+    padding-top: 110px; 
+}
+
+/* АДАПТАЦІЯ ДЛЯ ТЕЛЕФОНУ (Щоб нічого не налізало) */
+@media (max-width: 768px) {
+    .header {
+        height: 75px;
+    }
+    .main-container {
+        padding-top: 95px;
+    }
+    .brand-wrapper {
+        padding: 6px 15px;
+        gap: 8px;
+    }
+    .logo-main {
+        font-size: 16px !important;
+    }
+    .logo-sub {
+        display: none !important; /* На мобілці ховаємо підпис, щоб не було каші */
+    }
+    .flag-ua, .emblem-ua {
+        font-size: 16px !important;
+    }
+    .nav-icon {
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 16px !important;
+    }
+}
+
+/* Твої стилі лого та іконок (залишаю як були) */
 .brand-wrapper:hover {
     background: rgba(162, 210, 74, 0.12);
     box-shadow: 0 0 25px rgba(162, 210, 74, 0.4);
-    transform: translateY(-2px);
-    cursor: pointer;
-}
-
-/* Додатковий фікс для iOS (Safari) */
-.brand-text * {
-    color: inherit !important;
-    text-decoration: none !important;
+    transform: translate(-50%, -2px); /* Додаємо -50%, щоб при ховері лого не тікало */
 }
 
 .brand-text { display: flex; flex-direction: column; align-items: center; text-align: center; }
@@ -118,7 +147,6 @@ input, textarea, .search-box input {
 .logo-sub { font-size: 10px; color: #888; font-weight: 600; letter-spacing: 0.5px; margin-top: 5px; text-transform: none; }
 .flag-ua, .emblem-ua { font-size: 20px; filter: drop-shadow(0 0 5px rgba(0,0,0,0.5)); }
 
-/* Іконки (Меню, Кошик) */
 .nav-icon {
     background: var(--card-gray); border: 1px solid var(--border-gray); color: #fff;
     width: 45px; height: 45px; border-radius: 12px; cursor: pointer; position: relative;
@@ -126,12 +154,11 @@ input, textarea, .search-box input {
 }
 .nav-icon:hover { border-color: var(--mono-lime); color: var(--mono-lime); box-shadow: 0 0 10px rgba(162, 210, 74, 0.3); }
 
-#cart-count {
+#cart-count, #wishlist-count {
     position: absolute; top: -5px; right: -5px; background: var(--mono-lime); color: #000;
     font-size: 11px; font-weight: 800; width: 20px; height: 20px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(162, 210, 74, 0.5);
 }
-
 /* =================== SALE CAROUSEL (ФІКС РОЗМІРІВ ФОТО) =================== */
 .sale-carousel-section {
     max-width: 1200px;
