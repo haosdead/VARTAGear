@@ -48,35 +48,35 @@ input, textarea, .search-box input {
     cursor: text !important;
 }
 /* =================== ШАПКА (HEADER) ТА ЛОГОТИП =================== */
+/* ================= ЗАКРІПЛЕНА ШАПКА (FIXED HEADER) ================= */
 .header {
     background: #000;
     height: 90px;
     border-bottom: 2px solid var(--border-gray);
-    position: sticky;
+    /* Змінюємо на fixed, щоб точно трималося */
+    position: fixed; 
     top: 0;
-    z-index: 1000;
+    left: 0;
+    width: 100%;
+    z-index: 2000; /* Піднімаємо вище за все */
     display: flex;
     align-items: center;
     box-shadow: 0 4px 20px rgba(0,0,0,0.8);
 }
+
+/* ВАЖЛИВО: Оскільки шапка тепер "літає" над сайтом, 
+   нам треба відштовхнути контент вниз на висоту шапки (90px) */
 .main-container {
-    padding-top: 20px;
+    padding-top: 110px; /* 90px шапка + 20px відступ */
 }
 
-/* Якщо на телефоні шапка занадто велика, можна трохи зменшити відступи при закріпленні */
 @media (max-width: 768px) {
     .header {
-        padding: 8px 0;
+        height: 70px; /* Робимо шапку на телефоні трохи нижчою */
     }
-}
-.header-inner {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 15px;
+    .main-container {
+        padding-top: 85px; /* Коригуємо відступ для телефону */
+    }
 }
 
 /* ГАРНИЙ ЗЕЛЕНИЙ ОВАЛ (ОБОЛОНКА ЛОГОТИПУ) - Без синього кольору */

@@ -1210,12 +1210,12 @@ function filterByColor(colorKey, btn) {
 
     // 2. Словник синонімів кольорів
     const colorMap = {
-        'black': ['black', 'чорний', 'черн', 'blk'],
-        'olive': ['olive', 'green', 'олива', 'хакі', 'khaki', 'зелен', 'ranger'],
-        'coyote': ['coyote', 'tan', 'sand', 'койот', 'пісок', 'brown', 'коричн', 'coy'],
-        'multicam': ['multicam', 'мультикам', 'mcam', 'mc', 'мультік'],
-        'pixel': ['mm14', 'піксель', 'pixel', 'пиксель', 'пікс', 'pixe'],
-        'blue': ['blue', 'синій', 'синий', 'блакитний', 'navy']
+        'black': ['black', 'чорний', 'черн', 'blk', 'поліція', 'police', 'dark side'],
+        'olive': ['olive', 'green', 'олива', 'хакі', 'khaki', 'зелен', 'ranger', 'od green'],
+        'coyote': ['coyote', 'tan', 'sand', 'койот', 'пісок', 'brown', 'коричн', 'coy', 'dark earth'],
+        'multicam': ['multicam', 'мультикам', 'mcam', 'mc', 'мультік', 'мк'],
+        'pixel': ['mm14', 'піксель', 'pixel', 'пиксель', 'пікс', 'zsu', 'зсу', 'мм14'],
+        'blue': ['blue', 'синій', 'синий', 'блакитний', 'дснс', 'dsns', 'navy', 'dark blue']
     };
 
     // 3. ФІЛЬТРАЦІЯ: спочатку беремо товари поточної категорії, а потім фільтруємо за кольором
