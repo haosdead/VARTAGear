@@ -1146,51 +1146,34 @@ body {
     justify-content: center;
     overflow: hidden;
     background: #000; /* Резервний чорний */
+    
+    /* Плавний перехід для приховування */
+    transition: opacity 1s ease-out, visibility 1s ease-out;
+    opacity: 0;
+    visibility: hidden;
 }
 
-/* Фон, який розпадається на пазли */
+/* Коли прелоадер активний */
+.varta-preloader.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Фон, який повністю заповнює екран тактичним спорядженням */
 .varta-preloader-background {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     
-    /* Згенерований фон: спорядження, одяг БЕЗ ЗБРОЇ */
+    /* Твій фірмовий тактичний фон: спорядження, одяг БЕЗ ЗБРОЇ */
     background-image: url('image_1.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     
-    /* Розпад на частинки (пазли) */
-    mask-image: linear-gradient(to right, transparent 50%, black 50%), linear-gradient(to top, transparent 50%, black 50%);
-    mask-size: 10px 10px; /* Розмір пазлів */
-    mask-repeat: repeat;
-    mask-composite: exclude;
-    -webkit-mask-image: linear-gradient(to right, transparent 50%, black 50%), linear-gradient(to top, transparent 50%, black 50%);
-    -webkit-mask-size: 10px 10px;
-    -webkit-mask-repeat: repeat;
-    -webkit-mask-composite: exclude;
-    
-    /* Плавний перехід для приховування */
-    transition: opacity 1s ease-out, transform 1s ease-out;
-    opacity: 0;
-    visibility: hidden;
-}
-
-/* Коли прелоадер активний */
-.varta-preloader.active .varta-preloader-background {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* Темний оверлей та розмиття для преміального вигляду */
-.varta-preloader::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.85); /* Глибокий темний оверлей */
-    backdrop-filter: blur(5px); /* Легке розмиття фону */
-    z-index: 1;
+    /* Невелике темне затемнення для кращої читабельності тексту, але весь фон видно! */
+    filter: brightness(0.7) contrast(1.1);
 }
 
 .loader-content {
@@ -1198,46 +1181,33 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
-    z-index: 2; /* Поверх оверлею */
+    gap: 15px;
+    z-index: 2; /* Поверх фону */
     position: relative;
     color: #fff;
     font-family: 'Inter', sans-serif;
 }
 
-/* Логотип VARTA GEAR */
-.loader-logo-img {
-    max-width: 150px;
-    height: auto;
-    filter: drop-shadow(0 0 10px rgba(162, 210, 74, 0.15));
-}
-
-.loader-text-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-}
-
-/* Назва Varta Gear */
+/* Назва Varta Gear (Тільки текст) */
 .loader-name {
-    font-size: 36px;
+    font-size: 42px; /* Зробимо його великим і чітким */
     font-weight: 900;
     letter-spacing: 2px;
     color: #fff;
     text-transform: uppercase;
     margin: 0;
-    animation: logoGlowPulse 2.5s ease-in-out infinite; /* Пульсація */
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.15)); /* М'яке свічення */
+    animation: textGlowPulse 2.5s ease-in-out infinite; /* Пульсація */
 }
 
 .loader-name span.accent {
     color: var(--mono-lime);
 }
 
-/* Статус завантаження */
+/* Статус завантаження (Текст нижче) */
 .loader-status {
     color: #888;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 3px;
@@ -1245,7 +1215,7 @@ body {
 }
 
 /* Анімація м'якої пульсації назви */
-@keyframes logoGlowPulse {
+@keyframes textGlowPulse {
     0%, 100% {
         text-shadow: 0 0 10px rgba(255, 255, 255, 0.1), 0 0 20px rgba(162, 210, 74, 0.05);
         transform: scale(1);
