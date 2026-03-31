@@ -972,40 +972,45 @@ function renderCrossSell(currentProduct) {
 function goHome(e) {
     if(e) e.preventDefault();
     
-    // 1. Очищаємо URL (щоб прибрати ?product= якщо він є)
+    // 1. Очищаємо URL
     window.history.pushState({}, '', window.location.pathname); 
     
-    // 2. Скидаємо глобальні змінні фільтрів
-    window.currentSearchQuery = '';
+    // 2. Скидаємо ВСІ фільтри
     window.currentCategory = 'all';
+    window.currentSearchQuery = '';
     window.currentBadgeFilter = 'all';
+    window.currentColorFilter = 'all';
     
-    // 3. Очищаємо поле пошуку візуально
+    // 3. Очищаємо поле пошуку
     const searchInput = document.getElementById('search-input');
     if (searchInput) searchInput.value = '';
     
-    // 4. Робимо активною кнопку "Всі"
-    document.querySelectorAll('.filter-tag').forEach(b => b.classList.remove('active'));
-    const allBtn = document.querySelector('.filter-tag'); // Перша кнопка - це "Всі"
+    // 4. ПРАВИЛЬНЕ ПЕРЕМИКАННЯ КНОПОК
+    // Знімаємо active з усіх тегів і кнопок кольорів
+    document.querySelectorAll('.filter-tag, .color-btn').forEach(b => b.classList.remove('active'));
+    
+    // Робимо активною саме кнопку "Всі"
+    const allBtn = document.getElementById('all-products-btn') || document.querySelector('.filter-tag');
     if (allBtn) allBtn.classList.add('active');
     
+    // Робимо активною кнопку "Всі кольори"
+    const allColorsBtn = document.querySelector('.color-btn[onclick*="all"]');
+    if (allColorsBtn) allColorsBtn.classList.add('active');
+
     // 5. Повертаємо всі товари
     filteredProducts = [...allProducts];
     currentPage = 1;
     
-    // 6. ПРИМУСОВО ВМИКАЄМО КАРУСЕЛЬ І ОНОВЛЮЄМО ЇЇ КООРДИНАТИ
+    // 6. Повертаємо карусель
     const carouselSection = document.getElementById('main-sale-carousel');
     if (carouselSection) {
         carouselSection.style.display = 'block';
-        // Даємо браузеру 10 мілісекунд, щоб блок з'явився, і перераховуємо 3D-математику
         setTimeout(() => {
-            if (typeof update3DCarousel === 'function') {
-                update3DCarousel();
-            }
+            if (typeof update3DCarousel === 'function') update3DCarousel();
         }, 10);
     }
     
-    // 7. Оновлюємо інтерфейс
+    // 7. Оновлюємо каталог і скролимо наверх
     renderCatalog(); 
     closeAllPanels(); 
     window.scrollTo({ top: 0, behavior: 'smooth' }); 
