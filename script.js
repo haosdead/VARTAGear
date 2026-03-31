@@ -259,7 +259,15 @@ function openModal(id, updateUrl = true) {
 
     document.getElementById('modal-name').innerText = p.Name;
     document.getElementById('modal-price').innerText = `${p.Price} грн`;
-    document.getElementById('modal-old-price').innerText = p.OldPrice ? `${p.OldPrice} грн` : '';
+    
+    // Розумне відображення старої ціни (знижки)
+    const oldPriceEl = document.getElementById('modal-old-price');
+    if (p.OldPrice) {
+        oldPriceEl.innerText = `${p.OldPrice} грн`;
+        oldPriceEl.style.display = 'inline-block'; // Показуємо, якщо є знижка
+    } else {
+        oldPriceEl.style.display = 'none'; // Ховаємо, якщо знижки немає
+    }
     
     // Беремо опис товару
     let descriptionText = p.Description || 'Опис очікується...';
@@ -936,4 +944,14 @@ function renderCrossSell(currentProduct) {
         </div>
         `;
     }).join('');
+}
+
+// Миттєвий перехід на головну без перезавантаження сторінки
+function goHome(e) {
+    if(e) e.preventDefault();
+    // Очищаємо URL (щоб прибрати ?product= якщо він є)
+    window.history.pushState({}, '', window.location.pathname); 
+    resetFilters(); // Скидаємо пошук і фільтри
+    closeAllPanels(); // Ховаємо бокові меню
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Плавний скрол наверх
 }
