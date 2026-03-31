@@ -1196,45 +1196,51 @@ function animateCartIcon() {
 // ========================================================
 // РОЗУМНИЙ ФІЛЬТР ЗА КОЛЬОРАМИ (ПРАЦЮЄ З КНОПКАМИ)
 // ========================================================
+// ========================================================
+// РОЗУМНИЙ ФІЛЬТР ЗА КОЛЬОРАМИ (З УРАХУВАННЯМ КАТЕГОРІЇ)
+// ========================================================
 window.currentColorFilter = 'all';
 
 function filterByColor(colorKey, btn) {
-    // 1. Знімаємо виділення з усіх кнопок кольору і ставимо на натиснуту
+    // 1. Візуальна активація кнопки
     document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
 
     window.currentColorFilter = colorKey;
 
-    // 2. Скидаємо інші фільтри
-    window.currentCategory = 'all';
-    window.currentBadgeFilter = 'all';
-    window.currentSearchQuery = '';
-    
-    // Скидаємо виділення з кнопок (Всі/NEW/TOP)
-    document.querySelectorAll('.filter-tag').forEach(b => b.classList.remove('active'));
-    const allBtn = document.querySelector('.filter-tag');
-    if (allBtn) allBtn.classList.add('active');
-
-    // 3. Словник кольорів
+    // 2. Словник синонімів кольорів
     const colorMap = {
         'black': ['black', 'чорний', 'черн', 'blk'],
         'olive': ['olive', 'green', 'олива', 'хакі', 'khaki', 'зелен', 'ranger'],
         'coyote': ['coyote', 'tan', 'sand', 'койот', 'пісок', 'brown', 'коричн', 'coy'],
         'multicam': ['multicam', 'мультикам', 'mcam', 'mc', 'мультік'],
-        'pixel': ['mm14', 'піксель', 'pixel', 'пиксель', 'пікс', 'zsu'],
-        'blue': ['blue', 'синій', 'синий', 'блакитний']
+        'pixel': ['mm14', 'піксель', 'pixel', 'пиксель', 'пікс', 'pixe'],
+        'blue': ['blue', 'синій', 'синий', 'блакитний', 'navy']
     };
 
+    // 3. ФІЛЬТРАЦІЯ: спочатку беремо товари поточної категорії, а потім фільтруємо за кольором
+    let baseProducts = [];
+
+    if (!window.currentCategory || window.currentCategory === 'all') {
+        // Якщо категорія не обрана — шукаємо по всіх товарах
+        baseProducts = [...allProducts];
+    } else {
+        // Якщо ми в категорії — беремо товари ТІЛЬКИ цієї категорії
+        baseProducts = allProducts.filter(p => p.Category === window.currentCategory || p.SubCategory === window.currentCategory);
+    }
+
+    // 4. Застосовуємо фільтр кольору до обраної бази товарів
     if (colorKey === 'all') {
-        filteredProducts = [...allProducts];
+        filteredProducts = baseProducts;
     } else {
         const keywords = colorMap[colorKey];
-        filteredProducts = allProducts.filter(p => {
+        filteredProducts = baseProducts.filter(p => {
             const textToSearch = ((p.Color || '') + ' ' + (p.Name || '')).toLowerCase();
             return keywords.some(kw => textToSearch.includes(kw));
         });
     }
 
+    // 5. Оновлюємо інтерфейс
     applySorting(); 
     currentPage = 1; 
     renderCatalog();

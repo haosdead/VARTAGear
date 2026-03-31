@@ -59,7 +59,16 @@ input, textarea, .search-box input {
     align-items: center;
     box-shadow: 0 4px 20px rgba(0,0,0,0.8);
 }
+.main-container {
+    padding-top: 20px;
+}
 
+/* Якщо на телефоні шапка занадто велика, можна трохи зменшити відступи при закріпленні */
+@media (max-width: 768px) {
+    .header {
+        padding: 8px 0;
+    }
+}
 .header-inner {
     width: 100%;
     max-width: 1200px;
