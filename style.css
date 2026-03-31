@@ -1912,33 +1912,38 @@ html, body {
 
 /* 1. Відриваємо заголовок "Гарячі пропозиції" від закріпленої шапки */
 /* 1. Відриваємо карусель від шапки */
+/* 1. Відриваємо карусель від шапки */
 #main-sale-carousel { 
     margin-top: 50px !important; 
     margin-bottom: 0 !important; 
     padding-bottom: 0 !important; 
 }
 
-/* 2. Зменшуємо "чорну діру" (ДОДАНО ПРАВИЛЬНИЙ КЛАС .carousel-3d-viewport) */
-.carousel-3d-viewport, .scene, .carousel-container {
-    height: 330px !important; 
+/* 2. ПОВЕРТАЄМО ПРАВИЛЬНУ ВИСОТУ, ЩОБ НЕ ОБРІЗАЛО КАРТКУ (Картка = 360px) */
+.carousel-3d-viewport {
+    height: 380px !important; /* Даємо 20px запасу для тіні */
     min-height: auto !important;
-    margin-bottom: 10px !important;
+    margin-bottom: 0 !important;
 }
 
-/* 3. Підтягуємо сам блок фільтрів ближче до каруселі */
+/* 3. Підтягуємо фільтри ВПРИТУЛ до каруселі */
 .quick-filters, .quick-filters-wrap {
-    margin-top: 15px !important; 
+    margin-top: 5px !important; /* Мінімальний відступ, щоб не було "чорної діри" */
 }
 
 /* ================= АДАПТАЦІЯ ДЛЯ ТЕЛЕФОНІВ ================= */
 @media (max-width: 768px) {
     #main-sale-carousel {
-        margin-top: 40px !important; /* Збільшили з 15px до 40px, щоб точно вилізло з-під шапки */
+        margin-top: 40px !important; 
     }
     
-    /* ДОДАНО ПРАВИЛЬНИЙ КЛАС ДЛЯ ТЕЛЕФОНУ */
-    .carousel-3d-viewport, .scene, .carousel-container {
-        height: 300px !important; /* Робимо блок ще меншим для екрану телефона */
-        margin-bottom: 5px !important;
+    /* ПРАВИЛЬНА ВИСОТА ДЛЯ МОБІЛКИ (Мобільна картка = 320px) */
+    .carousel-3d-viewport {
+        height: 340px !important; /* Даємо 20px запасу для тіні */
+        margin-bottom: 0 !important;
+    }
+    
+    .quick-filters, .quick-filters-wrap {
+        margin-top: 5px !important; /* Фільтри стоять щільно під каруселлю */
     }
 }
