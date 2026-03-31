@@ -1107,13 +1107,25 @@ function updateWishlistUI() {
 }
 
 // --- 2. НЕЩОДАВНО ПЕРЕГЛЯНУТІ ---
-function addToRecentlyViewed(p) {
-    // Видаляємо, якщо вже є, щоб додати в початок
-    recentlyViewed = recentlyViewed.filter(x => x.myId !== p.myId);
-    recentlyViewed.unshift(p); // Додаємо на початок
-    if (recentlyViewed.length > 8) recentlyViewed.pop(); // Лишаємо тільки 8
-    localStorage.setItem('varta_recent', JSON.stringify(recentlyViewed));
-    renderRecentlyViewedUI();
+function addToRecentlyViewed(product) {
+    if (!recentlyViewed) recentlyViewed = [];
+    
+    // 1. Видаляємо дублікати (якщо товар вже є в списку)
+    recentlyViewed = recentlyViewed.filter(p => p.myId !== product.myId);
+    
+    // 2. Додаємо новий товар на самий початок
+    recentlyViewed.unshift(product);
+    
+    // 3. ОБМЕЖЕННЯ: Залишаємо строго 3 останні товари
+    recentlyViewed = recentlyViewed.slice(0, 3);
+    
+    // 4. Зберігаємо в пам'ять телефону/браузера
+    localStorage.setItem('varta_recently_viewed', JSON.stringify(recentlyViewed));
+    
+    // 5. Оновлюємо блок на екрані
+    if (typeof renderRecentlyViewedUI === 'function') {
+        renderRecentlyViewedUI();
+    }
 }
 
 // --- 2. НЕЩОДАВНО ПЕРЕГЛЯНУТІ (ОНОВЛЕНИЙ ІДЕАЛЬНИЙ ВИГЛЯД) ---
