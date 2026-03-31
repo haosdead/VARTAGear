@@ -856,3 +856,52 @@ function renderReviews() {
 document.addEventListener('DOMContentLoaded', () => {
     renderReviews(); // Викликаємо нашу функцію
 });
+
+// Функція для генерації "З цим також купують"
+function renderCrossSell(currentProduct) {
+    const csSection = document.getElementById('cross-sell-section');
+    const csGrid = document.getElementById('cross-sell-grid');
+    
+    // 1. Відкидаємо поточний товар, щоб не показувати його ж
+    let available = allProducts.filter(p => p.myId !== currentProduct.myId);
+    
+    // 2. Вибираємо пріоритетні товари (ТОП та Акції)
+    let priorityItems = available.filter(p => p.Badge === 'TOP' || p.Badge === 'SALE');
+    
+    // 3. Перемішуємо їх випадковим чином
+    priorityItems.sort(() => 0.5 - Math.random());
+    
+    // 4. Беремо 4 штуки
+    let recommendations = priorityItems.slice(0, 4);
+    
+    // 5. Якщо ТОПів менше 4-х, добираємо рандомні товари з тієї ж категорії
+    if (recommendations.length < 4) {
+        let sameCat = available.filter(p => p.Category === currentProduct.Category && !recommendations.includes(p));
+        sameCat.sort(() => 0.5 - Math.random());
+        
+        recommendations = [...recommendations, ...sameCat].slice(0, 4);
+    }
+    
+    // Якщо взагалі немає що запропонувати (буває при порожній базі)
+    if (recommendations.length === 0) {
+        csSection.style.display = 'none';
+        return;
+    }
+
+    // Показуємо секцію і малюємо картки
+    csSection.style.display = 'block';
+    csGrid.innerHTML = recommendations.map(p => {
+        const pic = p.Pictures ? p.Pictures.split(',')[0].trim() : '';
+        return `
+        <div class="cs-card" onclick="openModal(${p.myId}, false)">
+            <div class="cs-img-wrap">
+                <img src="${pic}" alt="${p.Name}">
+            </div>
+            <div class="cs-info">
+                <h4>${p.Name}</h4>
+                <div class="cs-price">${p.Price} грн</div>
+            </div>
+        </div>
+        `;
+    }).join('');
+}

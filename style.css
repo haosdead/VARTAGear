@@ -1053,3 +1053,83 @@ body {
     margin-right: 10px;
     font-size: 16px;
 }
+
+/* =================== КРОС-СЕЙЛ (З ЦИМ ТАКОЖ КУПУЮТЬ) =================== */
+.cross-sell-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px dashed #333;
+}
+
+.cross-sell-title {
+    color: #fff;
+    font-size: 16px;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cross-sell-title i {
+    color: var(--mono-lime);
+}
+
+.cross-sell-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+@media (min-width: 768px) {
+    .cross-sell-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.cs-card {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.cs-card:hover {
+    border-color: var(--mono-lime);
+    transform: translateY(-3px);
+}
+
+.cs-img-wrap {
+    width: 100%;
+    aspect-ratio: 1/1;
+    background: #080808;
+    overflow: hidden;
+}
+
+.cs-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cs-info {
+    padding: 8px;
+    text-align: center;
+}
+
+.cs-info h4 {
+    color: #ccc;
+    font-size: 11px;
+    margin: 0 0 5px 0;
+    height: 30px;
+    overflow: hidden;
+    text-transform: uppercase;
+}
+
+.cs-price {
+    color: var(--mono-lime);
+    font-weight: 800;
+    font-size: 14px;
+}
