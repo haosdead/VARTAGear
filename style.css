@@ -1438,3 +1438,49 @@ body {
     background: #e0e0e0; /* Трохи сірішає при наведенні */
     transform: translateY(-2px); /* Легенько підіймається */
 }
+
+/* ================= АДАПТАЦІЯ ШАПКИ ДЛЯ МОБІЛЬНИХ (Щоб не налізало) ================= */
+@media (max-width: 768px) {
+    /* 1. Ховаємо довгий підпис під логотипом на телефонах (економить купу місця!) */
+    .logo-sub {
+        display: none !important;
+    }
+
+    /* 2. Трохи зменшуємо головний текст логотипу */
+    .logo-main {
+        font-size: 18px !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    /* 3. Зменшуємо прапорець і тризуб */
+    .flag-ua, .emblem-ua {
+        font-size: 16px !important;
+        margin: 0 3px !important;
+    }
+
+    /* 4. Робимо відступи між іконками (обране і кошик) компактнішими */
+    .header-actions {
+        gap: 5px !important;
+    }
+
+    /* 5. Самі кнопки меню, кошика та обраного робимо акуратнішими */
+    .nav-icon {
+        font-size: 20px !important;
+        width: 35px !important;
+        height: 35px !important;
+        padding: 0 !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* 6. Значки кількості товарів (червоні кружечки) робимо трохи меншими */
+    .badge-count, #cart-count {
+        width: 16px !important;
+        height: 16px !important;
+        font-size: 10px !important;
+        top: -2px !important;
+        right: -2px !important;
+    }
+}
+/* ==================================================================================== */
