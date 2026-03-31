@@ -1911,16 +1911,15 @@ html, body {
 /* ================= ІДЕАЛЬНІ ВІДСТУПИ: КАРУСЕЛЬ ТА ФІЛЬТРИ ================= */
 
 /* 1. Відриваємо заголовок "Гарячі пропозиції" від закріпленої шапки */
-#main-sale-carousel {
-    margin-top: 25px !important; /* Даємо повітря зверху */
-    margin-bottom: 0 !important; /* Забираємо зайвий відступ знизу */
-    padding-bottom: 0 !important;
+#main-sale-carousel { 
+    margin-top: 50px !important; /* Було 25px, зробили 50px (опускаємо вниз) */
+    margin-bottom: 0 !important; 
+    padding-bottom: 0 !important; 
 }
-
 /* 2. Зменшуємо "чорну діру" (висоту 3D-сцени) */
 /* Зазвичай контейнер 3D має клас .scene або .carousel-container */
 .scene, .carousel-container {
-    height: 380px !important; /* Підрізаємо висоту, щоб фільтри підтягнулися вгору */
+    height: 330px !important; /* Підрізаємо висоту, щоб фільтри підтягнулися вгору */
     min-height: auto !important;
     margin-bottom: 10px !important;
 }
