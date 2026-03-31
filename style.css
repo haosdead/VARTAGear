@@ -1798,3 +1798,55 @@ html, body {
         gap: 10px;
     }
 }
+
+/* ================= ЦЕНТРУВАННЯ БЛОКУ ДОВІРИ ================= */
+.trust-signals-container {
+    max-width: 1000px; /* Обмежуємо ширину */
+    margin: 20px auto 30px auto !important; /* auto - центрує по горизонталі */
+    padding: 0 15px;
+}
+
+/* ================= ІДЕАЛЬНО МЕНШІ КАРТКИ В ІСТОРІЇ (ДЛЯ ТЕЛЕФОНІВ) ================= */
+@media (max-width: 768px) {
+    #recently-viewed-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px; /* Робимо їх ближчими одна до одної */
+    }
+    
+    /* Відключаємо старе масштабування, якщо воно було */
+    #recently-viewed-grid .card {
+        transform: none !important;
+        margin-bottom: 0 !important;
+    }
+
+    /* Жорстко зменшуємо всі деталі ВСЕРЕДИНІ картки історії */
+    #recently-viewed-grid .card-img-wrap { 
+        height: 120px !important; /* Менша картинка */
+    } 
+    
+    #recently-viewed-grid .card-info h4 { 
+        font-size: 11px !important; /* Менший шрифт назви */
+        margin-bottom: 5px; 
+        line-height: 1.2; 
+    }
+    
+    #recently-viewed-grid .current-price { 
+        font-size: 14px !important; /* Менша ціна */
+    }
+    
+    #recently-viewed-grid .old-price-global { 
+        font-size: 10px !important; 
+    }
+    
+    #recently-viewed-grid .buy-btn-card { 
+        padding: 6px !important; 
+        font-size: 11px !important; /* Менша кнопочка купити */
+    }
+    
+    #recently-viewed-grid .badge-sale, 
+    #recently-viewed-grid .badge-new, 
+    #recently-viewed-grid .badge-top { 
+        font-size: 8px !important; 
+        padding: 2px 4px !important; /* Малесенькі бейджі */
+    }
+}

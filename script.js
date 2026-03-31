@@ -1193,33 +1193,36 @@ function animateCartIcon() {
 // ========================================================
 // РОЗУМНИЙ ФІЛЬТР ЗА КОЛЬОРАМИ (ВЕРСІЯ ДЛЯ СПИСКУ)
 // ========================================================
+// ========================================================
+// РОЗУМНИЙ ФІЛЬТР ЗА КОЛЬОРАМИ (ПРАЦЮЄ З КНОПКАМИ)
+// ========================================================
 window.currentColorFilter = 'all';
 
-function filterByColorSelect() {
-    // Беремо значення з випадаючого списку
-    const colorSelect = document.getElementById('color-sort');
-    const colorKey = colorSelect ? colorSelect.value : 'all';
-    
+function filterByColor(colorKey, btn) {
+    // 1. Знімаємо виділення з усіх кнопок кольору і ставимо на натиснуту
+    document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
     window.currentColorFilter = colorKey;
 
-    // Скидаємо інші фільтри
+    // 2. Скидаємо інші фільтри
     window.currentCategory = 'all';
     window.currentBadgeFilter = 'all';
     window.currentSearchQuery = '';
     
-    // Повертаємо виділення на кнопку "Всі"
+    // Скидаємо виділення з кнопок (Всі/NEW/TOP)
     document.querySelectorAll('.filter-tag').forEach(b => b.classList.remove('active'));
     const allBtn = document.querySelector('.filter-tag');
     if (allBtn) allBtn.classList.add('active');
 
-    // Словник (Слово "Navy" прибрали, шукаємо просто синій)
+    // 3. Словник кольорів
     const colorMap = {
         'black': ['black', 'чорний', 'черн', 'blk'],
         'olive': ['olive', 'green', 'олива', 'хакі', 'khaki', 'зелен', 'ranger'],
         'coyote': ['coyote', 'tan', 'sand', 'койот', 'пісок', 'brown', 'коричн', 'coy'],
         'multicam': ['multicam', 'мультикам', 'mcam', 'mc', 'мультік'],
-        'pixel': ['mm14', 'піксель', 'pixel', 'пиксель', 'пікс', 'pixe'],
-        'blue': ['blue', 'синій', 'синий', 'блакитний', 'темно-синій', 'navy', 'deep navy']
+        'pixel': ['mm14', 'піксель', 'pixel', 'пиксель', 'пікс', 'zsu'],
+        'blue': ['blue', 'синій', 'синий', 'блакитний']
     };
 
     if (colorKey === 'all') {
