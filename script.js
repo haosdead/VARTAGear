@@ -76,7 +76,6 @@ function loadCSV() {
                 Priority: parseInt(p.Priority) || 999 
             }));
 
-            // 2. Розумне сортування
             // 2. Розумне сортування (SALE -> TOP -> Пріоритет 1,2...)
             allProducts.sort((a, b) => {
                 // 1. Спочатку перевіряємо SALE (він найголовніший)
@@ -107,18 +106,21 @@ function loadCSV() {
             }
 
             // ==========================================
-            // 6. ХОВАЄМО ПРЕЛОАДЕР ПІСЛЯ ЗАВАНТАЖЕННЯ
+            // 6. ХОВАЄМО ПРЕЛОАДЕР ПІСЛЯ ЗАВАНТАЖЕННЯ (Ефект пазлів)
             // ==========================================
-            const loader = document.getElementById('premium-loader');
+            const loader = document.getElementById('varta-preloader');
             if (loader) {
-                loader.classList.remove('active');
+                // Даємо пів секунди помилуватися логотипом, а потім запускаємо розпад
+                setTimeout(() => {
+                    loader.classList.remove('active');
+                }, 500);
             }
         },
         error: function(err) { 
             console.error("Помилка завантаження CSV:", err); 
             
             // Ховаємо прелоадер навіть при помилці, щоб екран не зависав
-            const loader = document.getElementById('premium-loader');
+            const loader = document.getElementById('varta-preloader');
             if (loader) {
                 loader.classList.remove('active');
             }
