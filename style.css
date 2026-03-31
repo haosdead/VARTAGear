@@ -1689,3 +1689,112 @@ body {
     .trust-text strong { font-size: 12px; }
     .trust-text span { font-size: 10px; }
 }
+
+/* =================== ФІЛЬТР ЗА КОЛЬОРАМИ (ІДЕАЛЬНА СІТКА) =================== */
+.color-filters-wrap {
+    display: flex;
+    flex-wrap: wrap; /* Кнопки акуратно переносяться на новий рядок */
+    justify-content: center; /* Рівняємо все по центру екрана */
+    gap: 10px;
+    padding: 10px 0 20px 0;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    width: 100%;
+}
+
+.color-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #1c1c1c;
+    border: 1px solid var(--border-gray);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.color-btn:hover { border-color: #555; background: #252525; }
+.color-btn.active { 
+    border-color: var(--mono-lime); 
+    background: rgba(162, 210, 74, 0.1); 
+    color: var(--mono-lime); 
+}
+
+/* Кольоровий кружечок всередині кнопки */
+.color-circle {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+/* ================= ФІКС ГОРИЗОНТАЛЬНОГО СКРОЛУ (Екран більше не їде вбік!) ================= */
+html, body {
+    overflow-x: hidden !important; 
+    max-width: 100vw;
+}
+
+/* ================= ДИЗАЙН НОВИХ ФІЛЬТРІВ ================= */
+.quick-filters-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 25px auto;
+    width: 100%;
+    max-width: 800px; /* Тримаємо все акуратно по центру */
+}
+
+.filter-tags-group, .filter-selects-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* ================= ІДЕАЛЬНА СІТКА ДЛЯ "НЕЩОДАВНО ПЕРЕГЛЯДАЛИ" ================= */
+#recently-viewed-section {
+    width: 100%;
+    max-width: 1200px; /* Не даємо розтягуватись на весь екран на великих моніторах */
+    margin: 50px auto 40px auto;
+    padding: 30px 15px 0 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#recently-viewed-grid {
+    display: grid;
+    /* auto-fill робить картки фіксованого розміру, вони більше не будуть гігантськими! */
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
+    gap: 15px;
+    justify-content: center;
+}
+
+/* Робимо картки історії ВІЗУАЛЬНО МЕНШИМИ (85% від оригіналу) */
+#recently-viewed-grid .card {
+    transform: scale(0.9);
+    transform-origin: top center;
+    margin-bottom: -15%; /* Компенсуємо місце після зменшення */
+}
+
+/* ================= АДАПТАЦІЯ ТЕЛЕФОНУ ================= */
+@media (max-width: 768px) {
+    .filter-selects-group { width: 100%; }
+    
+    /* Списки на телефоні стають ідеально рівно по 50% ширини кожен */
+    .filter-sort-select { 
+        width: 48% !important; 
+        font-size: 13px !important;
+        padding: 8px 30px 8px 10px !important;
+    }
+
+    #recently-viewed-grid {
+        grid-template-columns: repeat(2, 1fr); /* Завжди по 2 в ряд */
+        gap: 10px;
+    }
+}

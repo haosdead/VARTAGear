@@ -1190,50 +1190,48 @@ function animateCartIcon() {
 // ========================================================
 // РОЗУМНИЙ ФІЛЬТР ЗА КОЛЬОРАМИ
 // ========================================================
+// ========================================================
+// РОЗУМНИЙ ФІЛЬТР ЗА КОЛЬОРАМИ (ВЕРСІЯ ДЛЯ СПИСКУ)
+// ========================================================
 window.currentColorFilter = 'all';
 
-function filterByColor(colorKey, btn) {
-    // 1. Робимо активною тільки натиснуту кнопку кольору
-    document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-
+function filterByColorSelect() {
+    // Беремо значення з випадаючого списку
+    const colorSelect = document.getElementById('color-sort');
+    const colorKey = colorSelect ? colorSelect.value : 'all';
+    
     window.currentColorFilter = colorKey;
 
-    // 2. Скидаємо інші фільтри, щоб шукати колір по ВСЬОМУ магазину
+    // Скидаємо інші фільтри
     window.currentCategory = 'all';
     window.currentBadgeFilter = 'all';
     window.currentSearchQuery = '';
     
-    // Скидаємо візуальне виділення з кнопок (Всі/NEW/TOP)
+    // Повертаємо виділення на кнопку "Всі"
     document.querySelectorAll('.filter-tag').forEach(b => b.classList.remove('active'));
     const allBtn = document.querySelector('.filter-tag');
     if (allBtn) allBtn.classList.add('active');
 
-    // 3. СЛОВНИК СИНОНІМІВ (Тут ми ловимо і англійські, і українські назви)
+    // Словник (Слово "Navy" прибрали, шукаємо просто синій)
     const colorMap = {
         'black': ['black', 'чорний', 'черн', 'blk'],
         'olive': ['olive', 'green', 'олива', 'хакі', 'khaki', 'зелен', 'ranger'],
         'coyote': ['coyote', 'tan', 'sand', 'койот', 'пісок', 'brown', 'коричн', 'coy'],
         'multicam': ['multicam', 'мультикам', 'mcam', 'mc', 'мультік'],
-        'pixel': ['mm14', 'піксель', 'pixel', 'пиксель', 'пікс', 'zsu'],
-        'blue': ['blue', 'navy', 'синій', 'синий', 'блакитний', 'темно-синій']
+        'pixel': ['mm14', 'піксель', 'pixel', 'пиксель', 'пікс', 'pixe'],
+        'blue': ['blue', 'синій', 'синий', 'блакитний', 'темно-синій', 'navy', 'deep navy']
     };
 
     if (colorKey === 'all') {
         filteredProducts = [...allProducts];
     } else {
         const keywords = colorMap[colorKey];
-        
         filteredProducts = allProducts.filter(p => {
-            // Шукаємо або у властивості p.Color (якщо є в таблиці), або в самій Назві (p.Name)
             const textToSearch = ((p.Color || '') + ' ' + (p.Name || '')).toLowerCase();
-            
-            // Якщо хоч одне слово зі словника є в назві чи кольорі — беремо цей товар!
             return keywords.some(kw => textToSearch.includes(kw));
         });
     }
 
-    // 4. Оновлюємо сітку з урахуванням обраного сортування ціни
     applySorting(); 
     currentPage = 1; 
     renderCatalog();
