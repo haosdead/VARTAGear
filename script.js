@@ -3,6 +3,8 @@ const ITEMS_PER_PAGE = 21;
 
 let allProducts = [], filteredProducts = [], cart = [], currentPage = 1;
 let currentModalPics = [], currentModalPicIndex = 0;
+let wishlist = JSON.parse(localStorage.getItem('varta_wishlist')) || [];
+let recentlyViewed = JSON.parse(localStorage.getItem('varta_recent')) || [];
 
 document.addEventListener('DOMContentLoaded', () => {
     // Спочатку дістаємо дані з пам'яті браузера
@@ -16,6 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Завантажуємо товари
     loadCSV();
+
+    updateWishlistUI();        // <--- ДОДАЄМО ТУТ (відновлює сердечка)
+    renderRecentlyViewedUI();
 });
 
 // ========================================================
@@ -190,6 +195,9 @@ function renderCatalog(page = 1) {
             btnClass = 'buy-btn-card buy-btn-top';
         }
 
+        // ПЕРЕВІРКА: Чи є цей товар у "Списку бажань" клієнта?
+        const isWish = wishlist.some(x => x.myId === p.myId);
+
         // УНІВЕРСАЛЬНА ЦІНА (з червоним закресленням для ВСІХ товарів, якщо є OldPrice)
         let priceHTML = '';
         if (p.OldPrice) {
@@ -212,6 +220,9 @@ function renderCatalog(page = 1) {
             <div class="card-img-wrap">
                 ${badgeHTML}
                 <img src="${mainPic}" alt="${p.Name}" loading="lazy">
+                <button class="wishlist-btn-card ${isWish ? 'active' : ''}" onclick="toggleWishlistProduct(${p.myId}, event)">
+                    <i class="${isWish ? 'fas' : 'far'} fa-heart"></i>
+                </button>
             </div>
             <div class="card-info">
                 <h4>${p.Name}</h4>
@@ -256,7 +267,7 @@ function toggleCategory(catGroupElement) {
 function openModal(id, updateUrl = true) {
     const p = allProducts.find(x => x.myId === id);
     if(!p) return;
-
+    addToRecentlyViewed(p);
     document.getElementById('modal-name').innerText = p.Name;
     document.getElementById('modal-price').innerText = `${p.Price} грн`;
     
@@ -366,6 +377,7 @@ function filterBy(type, val) {
     filteredProducts = allProducts.filter(p => type === 'cat' ? p.Category === val : p.SubCategory === val);
     
     // 4. Оновлюємо інтерфейс
+    applySorting(); // Застосовуємо вибране сортування перед малюванням
     currentPage = 1; 
     renderCatalog(); 
     toggleMobileMenu(false);
@@ -385,6 +397,7 @@ function filterByBadge(badge, btn) {
         [...allProducts] : 
         allProducts.filter(p => p.Badge === badgeToCompare);
         
+    applySorting(); // Застосовуємо вибране сортування перед малюванням
     currentPage = 1; 
     renderCatalog();
 }
@@ -402,6 +415,7 @@ function resetPageAndFilter() {
     filteredProducts = allProducts.filter(p => p.Name.toLowerCase().includes(q) || (p.VendorCode || "").toLowerCase().includes(q));
     
     // 4. Малюємо результати
+    applySorting(); // Застосовуємо вибране сортування перед малюванням
     currentPage = 1; 
     renderCatalog();
 }
@@ -513,6 +527,13 @@ function updateCartUI() {
         
         if (totalPriceEl) totalPriceEl.innerText = total;
         if (finalPriceEl) finalPriceEl.innerText = total;
+    }
+
+    // ==========================================
+    // АНІМАЦІЯ КОШИКА (ПІДСТРИБУВАННЯ)
+    // ==========================================
+    if (typeof animateCartIcon === 'function') {
+        animateCartIcon(); // <--- ОСЬ ВОНА!
     }
 }
 
@@ -988,4 +1009,132 @@ function goHome(e) {
     renderCatalog(); 
     closeAllPanels(); 
     window.scrollTo({ top: 0, behavior: 'smooth' }); 
+}
+
+// ========================================================
+// ЗУМ ФОТОГРАФІЙ (ЛАЙТБОКС)
+// ========================================================
+function openLightbox() {
+    const imgSrc = document.getElementById('modal-main-img').src;
+    if (!imgSrc) return;
+    document.getElementById('lightbox-img').src = imgSrc;
+    document.getElementById('image-lightbox').style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Забороняємо скрол фону
+}
+
+function closeLightbox() {
+    document.getElementById('image-lightbox').style.display = 'none';
+}
+
+
+// ========================================================
+// СОРТУВАННЯ ЗА ЦІНОЮ
+// ========================================================
+window.currentSortMode = 'default';
+
+function sortCatalog() {
+    const sortSelect = document.getElementById('price-sort');
+    window.currentSortMode = sortSelect ? sortSelect.value : 'default';
+    
+    applySorting(); // Застосовуємо сортування до масиву
+    currentPage = 1; // Скидаємо на першу сторінку
+    renderCatalog(); // Перемальовуємо каталог
+}
+
+function applySorting() {
+    if (window.currentSortMode === 'asc') {
+        // Дешевші
+        filteredProducts.sort((a, b) => a.Price - b.Price);
+    } else if (window.currentSortMode === 'desc') {
+        // Дорожчі
+        filteredProducts.sort((a, b) => b.Price - a.Price);
+    } else {
+        // За замовчуванням (ТОП -> SALE -> Пріоритет)
+        filteredProducts.sort((a, b) => {
+            if (a.Badge === 'SALE' && b.Badge !== 'SALE') return -1;
+            if (b.Badge === 'SALE' && a.Badge !== 'SALE') return 1;
+            if (a.Badge === 'TOP' && b.Badge !== 'TOP') return -1;
+            if (b.Badge === 'TOP' && a.Badge !== 'TOP') return 1;
+            return a.Priority - b.Priority;
+        });
+    }
+}
+
+// --- 1. СПИСОК БАЖАНЬ ---
+function toggleWishlist(s) {
+    document.getElementById('wishlist-sidebar').classList.toggle('active', s);
+    document.getElementById('body-overlay').classList.toggle('active', s);
+    updateWishlistUI();
+}
+
+function toggleWishlistProduct(id, event) {
+    if(event) event.stopPropagation(); // щоб не відкривалася модалка
+    const p = allProducts.find(x => x.myId === id);
+    const index = wishlist.findIndex(x => x.myId === id);
+    
+    if (index > -1) {
+        wishlist.splice(index, 1);
+    } else {
+        wishlist.push(p);
+    }
+    
+    localStorage.setItem('varta_wishlist', JSON.stringify(wishlist));
+    renderCatalog(currentPage); // Перемальовуємо, щоб сердечко змінило колір
+    updateWishlistUI();
+}
+
+function updateWishlistUI() {
+    document.getElementById('wishlist-count').innerText = wishlist.length;
+    const content = document.getElementById('wishlist-content');
+    if (wishlist.length === 0) {
+        content.innerHTML = '<p style="text-align:center; padding:20px;">Список порожній</p>';
+    } else {
+        content.innerHTML = wishlist.map(it => `
+            <div class="cart-item">
+                <div class="cart-item-info" onclick="openModal(${it.myId}); toggleWishlist(false);">
+                    <span class="cart-item-title">${it.Name}</span>
+                    <span class="cart-item-price">${it.Price} грн</span>
+                </div>
+                <span class="cart-item-remove" onclick="toggleWishlistProduct(${it.myId})"><i class="fas fa-times"></i></span>
+            </div>
+        `).join('');
+    }
+}
+
+// --- 2. НЕЩОДАВНО ПЕРЕГЛЯНУТІ ---
+function addToRecentlyViewed(p) {
+    // Видаляємо, якщо вже є, щоб додати в початок
+    recentlyViewed = recentlyViewed.filter(x => x.myId !== p.myId);
+    recentlyViewed.unshift(p); // Додаємо на початок
+    if (recentlyViewed.length > 8) recentlyViewed.pop(); // Лишаємо тільки 8
+    localStorage.setItem('varta_recent', JSON.stringify(recentlyViewed));
+    renderRecentlyViewedUI();
+}
+
+function renderRecentlyViewedUI() {
+    const section = document.getElementById('recently-viewed-section');
+    const grid = document.getElementById('recently-viewed-grid');
+    if (!section || recentlyViewed.length === 0) return;
+
+    section.style.display = 'block';
+    grid.innerHTML = recentlyViewed.map(p => {
+        const pic = p.Pictures ? p.Pictures.split(',')[0].trim() : '';
+        return `
+            <div class="cs-card" onclick="openModal(${p.myId})">
+                <div class="cs-img-wrap"><img src="${pic}"></div>
+                <div class="cs-info">
+                    <h4>${p.Name}</h4>
+                    <div class="cs-price">${p.Price} грн</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// --- 3. АНІМАЦІЯ КОШИКА ---
+// Додай цей виклик всередині функції updateCartUI()
+function animateCartIcon() {
+    const btn = document.getElementById('cart-icon-btn');
+    btn.classList.add('cart-bounce');
+    setTimeout(() => btn.classList.remove('cart-bounce'), 600);
 }

@@ -42,23 +42,30 @@
 <div id="body-overlay" onclick="closeAllPanels()"></div>
 
 <header class="header">
-    <div class="header-inner">
-        <button class="nav-icon" onclick="toggleMobileMenu(true)"><i class="fas fa-bars"></i></button>
-        
-        <a href="#" onclick="goHome(event)" class="brand-wrapper">
-            <span class="flag-ua">🇺🇦</span>
-            <div class="brand-text">
-                <div class="logo-main">VARTA <span class="accent">GEAR</span></div>
-                <div class="logo-sub">Магазин тактичного одягу | Амуніції</div>
-            </div>
-            <span class="emblem-ua">🔱</span>
-        </a>
+   <div class="header-inner">
+    <button class="nav-icon" onclick="toggleMobileMenu(true)"><i class="fas fa-bars"></i></button>
+    
+    <a href="#" onclick="goHome(event)" class="brand-wrapper">
+        <span class="flag-ua">🇺🇦</span>
+        <div class="brand-text">
+            <div class="logo-main">VARTA <span class="accent">GEAR</span></div>
+            <div class="logo-sub">Магазин тактичного одягу | Амуніції</div>
+        </div>
+        <span class="emblem-ua">🔱</span>
+    </a>
 
-        <button class="nav-icon" onclick="toggleCart(true)">
+    <div class="header-actions" style="display: flex; gap: 10px;">
+        <button class="nav-icon" onclick="toggleWishlist(true)">
+            <i class="far fa-heart"></i>
+            <span id="wishlist-count" class="badge-count">0</span>
+        </button>
+
+        <button id="cart-icon-btn" class="nav-icon" onclick="toggleCart(true)">
             <i class="fas fa-shopping-bag"></i>
             <span id="cart-count">0</span>
         </button>
     </div>
+</div>
 </header>
 
 <div class="main-search-wrapper">
@@ -104,6 +111,12 @@
       <button class="filter-tag active" onclick="filterByBadge('all', this)">Всі</button>
       <button class="filter-tag new-tag-btn" onclick="filterByBadge('NEW', this)">✨ НОВИНКИ</button>
       <button class="filter-tag top-tag-btn" onclick="filterByBadge('TOP', this)">🏆 ТОП</button>
+      
+      <select id="price-sort" class="filter-sort-select" onchange="sortCatalog()">
+          <option value="default">↕️ За замовчуванням</option>
+          <option value="asc">📈 Спочатку дешевші</option>
+          <option value="desc">📉 Спочатку дорожчі</option>
+      </select>
     </div>
 
     <div class="trust-signals-container">
@@ -138,7 +151,13 @@
     <div id="catalog" class="products-grid"></div>
     <div id="pagination" class="pagination-bar"></div>
 </main>
-
+<aside id="wishlist-sidebar" class="side-panel right">
+    <div class="panel-header">
+        <h3>ОБРАНЕ ❤️</h3>
+        <button class="close-btn" onclick="toggleWishlist(false)">✕</button>
+    </div>
+    <div id="wishlist-content" class="cart-items-list"></div>
+</aside>
 <aside id="cart-sidebar" class="side-panel right">
     <div class="panel-header">
         <h3>КОШИК</h3>
@@ -205,7 +224,7 @@
             <div class="modal-body-top">
                 <div class="modal-photo-container">
                     <button class="nav-pic prev" onclick="changeModalPic(-1)">❮</button>
-                    <img id="modal-main-img" src="" alt="">
+                    <img id="modal-main-img" src="" alt="" onclick="openLightbox()" style="cursor: zoom-in;" title="Натисніть для збільшення">
                     <button class="nav-pic next" onclick="changeModalPic(1)">❯</button>
                     <div id="modal-sale-badge" class="badge-sale-modal" style="display:none;"></div>
                 </div>
@@ -244,6 +263,10 @@
         </div>
     </div>
 </div>
+<section id="recently-viewed-section" class="cross-sell-section" style="display: none; margin-bottom: 50px;">
+    <h3 class="cross-sell-title"><i class="fas fa-history"></i> ВИ НЕЩОДАВНО ПЕРЕГЛЯДАЛИ</h3>
+    <div id="recently-viewed-grid" class="cross-sell-grid"></div>
+</section>
 <section class="reviews-section">
     <div class="section-title">
         <i class="fas fa-star" style="color: var(--mono-lime);"></i>
@@ -289,6 +312,10 @@
 <div id="toast-notification" class="toast">
     <i class="fas fa-check-circle"></i>
     <span id="toast-message">Товар додано!</span>
+</div>
+<div id="image-lightbox" class="lightbox-overlay" onclick="closeLightbox()">
+    <span class="lightbox-close">✕</span>
+    <img id="lightbox-img" src="" alt="Zoomed Product">
 </div>
 
 <script src="script.js"></script>
