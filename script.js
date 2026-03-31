@@ -72,21 +72,15 @@ function loadCSV() {
                 Price: parseFloat(p.Price) || 0,
                 OldPrice: p.OldPrice ? parseFloat(p.OldPrice) || null : null,
                 Badge: p.Badge ? p.Badge.trim().toUpperCase() : "",
-                // Перетворюємо пріоритет у число (якщо пусто — буде 999)
                 Priority: parseInt(p.Priority) || 999 
             }));
 
-            // 2. Розумне сортування (SALE -> TOP -> Пріоритет 1,2...)
+            // 2. Розумне сортування
             allProducts.sort((a, b) => {
-                // 1. Спочатку перевіряємо SALE (він найголовніший)
                 if (a.Badge === 'SALE' && b.Badge !== 'SALE') return -1;
                 if (b.Badge === 'SALE' && a.Badge !== 'SALE') return 1;
-                
-                // 2. Далі йде TOP
                 if (a.Badge === 'TOP' && b.Badge !== 'TOP') return -1;
                 if (b.Badge === 'TOP' && a.Badge !== 'TOP') return 1;
-
-                // 3. Якщо статуси однакові або їх немає — сортуємо за цифрами (1, 2, 3...)
                 return a.Priority - b.Priority;
             });
             
@@ -94,9 +88,9 @@ function loadCSV() {
             filteredProducts = [...allProducts];
 
             // 4. Оновлюємо інтерфейс
-            renderCatalog();       // Малюємо основну сітку
-            buildCategoryTree();   // Будуємо меню категорій
-            renderSaleCarousel();  // ЗАПУСКАЄМО КАРУСЕЛЬ SALE
+            renderCatalog();       
+            buildCategoryTree();   
+            renderSaleCarousel();  
 
             // 5. Перевірка URL-параметрів
             const params = new URLSearchParams(window.location.search);
@@ -106,14 +100,19 @@ function loadCSV() {
             }
 
             // ==========================================
-            // 6. ХОВАЄМО ПРЕЛОАДЕР ПІСЛЯ ЗАВАНТАЖЕННЯ (Ефект пазлів)
+            // 6. ХОВАЄМО ПРЕЛОАДЕР ПІСЛЯ ЗАВАНТАЖЕННЯ
             // ==========================================
             const loader = document.getElementById('varta-preloader');
-            if (loader) {
-                // Даємо пів секунди помилуватися логотипом, а потім запускаємо розпад
+            // Перевіряємо, чи прелоадер взагалі активний на цій сторінці
+            if (loader && loader.style.display !== 'none') {
                 setTimeout(() => {
-                    loader.classList.remove('active');
-                }, 500);
+                    loader.classList.remove('active'); // Запускає плавне зникнення
+                    
+                    // Чекаємо 1 секунду на CSS-анімацію розчинення, і повністю вимикаємо шар
+                    setTimeout(() => {
+                        loader.style.display = 'none';
+                    }, 1000);
+                }, 500); // Пів секунди затримки, щоб клієнт встиг побачити красу
             }
         },
         error: function(err) { 
@@ -121,8 +120,11 @@ function loadCSV() {
             
             // Ховаємо прелоадер навіть при помилці, щоб екран не зависав
             const loader = document.getElementById('varta-preloader');
-            if (loader) {
+            if (loader && loader.style.display !== 'none') {
                 loader.classList.remove('active');
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                }, 1000);
             }
         }
     });

@@ -27,6 +27,18 @@
         <div class="loader-status">Синхронізація бази...</div>
     </div>
 </div>
+
+<script>
+    if (sessionStorage.getItem('varta_preloader_seen')) {
+        // Якщо клієнт вже був тут - миттєво вимикаємо екран (без анімацій)
+        const pl = document.getElementById('varta-preloader');
+        pl.style.display = 'none';
+        pl.classList.remove('active');
+    } else {
+        // Якщо це перший захід - записуємо в пам'ять
+        sessionStorage.setItem('varta_preloader_seen', 'true');
+    }
+</script>
 <div id="body-overlay" onclick="closeAllPanels()"></div>
 
 <header class="header">
