@@ -234,6 +234,7 @@ function toggleCategory(catGroupElement) {
 }
 
 // =================== ОНОВЛЕНА openModal ===================
+// =================== ОНОВЛЕНА openModal ===================
 function openModal(id, updateUrl = true) {
     const p = allProducts.find(x => x.myId === id);
     if(!p) return;
@@ -241,8 +242,8 @@ function openModal(id, updateUrl = true) {
     document.getElementById('modal-name').innerText = p.Name;
     document.getElementById('modal-price').innerText = `${p.Price} грн`;
     document.getElementById('modal-old-price').innerText = p.OldPrice ? `${p.OldPrice} грн` : '';
-    // Беремо опис, і якщо він є — робимо всі літери ВЕЛИКИМИ
-// Беремо опис товару
+    
+    // Беремо опис товару
     let descriptionText = p.Description || 'Опис очікується...';
 
     // Прибираємо артефакти &nbsp; та замінюємо їх на звичайний пробіл
@@ -264,16 +265,23 @@ function openModal(id, updateUrl = true) {
         '<option value="">Оберіть розмір</option>' + sizes.map(s => `<option value="${s.trim()}">${s.trim()}</option>`).join('') :
         '<option value="Універсальний">Універсальний</option>';
 
+    // ==========================================
+    // ВИКЛИКАЄМО ФУНКЦІЮ КРОС-СЕЙЛУ ОСЬ ТУТ!
+    // ==========================================
+    renderCrossSell(p);
+
     document.getElementById('product-modal').style.display = 'flex';
     document.getElementById('body-overlay').classList.add('active');
     document.body.style.overflow = 'hidden';
 
     // ВІШАЄМО ОБРОБНИК КЛІКУ НА КНОПКУ "ДОДАТИ В КОШИК"
     document.getElementById('modal-add-btn').onclick = () => {
-        if (!sel.value) return alert('Оберіть розмір!');
+        if (sizes.length > 0 && sizes[0].trim() !== "" && !sel.value) {
+            return alert('Оберіть розмір!');
+        }
         
         // Додаємо товар у масив
-        cart.push({ ...p, selectedSize: sel.value });
+        cart.push({ ...p, selectedSize: sel.value || 'Універсальний' });
         
         // ЗБЕРІГАЄМО ОНОВЛЕНИЙ МАСИВ У ПАМ'ЯТЬ
         localStorage.setItem('varta_cart', JSON.stringify(cart));
