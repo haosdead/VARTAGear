@@ -914,42 +914,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Функція для генерації "З цим також купують"
 // Функція для генерації "З цим також купують" (БЛИСКАВИЧНА ВЕРСІЯ)
+// Функція для генерації "З цим також купують" (БЕЗПЕЧНА ТА ШВИДКА ВЕРСІЯ)
 function renderCrossSell(currentProduct) {
     const csSection = document.getElementById('cross-sell-section');
     const csGrid = document.getElementById('cross-sell-grid');
+    if (!csSection || !csGrid) return;
     
-    let recommendations = [];
-    let attempts = 0;
+    // 1. Беремо всі товари, крім поточного
+    let available = allProducts.filter(p => p.myId !== currentProduct.myId);
     
-    // Швидкий алгоритм: витягуємо 4 товари випадковим чином (без важкого перемішування бази)
-    while (recommendations.length < 4 && attempts < 50) {
-        let randomIndex = Math.floor(Math.random() * allProducts.length);
-        let p = allProducts[randomIndex];
-        
-        // Перевіряємо, щоб це був інший товар і бажано з тієї ж категорії, або ТОП/SALE
-        if (p.myId !== currentProduct.myId && !recommendations.includes(p)) {
-            if (p.Category === currentProduct.Category || p.Badge === 'TOP' || p.Badge === 'SALE') {
-                recommendations.push(p);
-            }
-        }
-        attempts++;
-    }
+    // 2. Швидко перемішуємо їх у випадковому порядку
+    available.sort(() => 0.5 - Math.random());
     
-    // Якщо за 50 спроб не знайшлося 4 ідеальних товарів, добиваємо будь-якими іншими
-    while (recommendations.length < 4) {
-        let randomIndex = Math.floor(Math.random() * allProducts.length);
-        let p = allProducts[randomIndex];
-        if (p.myId !== currentProduct.myId && !recommendations.includes(p)) {
-            recommendations.push(p);
-        }
-    }
+    // 3. Беремо перші 4 товари
+    let recommendations = available.slice(0, 4);
     
     if (recommendations.length === 0) {
         csSection.style.display = 'none';
         return;
     }
 
-    // Малюємо картки
+    // 4. Малюємо картки
     csSection.style.display = 'block';
     csGrid.innerHTML = recommendations.map(p => {
         const pic = p.Pictures ? p.Pictures.split(',')[0].trim() : '';

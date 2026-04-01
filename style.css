@@ -102,8 +102,13 @@ input, textarea, .search-box input {
 }
 
 /* ВІДСТУП КОНТЕНТУ (Щоб товари не ховалися під шапку) */
+/* ================= ВІДСТУП КОНТЕНТУ (Щоб пошук не ховався під шапку) ================= */
+.main-search-wrapper { 
+    padding-top: 110px !important; 
+}
+
 .main-container {
-    padding-top: 110px; 
+    padding-top: 0 !important; /* Забираємо відступ звідси */
 }
 
 /* АДАПТАЦІЯ ДЛЯ ТЕЛЕФОНУ (Щоб нічого не налізало) */
@@ -111,9 +116,15 @@ input, textarea, .search-box input {
     .header {
         height: 75px;
     }
-    .main-container {
-        padding-top: 95px;
+    
+    /* Відступ для пошуку на телефоні */
+    .main-search-wrapper { 
+        padding-top: 95px !important; 
     }
+    .main-container {
+        padding-top: 0 !important;
+    }
+
     .brand-wrapper {
         padding: 6px 15px;
         gap: 8px;
