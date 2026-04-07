@@ -192,13 +192,16 @@
     </div>
 
     <div id="cart-items-container">
+        <div class="messenger-notice">
+            <i class="fas fa-comment-dots"></i>
+            <span>Замовлення автоматично передається менеджеру в Telegram або WhatsApp для підтвердження.</span>
+        </div>
+
         <div id="cart-content" class="cart-items-list"></div>
         
         <div id="cart-footer" class="cart-bottom" style="display:none;">
             <div class="cart-sum">Разом: <span id="cart-total-price">0</span> грн</div>
-            
-            <button class="add-to-cart-btn" style="width:100%; margin-bottom: 10px;" onclick="showCheckoutForm()">ОФОРМИТИ ЗАМОВЛЕННЯ</button>
-            
+            <button class="add-to-cart-btn" style="width:100%; margin-bottom: 10px;" onclick="showCheckoutForm()">ПЕРЕЙТИ ДО ОФОРМЛЕННЯ</button>
             <button class="continue-btn" onclick="toggleCart(false)">ПРОДОВЖИТИ ПОКУПКИ</button>
         </div>
     </div>
