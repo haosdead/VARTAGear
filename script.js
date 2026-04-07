@@ -134,6 +134,9 @@ function loadCSV() {
 // ==========================================
 // 1. ОНОВЛЕНИЙ РЕНДЕР КАТАЛОГУ (НОВИНКИ + СЕЙЛ У КАРУСЕЛІ)
 // ==========================================
+// ==========================================
+// 1. ОНОВЛЕНИЙ РЕНДЕР КАТАЛОГУ (НОВИНКИ + СЕЙЛ У КАРУСЕЛІ)
+// ==========================================
 function renderCatalog(page = 1) {
     const catalog = document.getElementById('catalog');
     const pagination = document.getElementById('pagination');
@@ -141,19 +144,16 @@ function renderCatalog(page = 1) {
     
     let productsToShow = [...filteredProducts];
     
-    // Перевіряємо, чи ми на самій першій сторінці (без фільтрів і категорій)
     const isMainPage = 
         (!window.currentCategory || window.currentCategory === 'all') && 
         (!window.currentSearchQuery || window.currentSearchQuery === '') && 
         (!window.currentBadgeFilter || window.currentBadgeFilter === 'all');
 
     if (isMainPage) {
-        if (carouselSection) carouselSection.style.display = 'block'; // Карусель показуємо
-        
-        // ХОВАЄМО з сітки і SALE (бо вони в каруселі), і NEW (бо вони чекають на клік по кнопці)
+        if (carouselSection) carouselSection.style.display = 'block'; 
         productsToShow = productsToShow.filter(p => p.Badge !== 'SALE' && p.Badge !== 'NEW');
     } else {
-        if (carouselSection) carouselSection.style.display = 'none'; // Ховаємо карусель
+        if (carouselSection) carouselSection.style.display = 'none'; 
     }
 
     if (productsToShow.length === 0) {
@@ -168,7 +168,6 @@ function renderCatalog(page = 1) {
     const paginated = productsToShow.slice(start, end);
 
     catalog.innerHTML = paginated.map(p => {
-        // Визначаємо статуси
         const isSale = p.Badge === 'SALE';
         const isNew = p.Badge === 'NEW';
         const isTop = p.Badge === 'TOP';
@@ -177,7 +176,6 @@ function renderCatalog(page = 1) {
         let badgeHTML = '';
         let btnClass = 'buy-btn-card';
 
-        // Призначаємо дизайн залежно від бейджа
         if (isSale) {
             cardClass = 'card sale-card';
             badgeHTML = `<div class="badge-sale">🔥 SALE</div>`;
@@ -192,10 +190,8 @@ function renderCatalog(page = 1) {
             btnClass = 'buy-btn-card buy-btn-top';
         }
 
-        // ПЕРЕВІРКА: Чи є цей товар у "Списку бажань" клієнта?
-        const isWish = wishlist.some(x => x.myId === p.myId);
+        const isWish = wishlist.some(x => String(x.myId) === String(p.myId));
 
-        // УНІВЕРСАЛЬНА ЦІНА (з червоним закресленням для ВСІХ товарів, якщо є OldPrice)
         let priceHTML = '';
         if (p.OldPrice) {
             priceHTML = `
@@ -213,11 +209,11 @@ function renderCatalog(page = 1) {
         const mainPic = p.Pictures ? p.Pictures.split(',')[0].trim() : '';
         
         return `
-        <div class="${cardClass}" onclick="openModal(${p.myId})">
+        <div class="${cardClass}" onclick="openModal('${p.myId}')">
             <div class="card-img-wrap">
                 ${badgeHTML}
                 <img src="${mainPic}" alt="${p.Name}" loading="lazy">
-                <button class="wishlist-btn-card ${isWish ? 'active' : ''}" onclick="toggleWishlistProduct(${p.myId}, event)">
+                <button class="wishlist-btn-card ${isWish ? 'active' : ''}" onclick="toggleWishlistProduct('${p.myId}', event)">
                     <i class="${isWish ? 'fas' : 'far'} fa-heart"></i>
                 </button>
             </div>
@@ -261,32 +257,28 @@ function toggleCategory(catGroupElement) {
 
 // =================== ОНОВЛЕНА openModal ===================
 // =================== ОНОВЛЕНА openModal ===================
+// =================== ОНОВЛЕНА openModal ===================
 function openModal(id, updateUrl = true) {
-    const p = allProducts.find(x => x.myId === id);
+    // ШУКАЄМО ТОВАР ЯК РЯДОК (String)
+    const p = allProducts.find(x => String(x.myId) === String(id));
     if(!p) return;
+    
     addToRecentlyViewed(p);
     document.getElementById('modal-name').innerText = p.Name;
     document.getElementById('modal-price').innerText = `${p.Price} грн`;
     
-    // Розумне відображення старої ціни (знижки)
     const oldPriceEl = document.getElementById('modal-old-price');
     if (p.OldPrice) {
         oldPriceEl.innerText = `${p.OldPrice} грн`;
-        oldPriceEl.style.display = 'inline-block'; // Показуємо, якщо є знижка
+        oldPriceEl.style.display = 'inline-block'; 
     } else {
-        oldPriceEl.style.display = 'none'; // Ховаємо, якщо знижки немає
+        oldPriceEl.style.display = 'none'; 
     }
     
-    // Беремо опис товару
     let descriptionText = p.Description || 'Опис очікується...';
-
-    // Прибираємо артефакти &nbsp; та замінюємо їх на звичайний пробіл
     descriptionText = descriptionText.replace(/&nbsp;/g, ' ');
-
-    // Вставляємо чистий HTML (заголовки стануть великими завдяки CSS)
     document.getElementById('modal-desc').innerHTML = descriptionText;
     
-    // Залишаємо артикул без змін
     document.getElementById('modal-vendor').innerText = `Артикул: ${p.VendorCode}`;
 
     currentModalPics = p.Pictures ? p.Pictures.split(',').map(s => s.trim()) : [];
@@ -299,25 +291,18 @@ function openModal(id, updateUrl = true) {
         '<option value="">Оберіть розмір</option>' + sizes.map(s => `<option value="${s.trim()}">${s.trim()}</option>`).join('') :
         '<option value="Універсальний">Універсальний</option>';
 
-    // ==========================================
-    // ВИКЛИКАЄМО ФУНКЦІЮ КРОС-СЕЙЛУ ОСЬ ТУТ!
-    // ==========================================
     renderCrossSell(p);
 
     document.getElementById('product-modal').style.display = 'flex';
     document.getElementById('body-overlay').classList.add('active');
     document.body.style.overflow = 'hidden';
 
-    // ВІШАЄМО ОБРОБНИК КЛІКУ НА КНОПКУ "ДОДАТИ В КОШИК"
     document.getElementById('modal-add-btn').onclick = () => {
         if (sizes.length > 0 && sizes[0].trim() !== "" && !sel.value) {
             return alert('Оберіть розмір!');
         }
         
-        // Додаємо товар у масив
         cart.push({ ...p, selectedSize: sel.value || 'Універсальний' });
-        
-        // ЗБЕРІГАЄМО ОНОВЛЕНИЙ МАСИВ У ПАМ'ЯТЬ
         localStorage.setItem('varta_cart', JSON.stringify(cart));
         
         updateCartUI();
@@ -325,7 +310,6 @@ function openModal(id, updateUrl = true) {
         toggleCart(true);
     };
 
-    // Оновлення URL (унікальне посилання на товар)
     if (updateUrl) {
         const url = new URL(window.location);
         url.searchParams.set('product', id);
@@ -699,7 +683,7 @@ function renderSaleCarousel() {
     track.innerHTML = carouselItemsData.map((p, i) => {
         const mainPic = p.Pictures ? p.Pictures.split(',')[0].trim() : '';
         return `
-        <div class="carousel-3d-item" onclick="openModal(${p.myId})">
+        <div class="carousel-3d-item" onclick="openModal('${p.myId}')">
             <div class="badge-sale" style="top:10px; left:10px;">🔥 SALE</div>
             <img src="${mainPic}" class="carousel-img" alt="${p.Name}" loading="lazy">
             <div class="carousel-info">
@@ -909,21 +893,14 @@ document.addEventListener('DOMContentLoaded', () => {
     renderReviews(); // Викликаємо нашу функцію
 });
 
-// Функція для генерації "З цим також купують"
-// Функція для генерації "З цим також купують" (БЛИСКАВИЧНА ВЕРСІЯ)
-// Функція для генерації "З цим також купують" (БЕЗПЕЧНА ТА ШВИДКА ВЕРСІЯ)
+
 function renderCrossSell(currentProduct) {
     const csSection = document.getElementById('cross-sell-section');
     const csGrid = document.getElementById('cross-sell-grid');
     if (!csSection || !csGrid) return;
     
-    // 1. Беремо всі товари, крім поточного
     let available = allProducts.filter(p => p.myId !== currentProduct.myId);
-    
-    // 2. Швидко перемішуємо їх у випадковому порядку
     available.sort(() => 0.5 - Math.random());
-    
-    // 3. Беремо перші 4 товари
     let recommendations = available.slice(0, 4);
     
     if (recommendations.length === 0) {
@@ -931,12 +908,11 @@ function renderCrossSell(currentProduct) {
         return;
     }
 
-    // 4. Малюємо картки
     csSection.style.display = 'block';
     csGrid.innerHTML = recommendations.map(p => {
         const pic = p.Pictures ? p.Pictures.split(',')[0].trim() : '';
         return `
-        <div class="cs-card" onclick="openModal(${p.myId}, false)">
+        <div class="cs-card" onclick="openModal('${p.myId}', false)">
             <div class="cs-img-wrap">
                 <img src="${pic}" alt="${p.Name}">
             </div>
@@ -1054,19 +1030,22 @@ function toggleWishlist(s) {
     updateWishlistUI();
 }
 
+// --- 1. СПИСОК БАЖАНЬ ---
 function toggleWishlistProduct(id, event) {
-    if(event) event.stopPropagation(); // щоб не відкривалася модалка
-    const p = allProducts.find(x => x.myId === id);
-    const index = wishlist.findIndex(x => x.myId === id);
+    if(event) event.stopPropagation(); 
+    
+    // Перетворюємо в рядок для безпечного пошуку
+    const p = allProducts.find(x => String(x.myId) === String(id));
+    const index = wishlist.findIndex(x => String(x.myId) === String(id));
     
     if (index > -1) {
         wishlist.splice(index, 1);
-    } else {
+    } else if (p) {
         wishlist.push(p);
     }
     
     localStorage.setItem('varta_wishlist', JSON.stringify(wishlist));
-    renderCatalog(currentPage); // Перемальовуємо, щоб сердечко змінило колір
+    renderCatalog(currentPage); 
     updateWishlistUI();
 }
 
@@ -1078,15 +1057,30 @@ function updateWishlistUI() {
     } else {
         content.innerHTML = wishlist.map(it => `
             <div class="cart-item">
-                <div class="cart-item-info" onclick="openModal(${it.myId}); toggleWishlist(false);">
+                <div class="cart-item-info" onclick="openModal('${it.myId}'); toggleWishlist(false);">
                     <span class="cart-item-title">${it.Name}</span>
                     <span class="cart-item-price">${it.Price} грн</span>
                 </div>
-                <span class="cart-item-remove" onclick="toggleWishlistProduct(${it.myId})"><i class="fas fa-times"></i></span>
+                <span class="cart-item-remove" onclick="toggleWishlistProduct('${it.myId}')"><i class="fas fa-times"></i></span>
             </div>
         `).join('');
     }
 }
+
+// =================== НАВІГАЦІЯ БРАУЗЕРА (КНОПКА НАЗАД) ===================
+window.addEventListener('popstate', () => {
+    const params = new URLSearchParams(window.location.search);
+    const prodId = params.get('product');
+    
+    if (prodId !== null) {
+        // ВИДАЛЕНО parseInt, бо тепер працюємо з текстом
+        openModal(prodId, false); 
+    } else {
+        closeModal(false);
+        toggleMobileMenu(false);
+        toggleCart(false);
+    }
+});
 
 // --- 2. НЕЩОДАВНО ПЕРЕГЛЯНУТІ ---
 function addToRecentlyViewed(product) {
@@ -1118,7 +1112,6 @@ function renderRecentlyViewedUI() {
 
     section.style.display = 'block';
     
-    // Малюємо точно такі ж картки, як у головному каталозі
     grid.innerHTML = recentlyViewed.map(p => {
         const isSale = p.Badge === 'SALE';
         const isNew = p.Badge === 'NEW';
@@ -1142,7 +1135,7 @@ function renderRecentlyViewedUI() {
             btnClass = 'buy-btn-card buy-btn-top';
         }
 
-        const isWish = wishlist.some(x => x.myId === p.myId);
+        const isWish = wishlist.some(x => String(x.myId) === String(p.myId));
 
         let priceHTML = '';
         if (p.OldPrice) {
@@ -1161,11 +1154,11 @@ function renderRecentlyViewedUI() {
         const mainPic = p.Pictures ? p.Pictures.split(',')[0].trim() : '';
 
         return `
-        <div class="${cardClass}" onclick="openModal(${p.myId})">
+        <div class="${cardClass}" onclick="openModal('${p.myId}')">
             <div class="card-img-wrap">
                 ${badgeHTML}
                 <img src="${mainPic}" alt="${p.Name}" loading="lazy">
-                <button class="wishlist-btn-card ${isWish ? 'active' : ''}" onclick="toggleWishlistProduct(${p.myId}, event)">
+                <button class="wishlist-btn-card ${isWish ? 'active' : ''}" onclick="toggleWishlistProduct('${p.myId}', event)">
                     <i class="${isWish ? 'fas' : 'far'} fa-heart"></i>
                 </button>
             </div>
