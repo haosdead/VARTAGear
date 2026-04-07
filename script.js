@@ -1284,3 +1284,34 @@ document.addEventListener('click', (e) => {
         }
     }
 });
+
+// ========================================================
+// VIP-ФІЛЬТР: БРОНЕЗАХИСТ ТА ШОЛОМИ
+// ========================================================
+function filterByPremiumArmor() {
+    // 1. Повідомляємо системі про зміну категорії
+    window.currentCategory = 'premium-armor';
+    window.currentSearchQuery = '';
+    window.currentBadgeFilter = 'all';
+    window.currentColorFilter = 'all';
+    
+    // 2. Знімаємо виділення з кнопок "Всі", "Новинки" тощо
+    document.querySelectorAll('.filter-tag').forEach(b => b.classList.remove('active'));
+
+    // 3. Відбираємо товари: тільки Броня та Шоломи (беремо з колонок Category)
+    filteredProducts = allProducts.filter(p => {
+        const catText = (p.Category || '').toLowerCase();
+        return catText.includes('бронезахист') || catText.includes('шолом');
+    });
+    
+    // 4. Перемальовуємо каталог
+    applySorting();
+    currentPage = 1;
+    renderCatalog();
+    
+    // 5. Плавний скролл прямо до карток товарів
+    const catalogEl = document.getElementById('catalog');
+    if (catalogEl) {
+        window.scrollTo({ top: catalogEl.offsetTop - 80, behavior: 'smooth' });
+    }
+}
