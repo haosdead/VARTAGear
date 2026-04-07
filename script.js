@@ -471,24 +471,30 @@ function changePage(page) {
 }
 
 // =================== ЛОГІКА КОШИКА ТА ОФОРМЛЕННЯ ===================
+// =================== ЛОГІКА КОШИКА ТА ДОСТАВКИ ===================
 function updateCartUI() {
-    // Оновлюємо число на іконці кошика
     const cartCount = document.getElementById('cart-count');
     if (cartCount) cartCount.innerText = cart.length;
 
     const content = document.getElementById('cart-content');
     const footer = document.getElementById('cart-footer');
     
+    // НОВЕ: Поріг безкоштовної доставки (тут стоїть 3000 грн. Якщо треба інша сума - просто зміни цифру)
+    const FREE_SHIPPING_THRESHOLD = 3000; 
+    const shippingContainer = document.getElementById('free-shipping-container');
+    const shippingText = document.getElementById('shipping-text');
+    const shippingBar = document.getElementById('shipping-bar-fill');
+    
     if (cart.length === 0) {
         content.innerHTML = '<div style="text-align:center; padding:50px 0; color:#666; user-select:none;">Кошик порожній</div>';
         if (footer) footer.style.display = 'none';
-        
-        // Видаляємо ключ з пам'яті зовсім, якщо кошик порожній
+        if (shippingContainer) shippingContainer.style.display = 'none';
         localStorage.removeItem('varta_cart');
     } else {
         if (footer) footer.style.display = 'block';
-        let total = 0;
+        if (shippingContainer) shippingContainer.style.display = 'block';
         
+        let total = 0;
         content.innerHTML = cart.map((it, i) => {
             total += parseFloat(it.Price);
             return `
@@ -502,20 +508,26 @@ function updateCartUI() {
             </div>`;
         }).join('');
         
-        // Оновлюємо ціни в усіх блоках
         const totalPriceEl = document.getElementById('cart-total-price');
         const finalPriceEl = document.getElementById('final-total-price');
-        
         if (totalPriceEl) totalPriceEl.innerText = total;
         if (finalPriceEl) finalPriceEl.innerText = total;
+
+        // РОЗРАХУНОК ПОЛОСКИ ДОСТАВКИ
+        const percent = Math.min((total / FREE_SHIPPING_THRESHOLD) * 100, 100);
+        if (shippingBar) shippingBar.style.width = percent + '%';
+        
+        if (total >= FREE_SHIPPING_THRESHOLD) {
+            if (shippingText) shippingText.innerHTML = '🎉 У вас <b>БЕЗКОШТОВНА ДОСТАВКА</b>!';
+            if (shippingBar) shippingBar.style.backgroundColor = '#25D366'; // Зелений колір успіху
+        } else {
+            const left = FREE_SHIPPING_THRESHOLD - total;
+            if (shippingText) shippingText.innerHTML = `До безкоштовної доставки залишилося: <b style="color:var(--mono-lime)">${left} грн</b>`;
+            if (shippingBar) shippingBar.style.backgroundColor = 'var(--mono-lime)';
+        }
     }
 
-    // ==========================================
-    // АНІМАЦІЯ КОШИКА (ПІДСТРИБУВАННЯ)
-    // ==========================================
-    if (typeof animateCartIcon === 'function') {
-        animateCartIcon(); // <--- ОСЬ ВОНА!
-    }
+    if (typeof animateCartIcon === 'function') animateCartIcon();
 }
 
 function removeFromCart(i) {
@@ -768,21 +780,46 @@ let touchEndX = 0;
 
 // Чекаємо завантаження сторінки
 document.addEventListener('DOMContentLoaded', () => {
-    const carouselViewport = document.querySelector('.carousel-3d-viewport');
-    
-    if (carouselViewport) {
-        // Засікаємо, де палець торкнувся екрану
-        carouselViewport.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-
-        // Засікаємо, де палець відірвався від екрану
-        carouselViewport.addEventListener('touchend', e => {
-            touchEndX = e.changedTouches[0].screenX;
-            handleCarouselSwipe();
-        }, { passive: true });
+    // Спочатку дістаємо дані з пам'яті браузера
+    const savedCart = localStorage.getItem('varta_cart');
+    if (savedCart) {
+        cart = JSON.parse(savedCart);
     }
+    
+    // Оновлюємо інтерфейс кошика
+    updateCartUI();
+    
+    // НОВЕ: Показуємо преміальні скелети, поки вантажиться база
+    renderSkeletons(); 
+    
+    // Завантажуємо товари
+    loadCSV();
+
+    updateWishlistUI();        
+    renderRecentlyViewedUI();
 });
+
+// НОВЕ: ФУНКЦІЯ СКЕЛЕТНОГО ЗАВАНТАЖЕННЯ (Адаптивна)
+function renderSkeletons() {
+    const catalog = document.getElementById('catalog');
+    if (!catalog) return;
+    
+    let skeletonsHTML = '';
+    // Малюємо 12 пустих карток (як на 1 сторінці)
+    for(let i=0; i<12; i++) {
+        skeletonsHTML += `
+        <div class="card skeleton-card">
+            <div class="skeleton-img"></div>
+            <div class="card-info" style="padding: 15px;">
+                <div class="skeleton-line title-line"></div>
+                <div class="skeleton-line title-line-short"></div>
+                <div class="skeleton-line price-line"></div>
+                <div class="skeleton-button"></div>
+            </div>
+        </div>`;
+    }
+    catalog.innerHTML = skeletonsHTML;
+}
 
 // Перевіряємо напрямок свайпу і крутимо карусель
 function handleCarouselSwipe() {
