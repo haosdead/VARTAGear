@@ -2164,3 +2164,124 @@ html, body {
 @keyframes shimmer {
     100% { transform: translateX(100%); }
 }
+
+
+/* ==========================================
+   ПРЕМІУМ БАНЕР БРОНЕЗАХИСТУ ТА ШОЛОМІВ
+========================================== */
+.premium-armor-banner {
+    position: relative;
+    margin: 25px 15px;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    background: linear-gradient(135deg, #151813 0%, #0a0a0a 100%);
+    border: 1px solid #2a2a2a;
+    transition: all 0.3s ease;
+}
+
+.premium-armor-banner:hover {
+    border-color: var(--mono-lime);
+    box-shadow: 0 10px 30px rgba(162, 210, 74, 0.15);
+    transform: translateY(-2px);
+}
+
+/* Декоративна текстура на фоні */
+.premium-banner-bg {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px, transparent 2px, transparent 8px);
+    z-index: 1;
+}
+
+.premium-banner-content {
+    position: relative;
+    z-index: 2;
+    padding: 30px 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.banner-text-block {
+    flex: 1;
+}
+
+.banner-subtitle {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--mono-lime);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.banner-title {
+    font-size: 24px;
+    font-weight: 900;
+    color: #ffffff;
+    margin: 0 0 10px 0;
+    line-height: 1.2;
+}
+
+.banner-desc {
+    font-size: 14px;
+    color: #999;
+    margin: 0;
+    max-width: 90%;
+    line-height: 1.4;
+}
+
+.banner-action {
+    margin-left: 20px;
+}
+
+.banner-btn {
+    background: var(--mono-lime);
+    color: #000;
+    border: none;
+    padding: 14px 24px;
+    font-size: 14px;
+    font-weight: 800;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    white-space: nowrap;
+}
+
+.premium-armor-banner:hover .banner-btn {
+    transform: scale(1.05);
+}
+
+/* ==========================================
+   АДАПТАЦІЯ ПІД ТЕЛЕФОНИ (Ідеально рівно)
+========================================== */
+@media (max-width: 768px) {
+    .premium-armor-banner {
+        margin: 15px 10px;
+    }
+    .premium-banner-content {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px 15px;
+    }
+    .banner-title {
+        font-size: 20px;
+    }
+    .banner-desc {
+        max-width: 100%;
+        margin-bottom: 18px;
+        font-size: 13px;
+    }
+    .banner-action {
+        margin-left: 0;
+        width: 100%;
+    }
+    .banner-btn {
+        width: 100%;
+        text-align: center;
+        padding: 16px 20px; /* Більша кнопка для зручного тапу */
+    }
+}
