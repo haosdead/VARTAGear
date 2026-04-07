@@ -2055,3 +2055,22 @@ html, body {
     .fab-main { width: 55px; height: 55px; font-size: 24px; }
     .fab-item { width: 45px; height: 45px; font-size: 20px; }
 }
+
+.messenger-notice {
+    background: rgba(162, 210, 74, 0.1);
+    border: 1px solid var(--mono-lime);
+    border-radius: 8px;
+    padding: 12px;
+    margin: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.85rem;
+    color: #eee;
+    line-height: 1.4;
+}
+
+.messenger-notice i {
+    font-size: 1.5rem;
+    color: var(--mono-lime);
+}
