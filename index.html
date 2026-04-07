@@ -192,16 +192,31 @@
     </div>
 
     <div id="cart-items-container">
+        <div class="order-notice">
+            <i class="fas fa-info-circle"></i> Оформлення та підтвердження замовлення відбувається у месенджерах. Наш менеджер швидко відповість вам!
+        </div>
+
         <div id="cart-content" class="cart-items-list"></div>
         
         <div id="cart-footer" class="cart-bottom" style="display:none;">
             <div class="cart-sum">Разом: <span id="cart-total-price">0</span> грн</div>
             
-            <button class="add-to-cart-btn" style="width:100%; margin-bottom: 10px;" onclick="showCheckoutForm()">ОФОРМИТИ ЗАМОВЛЕННЯ</button>
+            <div class="checkout-actions">
+                <p style="text-align: center; font-size: 13px; margin-bottom: 10px; color: #aaa;">
+                    Натисніть кнопку нижче, щоб відправити список товарів менеджеру:
+                </p>
+                <button class="checkout-btn tg" onclick="sendOrderToMessenger('tg')">
+                    <i class="fab fa-telegram-plane"></i> Замовити в Telegram
+                </button>
+                <button class="checkout-btn wa" onclick="sendOrderToMessenger('wa')">
+                    <i class="fab fa-whatsapp"></i> Замовити в WhatsApp
+                </button>
+            </div>
             
-            <button class="continue-btn" onclick="toggleCart(false)">ПРОДОВЖИТИ ПОКУПКИ</button>
+            <button class="continue-btn" onclick="toggleCart(false)" style="margin-top: 15px;">ПРОДОВЖИТИ ПОКУПКИ</button>
         </div>
     </div>
+</aside>
     
     <div id="checkout-form-container" style="display: none;">
         <button class="back-to-cart-btn" onclick="hideCheckoutForm()">❮ Назад до кошика</button>
