@@ -73,7 +73,9 @@ function loadCSV() {
             // 1. Парсинг даних та підготовка об'єктів
             allProducts = res.data.filter(p => p.Name).map((p, i) => ({
                 ...p,
-                myId: i,
+                // БЕРЕМО СТАБІЛЬНИЙ ID З ТАБЛИЦІ (АБО АРТИКУЛ).
+                // Перевіряємо колонку ID, потім SKU. Якщо їх немає - беремо індекс.
+                myId: p.ID ? p.ID.toString().trim() : (p.SKU ? p.SKU.toString().trim() : i.toString()),
                 Price: parseFloat(p.Price) || 0,
                 OldPrice: p.OldPrice ? parseFloat(p.OldPrice) || null : null,
                 Badge: p.Badge ? p.Badge.trim().toUpperCase() : "",
@@ -97,33 +99,28 @@ function loadCSV() {
             buildCategoryTree();   
             renderSaleCarousel();  
 
-            // 5. Перевірка URL-параметрів
+            // 5. Перевірка URL-параметрів (БЕЗ parseInt, бо ID може бути текстом)
             const params = new URLSearchParams(window.location.search);
             const prodId = params.get('product');
             if (prodId !== null) {
-                setTimeout(() => openModal(parseInt(prodId), false), 300); 
+                setTimeout(() => openModal(prodId, false), 300); 
             }
 
             // ==========================================
             // 6. ХОВАЄМО ПРЕЛОАДЕР ПІСЛЯ ЗАВАНТАЖЕННЯ
             // ==========================================
             const loader = document.getElementById('varta-preloader');
-            // Перевіряємо, чи прелоадер взагалі активний на цій сторінці
             if (loader && loader.style.display !== 'none') {
                 setTimeout(() => {
-                    loader.classList.remove('active'); // Запускає плавне зникнення
-                    
-                    // Чекаємо 1 секунду на CSS-анімацію розчинення, і повністю вимикаємо шар
+                    loader.classList.remove('active'); 
                     setTimeout(() => {
                         loader.style.display = 'none';
                     }, 1000);
-                }, 500); // Пів секунди затримки, щоб клієнт встиг побачити красу
+                }, 500); 
             }
         },
         error: function(err) { 
             console.error("Помилка завантаження CSV:", err); 
-            
-            // Ховаємо прелоадер навіть при помилці, щоб екран не зависав
             const loader = document.getElementById('varta-preloader');
             if (loader && loader.style.display !== 'none') {
                 loader.classList.remove('active');
