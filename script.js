@@ -1,4 +1,4 @@
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQbyMki6lBczqgrhuK20OMPP-XeXjGEeDHPqJCPR84MMMOYvGrqU4Y-stTmajVxW55cpgUJ-199Hu7M/pub?gid=1194843878&single=true&output=csv';
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQbyMki6lBczqgrhuK20OMPP-XeXjGEeDHPqJCPR84MMMOYvGrqU4Y-stTmajVxW55cpgUJ-199Hu7M/pub?gid=508007279&single=true&output=csv';
 const ITEMS_PER_PAGE = 21;
 
 let allProducts = [], filteredProducts = [], cart = [], currentPage = 1;
