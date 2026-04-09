@@ -22,6 +22,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
+
+<div id="tg-discount-popup" class="popup-overlay">
+    <div class="popup-content">
+        <button class="popup-close" onclick="closePromoPopup()"><i class="fas fa-times"></i></button>
+        <div class="popup-icon">
+            <i class="fab fa-telegram-plane"></i>
+        </div>
+        <h3 class="popup-title">ОТРИМАЙ ЗНИЖКУ</h3>
+        <p class="popup-desc">Підпишись на наш закритий Telegram-канал та отримай гарантовану знижку на перше замовлення!</p>
+        <a href="https://t.me/vartagear" target="_blank" class="popup-btn" onclick="closePromoPopup()">
+            ПІДПИСАТИСЯ ТА ОТРИМАТИ ПРОМОКОД
+        </a>
+        <span class="popup-nothanks" onclick="closePromoPopup()">Ні, дякую, я купую за повну ціну</span>
+    </div>
+</div>
 <body>
 <div id="varta-preloader" class="varta-preloader active">
     <div class="varta-preloader-background"></div>
