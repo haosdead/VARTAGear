@@ -2399,3 +2399,78 @@ html, body {
 .popup-nothanks:hover {
     color: #aaa;
 }
+
+/* ==========================================
+   ЛИПКА КНОПКА КУПИТИ (ТІЛЬКИ ДЛЯ МОБІЛЬНИХ)
+========================================== */
+.sticky-mobile-cart {
+    position: absolute; /* Буде позиціонуватись відносно modal-content */
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(15, 15, 15, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--mono-lime);
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+    
+    /* Ховаємо її за замовчуванням (опускаємо вниз) */
+    transform: translateY(100%);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.8);
+}
+
+/* Клас, який буде показувати кнопку через JS */
+.sticky-mobile-cart.visible {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+}
+
+.sticky-price-wrap {
+    display: flex;
+    flex-direction: column;
+}
+
+.sticky-label {
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.sticky-price {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--mono-lime);
+}
+
+.sticky-buy-btn {
+    background: var(--mono-lime);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 30px;
+    font-weight: 900;
+    font-size: 14px;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 0 4px 15px rgba(162, 210, 74, 0.3);
+}
+
+.sticky-buy-btn:active {
+    transform: scale(0.95);
+    background: #b0e060;
+}
+
+/* Ховаємо панель на великих екранах (комп'ютерах) */
+@media (min-width: 769px) {
+    .sticky-mobile-cart {
+        display: none !important;
+    }
+}
