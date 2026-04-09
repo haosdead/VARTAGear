@@ -421,8 +421,19 @@ function filterByBadge(badge, btn) {
 function resetPageAndFilter() {
     const q = document.getElementById('search-input').value.toLowerCase().trim();
     
+    // === 🔥 АНАЛІТИКА: Відстеження пошуку по сайту ===
+    // Відправляємо подію тільки якщо ввели хоча б 3 символи (щоб уникнути спаму від кожної літери)
+    if (typeof gtag === 'function' && q.length > 2) {
+        gtag('event', 'search', {
+            search_term: q
+        });
+        console.log("🔍 Аналітика: Шукали", q);
+    }
+    // === КІНЕЦЬ ===
+
     // 1. Повідомляємо системі, що ми шукаємо текст
     window.currentSearchQuery = q;
+    
     // 2. Скидаємо категорії та бейджі
     window.currentCategory = 'all'; 
     window.currentBadgeFilter = 'all'; 
@@ -566,6 +577,33 @@ function updateCartUI() {
 }
 
 function removeFromCart(i) {
+    const itemToRemove = cart[i]; // Запам'ятовуємо товар перед видаленням
+    
+    // === 🔥 АНАЛІТИКА: Видалення з кошика ===
+    if (typeof gtag === 'function' && itemToRemove) {
+        gtag('event', 'remove_from_cart', {
+            currency: 'UAH',
+            value: Number(itemToRemove.Price) || 0,
+            items: [{
+                item_id: itemToRemove.VendorCode || 'SKU_UNKNOWN',
+                item_name: itemToRemove.Name,
+                item_category: itemToRemove.Category || 'Без категорії',
+                price: Number(itemToRemove.Price) || 0,
+                quantity: itemToRemove.quantity || 1
+            }]
+        });
+        console.log("🗑 Аналітика: Видалено з кошика", itemToRemove.Name);
+    }
+    // === КІНЕЦЬ ===
+
+    // Видаляємо елемент з масиву
+    cart.splice(i, 1);
+    
+    // Оновлюємо пам'ять (якщо масив порожній, запишеться [])
+    localStorage.setItem('varta_cart', JSON.stringify(cart));
+    
+    updateCartUI();
+} {
     // Видаляємо елемент з масиву
     cart.splice(i, 1);
     
@@ -1111,16 +1149,34 @@ function toggleWishlistProduct(id, event) {
     const index = wishlist.findIndex(x => String(x.myId) === String(id));
     
     if (index > -1) {
+        // Видаляємо з обраного
         wishlist.splice(index, 1);
     } else if (p) {
+        // Додаємо в обране
         wishlist.push(p);
+        
+        // === 🔥 АНАЛІТИКА: Додано в обране ===
+        if (typeof gtag === 'function') {
+            gtag('event', 'add_to_wishlist', {
+                currency: 'UAH',
+                value: Number(p.Price) || 0,
+                items: [{
+                    item_id: p.VendorCode || 'SKU_UNKNOWN',
+                    item_name: p.Name,
+                    item_category: p.Category || 'Без категорії',
+                    price: Number(p.Price) || 0,
+                    quantity: 1
+                }]
+            });
+            console.log("❤️ Аналітика: Додано в обране", p.Name);
+        }
+        // === КІНЕЦЬ ===
     }
     
     localStorage.setItem('varta_wishlist', JSON.stringify(wishlist));
     renderCatalog(currentPage); 
     updateWishlistUI();
 }
-
 function updateWishlistUI() {
     document.getElementById('wishlist-count').innerText = wishlist.length;
     const content = document.getElementById('wishlist-content');
