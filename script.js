@@ -310,11 +310,45 @@ function openModal(id, updateUrl = true) {
 
     renderCrossSell(p);
 
+    // Відкриваємо саме вікно
     document.getElementById('product-modal').style.display = 'flex';
     document.getElementById('body-overlay').classList.add('active');
     document.body.style.overflow = 'hidden';
 
-    // КНОПКА ДОДАТИ В КОШИК
+    // === 📱 ЛИПКА КНОПКА ДЛЯ МОБІЛЬНИХ (Скрол і ціна) ===
+    const stickyPanel = document.getElementById('sticky-mobile-cart');
+    const stickyPrice = document.getElementById('sticky-price');
+    const stickyAddBtn = document.getElementById('sticky-add-btn');
+    const modalContent = document.querySelector('.modal-content');
+    
+    if (stickyPrice) stickyPrice.innerText = `${p.Price} грн`;
+    
+    if (stickyAddBtn) {
+        // Якщо тиснуть на липку кнопку - імітуємо клік по головній кнопці
+        stickyAddBtn.onclick = () => {
+            document.getElementById('modal-add-btn').click(); 
+        };
+    }
+
+    if (modalContent && stickyPanel) {
+        // Спочатку завжди ховаємо
+        stickyPanel.classList.remove('visible');
+        
+        // Очищаємо старі події, щоб не було глюків
+        modalContent.onscroll = null; 
+        
+        modalContent.onscroll = () => {
+            // Якщо проскролили вниз більше ніж на 200 пікселів
+            if (modalContent.scrollTop > 200) {
+                stickyPanel.classList.add('visible');
+            } else {
+                stickyPanel.classList.remove('visible');
+            }
+        };
+    }
+    // === КІНЕЦЬ ЛИПКОЇ КНОПКИ ===
+
+    // КНОПКА "ДОДАТИ В КОШИК" (Головна)
     document.getElementById('modal-add-btn').onclick = () => {
         if (sizes.length > 0 && sizes[0].trim() !== "" && !sel.value) {
             return alert('Оберіть розмір!');
@@ -342,7 +376,7 @@ function openModal(id, updateUrl = true) {
         
         updateCartUI();
         closeModal();
-        toggleCart(true);
+        toggleCart(true); 
     };
 
     if (updateUrl) {
