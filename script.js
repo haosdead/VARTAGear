@@ -375,7 +375,7 @@ function openModal(id, updateUrl = true) {
         localStorage.setItem('varta_cart', JSON.stringify(cart));
         
         updateCartUI();
-        closeModal();
+        closeModal(false); // Закриваємо модалку, але URL не міняємо (бо далі відкриється кошик)
         toggleCart(true); 
     };
 
@@ -383,6 +383,30 @@ function openModal(id, updateUrl = true) {
         const url = new URL(window.location);
         url.searchParams.set('product', id);
         window.history.pushState({ productId: id }, '', url);
+
+        // ДОДАНО: Оновлюємо canonical для Google
+        const canonicalTag = document.getElementById('canonical-url');
+        if (canonicalTag) {
+            canonicalTag.href = url.href; 
+        }
+    }
+}
+
+function closeModal(updateUrl = true) { 
+    document.getElementById('product-modal').style.display = 'none'; 
+    document.getElementById('body-overlay').classList.remove('active'); 
+    document.body.classList.remove('no-scroll'); 
+    
+    if (updateUrl) {
+        const url = new URL(window.location);
+        url.searchParams.delete('product');
+        window.history.pushState({}, '', url);
+
+        // ДОДАНО: Повертаємо базовий canonical
+        const canonicalTag = document.getElementById('canonical-url');
+        if (canonicalTag) {
+            canonicalTag.href = 'https://vartagear.com.ua/'; 
+        }
     }
 }
 // Додайте цю нову функцію в кінець script.js
