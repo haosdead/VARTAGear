@@ -313,7 +313,7 @@ function openModal(id, updateUrl = true) {
     // Відкриваємо саме вікно
     document.getElementById('product-modal').style.display = 'flex';
     document.getElementById('body-overlay').classList.add('active');
-    document.body.style.overflow = 'hidden';
+    document.body.classList.add('no-scroll');
 
     // === 📱 ЛИПКА КНОПКА ДЛЯ МОБІЛЬНИХ (Скрол і ціна) ===
     const stickyPanel = document.getElementById('sticky-mobile-cart');
@@ -740,7 +740,7 @@ function toggleCart(s) { document.getElementById('cart-sidebar').classList.toggl
 function closeModal(updateUrl = true) { 
     document.getElementById('product-modal').style.display = 'none'; 
     document.getElementById('body-overlay').classList.remove('active'); 
-    document.body.style.overflow = 'auto'; 
+    document.body.classList.remove('no-scroll'); 
     
     // НОВЕ: Прибираємо товар з посилання
     if (updateUrl) {
