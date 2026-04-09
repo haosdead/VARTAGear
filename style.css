@@ -2285,3 +2285,117 @@ html, body {
         padding: 16px 20px; /* Більша кнопка для зручного тапу */
     }
 }
+
+/* ==========================================
+   POP-UP ЗНИЖКИ (TELEGRAM)
+========================================== */
+.popup-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s ease;
+}
+
+.popup-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.popup-content {
+    background: var(--card-gray);
+    border: 1px solid var(--border-gray);
+    border-top: 4px solid #2AABEE; /* Фірмовий колір Телеграму */
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    padding: 40px 30px 30px;
+    text-align: center;
+    position: relative;
+    transform: translateY(50px) scale(0.9);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+}
+
+.popup-overlay.show .popup-content {
+    transform: translateY(0) scale(1);
+}
+
+.popup-close {
+    position: absolute;
+    top: 15px; right: 15px;
+    background: transparent;
+    border: none;
+    color: #666;
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.popup-close:hover {
+    color: #fff;
+}
+
+.popup-icon {
+    width: 70px; height: 70px;
+    background: rgba(42, 171, 238, 0.1);
+    color: #2AABEE;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 35px;
+    margin: 0 auto 20px;
+}
+
+.popup-title {
+    font-size: 24px;
+    font-weight: 900;
+    margin: 0 0 15px;
+    color: var(--text-white);
+    letter-spacing: 1px;
+}
+
+.popup-desc {
+    font-size: 14px;
+    color: #aaa;
+    line-height: 1.5;
+    margin-bottom: 25px;
+}
+
+.popup-btn {
+    display: block;
+    background: #2AABEE;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 800;
+    padding: 15px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: background 0.3s, transform 0.2s;
+    margin-bottom: 15px;
+}
+
+.popup-btn:hover {
+    background: #2298d6;
+    transform: scale(1.02);
+}
+
+.popup-nothanks {
+    display: inline-block;
+    font-size: 12px;
+    color: #666;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.popup-nothanks:hover {
+    color: #aaa;
+}
