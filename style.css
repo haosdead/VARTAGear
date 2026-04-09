@@ -2490,4 +2490,19 @@ html, body {
     }
 }
 
-/* Клас, який блокує прокрутку */
+/* Блокуємо прокрутку основної сторінки */
+body.no-scroll {
+    overflow: hidden !important;
+    height: 100vh !important; /* Важливо для iOS */
+    touch-action: none; /* Забороняє скрол свайпом на фоні */
+}
+
+/* Дозволяємо скролити ТІЛЬКИ модальне вікно/кошик/меню */
+#product-modal,
+#cart-sidebar,
+#mobile-menu {
+    overflow-y: auto !important;
+    overscroll-behavior: contain; /* МАГІЯ: не дає скролу переходити на задній фон! */
+    -webkit-overflow-scrolling: touch; /* Плавний скрол на iPhone */
+    touch-action: auto; /* Дозволяємо тач-події всередині */
+}
