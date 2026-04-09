@@ -2403,29 +2403,39 @@ html, body {
 /* ==========================================
    ЛИПКА КНОПКА КУПИТИ (ТІЛЬКИ ДЛЯ МОБІЛЬНИХ)
 ========================================== */
+/* ==========================================
+   ЛИПКА КНОПКА КУПИТИ (ПЛАВАЮЧА КАПСУЛА)
+========================================== */
 .sticky-mobile-cart {
-    position: absolute; /* Буде позиціонуватись відносно modal-content */
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: rgba(15, 15, 15, 0.95);
-    backdrop-filter: blur(10px);
-    border-top: 1px solid var(--mono-lime);
-    padding: 12px 15px;
+    position: fixed; /* Тепер вона завжди чітко на екрані камери */
+    bottom: 25px; /* Висить над нижнім краєм екрана */
+    left: 15px; /* Відступ зліва */
+    right: 15px; /* Відступ справа */
+    width: auto; /* Скасовуємо розтягування на весь екран */
+    
+    /* Сучасний дизайн матового скла */
+    background: rgba(20, 20, 20, 0.85); 
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px); /* Важливо для iPhone */
+    
+    border: 1px solid rgba(162, 210, 74, 0.4); /* Тонка зелена рамка */
+    border-radius: 100px; /* Ідеально круглі краї (капсула) */
+    padding: 8px 8px 8px 25px; /* Внутрішні відступи */
+    
     display: flex;
     justify-content: space-between;
     align-items: center;
-    z-index: 1000;
+    z-index: 10000;
     
-    /* Ховаємо її за замовчуванням (опускаємо вниз) */
-    transform: translateY(100%);
+    /* Анімація появи */
+    transform: translateY(150px);
     opacity: 0;
     visibility: hidden;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.8);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.6); /* Крута тінь під капсулою */
 }
 
-/* Клас, який буде показувати кнопку через JS */
+/* Коли скрипт додає клас .visible - вона виринає */
 .sticky-mobile-cart.visible {
     transform: translateY(0);
     opacity: 1;
@@ -2438,29 +2448,34 @@ html, body {
 }
 
 .sticky-label {
-    font-size: 11px;
-    color: #888;
+    font-size: 10px;
+    color: #999;
     text-transform: uppercase;
     font-weight: 700;
+    line-height: 1;
+    margin-bottom: 3px;
 }
 
 .sticky-price {
     font-size: 18px;
     font-weight: 900;
     color: var(--mono-lime);
+    line-height: 1;
 }
 
+/* Сама зелена кнопка всередині капсули */
 .sticky-buy-btn {
     background: var(--mono-lime);
     color: #000;
     border: none;
-    border-radius: 8px;
-    padding: 12px 30px;
+    border-radius: 50px; /* Кнопка теж має бути круглою */
+    padding: 14px 30px;
     font-weight: 900;
     font-size: 14px;
     cursor: pointer;
     text-transform: uppercase;
     box-shadow: 0 4px 15px rgba(162, 210, 74, 0.3);
+    transition: transform 0.2s;
 }
 
 .sticky-buy-btn:active {
@@ -2468,7 +2483,7 @@ html, body {
     background: #b0e060;
 }
 
-/* Ховаємо панель на великих екранах (комп'ютерах) */
+/* На комп'ютерах ця фішка не потрібна - ховаємо */
 @media (min-width: 769px) {
     .sticky-mobile-cart {
         display: none !important;
