@@ -263,6 +263,23 @@ function openModal(id, updateUrl = true) {
     const p = allProducts.find(x => String(x.myId) === String(id));
     if(!p) return;
     
+    // === 🔥 АНАЛІТИКА: Відправляємо ПЕРЕГЛЯД товару ===
+    if (typeof gtag === 'function' && p) {
+        gtag('event', 'view_item', {
+            currency: 'UAH',
+            value: Number(p.Price) || 0,
+            items: [{
+                item_id: p.VendorCode || 'SKU_UNKNOWN',
+                item_name: p.Name,
+                item_category: p.Category || 'Без категорії',
+                price: Number(p.Price) || 0,
+                quantity: 1
+            }]
+        });
+        console.log("📈 Аналітика: Перегляд товару", p.Name);
+    }
+    // === КІНЕЦЬ ===
+
     addToRecentlyViewed(p);
     document.getElementById('modal-name').innerText = p.Name;
     document.getElementById('modal-price').innerText = `${p.Price} грн`;
@@ -297,11 +314,29 @@ function openModal(id, updateUrl = true) {
     document.getElementById('body-overlay').classList.add('active');
     document.body.style.overflow = 'hidden';
 
+    // КНОПКА ДОДАТИ В КОШИК
     document.getElementById('modal-add-btn').onclick = () => {
         if (sizes.length > 0 && sizes[0].trim() !== "" && !sel.value) {
             return alert('Оберіть розмір!');
         }
         
+        // === 🔥 АНАЛІТИКА: Відправляємо ДОДАВАННЯ В КОШИК ===
+        if (typeof gtag === 'function' && p) {
+            gtag('event', 'add_to_cart', {
+                currency: 'UAH',
+                value: Number(p.Price) || 0,
+                items: [{
+                    item_id: p.VendorCode || 'SKU_UNKNOWN',
+                    item_name: p.Name,
+                    item_category: p.Category || 'Без категорії',
+                    price: Number(p.Price) || 0,
+                    quantity: 1
+                }]
+            });
+            console.log("🛒 Аналітика: Додано в кошик", p.Name);
+        }
+        // === КІНЕЦЬ ===
+
         cart.push({ ...p, selectedSize: sel.value || 'Універсальний' });
         localStorage.setItem('varta_cart', JSON.stringify(cart));
         
