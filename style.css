@@ -2582,18 +2582,46 @@ body.no-scroll {
 }
 
 /* Адаптація для мобілок */
+/* Адаптація для мобілок (оновлений, преміальний вигляд) */
 @media (max-width: 768px) {
     .tg-native-card {
-        flex-direction: column;
-        text-align: center;
-        padding: 30px 20px;
+        display: grid;
+        grid-template-columns: 50px 1fr; /* Іконка зліва (50px), текст займає решту */
+        grid-template-areas: 
+            "icon info"
+            "btn btn"; /* Кнопка на всю ширину внизу */
+        gap: 15px;
+        padding: 20px 15px;
+        align-items: center;
+        text-align: left; /* Повертаємо вирівнювання по лівому краю */
+    }
+    
+    .tg-native-icon {
+        grid-area: icon;
+        width: 50px;
+        height: 50px;
+        font-size: 24px; /* Робимо іконку акуратною */
+    }
+    
+    .tg-native-info {
+        grid-area: info;
     }
     
     .tg-native-info h4 {
-        font-size: 16px;
+        font-size: 15px;
+        margin-bottom: 4px;
+    }
+    
+    .tg-native-info p {
+        font-size: 13px;
+        line-height: 1.4;
     }
     
     .tg-native-btn {
+        grid-area: btn;
         width: 100%;
+        text-align: center;
+        padding: 14px;
+        margin-top: 5px; /* Легкий відступ від тексту до кнопки */
     }
 }
