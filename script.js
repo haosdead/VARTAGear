@@ -1465,23 +1465,7 @@ function filterByPremiumArmor() {
     }
 }
 
-// ========================================================
-// POP-UP ЗНИЖКИ НА ПІДПИСКУ (TELEGRAM)
-// ========================================================
-document.addEventListener('DOMContentLoaded', () => {
-    // Перевіряємо, чи юзер вже закривав поп-ап раніше
-    const popupClosed = localStorage.getItem('varta_popup_closed');
-    
-    if (!popupClosed) {
-        // Показуємо поп-ап через 12 секунд перебування на сайті
-        setTimeout(() => {
-            const popup = document.getElementById('tg-discount-popup');
-            if (popup) {
-                popup.classList.add('show');
-            }
-        }, 12000); 
-    }
-});
+
 
 function closePromoPopup() {
     const popup = document.getElementById('tg-discount-popup');
