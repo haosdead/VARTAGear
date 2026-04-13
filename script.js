@@ -1,6 +1,25 @@
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQbyMki6lBczqgrhuK20OMPP-XeXjGEeDHPqJCPR84MMMOYvGrqU4Y-stTmajVxW55cpgUJ-199Hu7M/pub?gid=508007279&single=true&output=csv';
 const ITEMS_PER_PAGE = 21;
+// === РОЗУМНЕ БЛОКУВАННЯ СКРОЛУ ===
+let savedScrollY = 0;
 
+function lockScroll() {
+    savedScrollY = window.scrollY; // Запам'ятовуємо, де був клієнт
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${savedScrollY}px`;
+    document.body.style.width = '100%';
+    document.body.classList.add('no-scroll');
+}
+
+function unlockScroll() {
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    document.body.classList.remove('no-scroll');
+    // Миттєво повертаємо клієнта на ту ж висоту
+    window.scrollTo({ top: savedScrollY, behavior: 'instant' }); 
+}
+// ==================================
 let allProducts = [], filteredProducts = [], cart = [], currentPage = 1;
 let currentModalPics = [], currentModalPicIndex = 0;
 let wishlist = JSON.parse(localStorage.getItem('varta_wishlist')) || [];
@@ -26,8 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ========================================================
 // 2. ДОДАВАННЯ: Оновлена функція з записом у пам'ять
 // ========================================================
-// Примітка: переконайтеся, що всередині вашої функції openModal 
-// код натискання на кнопку виглядає саме так:
+
 function setupAddToCart(p, sel) {
     document.getElementById('modal-add-btn').onclick = () => {
         if (!sel.value) return alert('Оберіть розмір!');
@@ -313,7 +331,7 @@ function openModal(id, updateUrl = true) {
     // Відкриваємо саме вікно
     document.getElementById('product-modal').style.display = 'flex';
     document.getElementById('body-overlay').classList.add('active');
-    document.body.classList.add('no-scroll');
+    lockScroll();
 
     // === 📱 ЛИПКА КНОПКА ДЛЯ МОБІЛЬНИХ (Скрол і ціна) ===
     const stickyPanel = document.getElementById('sticky-mobile-cart');
@@ -392,23 +410,6 @@ function openModal(id, updateUrl = true) {
     }
 }
 
-function closeModal(updateUrl = true) { 
-    document.getElementById('product-modal').style.display = 'none'; 
-    document.getElementById('body-overlay').classList.remove('active'); 
-    document.body.classList.remove('no-scroll'); 
-    
-    if (updateUrl) {
-        const url = new URL(window.location);
-        url.searchParams.delete('product');
-        window.history.pushState({}, '', url);
-
-        // ДОДАНО: Повертаємо базовий canonical
-        const canonicalTag = document.getElementById('canonical-url');
-        if (canonicalTag) {
-            canonicalTag.href = 'https://vartagear.com.ua/'; 
-        }
-    }
-}
 // Додайте цю нову функцію в кінець script.js
 // Функція розгортання/згортання опису
 function toggleModalDescription() {
@@ -759,18 +760,41 @@ function openTrustInfo(type) {
 }
 
 // Допоміжні функції інтерфейсу
-function toggleMobileMenu(s) { document.getElementById('mobile-menu').classList.toggle('active', s); document.getElementById('body-overlay').classList.toggle('active', s); document.body.style.overflow = s ? 'hidden' : 'auto'; }
-function toggleCart(s) { document.getElementById('cart-sidebar').classList.toggle('active', s); document.getElementById('body-overlay').classList.toggle('active', s); document.body.style.overflow = s ? 'hidden' : 'auto'; }
+function toggleMobileMenu(s) { 
+    document.getElementById('mobile-menu').classList.toggle('active', s); 
+    document.getElementById('body-overlay').classList.toggle('active', s); 
+    // Застосовуємо розумний скрол
+    if (s) lockScroll(); else unlockScroll(); 
+}
+
+function toggleCart(s) { 
+    document.getElementById('cart-sidebar').classList.toggle('active', s); 
+    document.getElementById('body-overlay').classList.toggle('active', s); 
+    // Застосовуємо розумний скрол
+    if (s) lockScroll(); else unlockScroll(); 
+}
 function closeModal(updateUrl = true) { 
+    // 1. Ховаємо модалку та затемнення
     document.getElementById('product-modal').style.display = 'none'; 
     document.getElementById('body-overlay').classList.remove('active'); 
-    document.body.classList.remove('no-scroll'); 
     
-    // НОВЕ: Прибираємо товар з посилання
+    // 2. Повертаємо скрол на те саме місце (щоб екран не стрибав)
+    if (typeof unlockScroll === 'function') {
+        unlockScroll(); 
+    } else {
+        document.body.classList.remove('no-scroll'); 
+    }
+    
+    // 3. Очищаємо URL та канонічний тег для Google
     if (updateUrl) {
         const url = new URL(window.location);
         url.searchParams.delete('product');
         window.history.pushState({}, '', url);
+
+        const canonicalTag = document.getElementById('canonical-url');
+        if (canonicalTag) {
+            canonicalTag.href = 'https://vartagear.com.ua/'; 
+        }
     }
 }
 function closeAllPanels() { toggleMobileMenu(false); toggleCart(false); closeModal(); }
@@ -1150,11 +1174,14 @@ function openLightbox() {
     if (!imgSrc) return;
     document.getElementById('lightbox-img').src = imgSrc;
     document.getElementById('image-lightbox').style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // Забороняємо скрол фону
+    
+    lockScroll(); // Запам'ятовуємо скрол
 }
 
 function closeLightbox() {
     document.getElementById('image-lightbox').style.display = 'none';
+    
+    unlockScroll(); // Повертаємо скрол
 }
 
 
