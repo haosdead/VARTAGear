@@ -778,25 +778,37 @@ function updateCartUI() {
             </div>`;
         }).join('');
         
-        const totalPriceEl = document.getElementById('cart-total-price');
+       const totalPriceEl = document.getElementById('cart-total-price');
         const finalPriceEl = document.getElementById('final-total-price');
+        
         if (totalPriceEl) totalPriceEl.innerText = total;
-        if (finalPriceEl) finalPriceEl.innerText = total;
 
-        // РОЗРАХУНОК ПОЛОСКИ ДОСТАВКИ
-        const percent = Math.min((total / FREE_SHIPPING_THRESHOLD) * 100, 100);
+        // 🔥 ЗАСТОСУВАННЯ ПРОМОКОДУ
+        let finalTotal = total;
+        if (typeof currentDiscount !== 'undefined' && currentDiscount > 0) {
+            // Рахуємо суму зі знижкою
+            finalTotal = Math.round(total - (total * (currentDiscount / 100)));
+            if (finalPriceEl) {
+                // Закреслюємо стару ціну і пишемо нову зеленим
+                finalPriceEl.innerHTML = `<s style="color:#888; font-size:14px; margin-right:8px;">${total}</s> <span style="color:var(--mono-lime)">${finalTotal}</span>`;
+            }
+        } else {
+            if (finalPriceEl) finalPriceEl.innerText = total;
+        }
+
+        // РОЗРАХУНОК ПОЛОСКИ ДОСТАВКИ (рахуємо від фінальної суми зі знижкою)
+        const percent = Math.min((finalTotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
         if (shippingBar) shippingBar.style.width = percent + '%';
         
-        if (total >= FREE_SHIPPING_THRESHOLD) {
+        if (finalTotal >= FREE_SHIPPING_THRESHOLD) {
             if (shippingText) shippingText.innerHTML = '🎉 У вас <b>БЕЗКОШТОВНА ДОСТАВКА</b>!';
-            if (shippingBar) shippingBar.style.backgroundColor = '#25D366'; // Зелений колір успіху
+            if (shippingBar) shippingBar.style.backgroundColor = '#25D366'; 
         } else {
-            const left = FREE_SHIPPING_THRESHOLD - total;
+            const left = FREE_SHIPPING_THRESHOLD - finalTotal;
             if (shippingText) shippingText.innerHTML = `До безкоштовної доставки залишилося: <b style="color:var(--mono-lime)">${left} грн</b>`;
             if (shippingBar) shippingBar.style.backgroundColor = 'var(--mono-lime)';
         }
-    }
-
+ }
     if (typeof animateCartIcon === 'function') animateCartIcon();
 }
 
