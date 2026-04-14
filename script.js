@@ -347,56 +347,65 @@ function openModal(id, updateUrl = true) {
     // ==========================================
     // 🔥 РОЗУМНА ОБРОБКА ОПИСУ ТА ТАБЛИЦЬ
     // ==========================================
+   // ==========================================
+    // 🛡️ БРОНЕБІЙНИЙ ПАРСЕР ЗАМІРІВ V2.0
+    // ==========================================
     let descriptionText = p.Description || '';
     descriptionText = descriptionText.replace(/&nbsp;/g, ' ');
 
-    // АВТО-ФОРМАТУВАННЯ ЗАМІРІВ: 
-    // Шукаємо в тексті розміри (м, л, хл...) та перетворюємо їх на заголовки замірів
-    const sizeMarkers = ['с', 'м', 'л', 'хл', '2хл', '3хл', '4хл', 'xxl', 'xxxl'];
-    
-    // Створюємо тимчасовий елемент, щоб зручно розібрати HTML по тегах <p>
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = descriptionText;
     const paragraphs = tempDiv.querySelectorAll('p');
-    
+
+    // Розширений список ключів (тепер бачимо ВСЕ)
+    const sizeKeys = ['плечі', 'груди', 'довжина', 'пояс', 'стегна', 'бедіра', 'рукав', 'талія', 'стегно', 'shoulders', 'chest', 'length', 'waist', 'hips'];
+    const sizeMarkers = /^(s|m|l|xl|2xl|3xl|4xl|5xl|s\/m|l\/xl|2xl\/3xl|хс|с|м|л|хл|2хл|3хл|4хл|5хл)\b/i;
+
     let cleanedHTML = '';
-    let isTableStarted = false;
+    let currentTableHTML = '';
 
     paragraphs.forEach(pTag => {
-        let text = pTag.innerText.toLowerCase().trim();
-        
-        // Якщо це просто одна літера розміру (наприклад "м")
-        if (sizeMarkers.includes(text)) {
-            if (isTableStarted) cleanedHTML += `</div>`; // Закриваємо попередній блок замірів
-            cleanedHTML += `<h4 class="desc-size-header">📏 РОЗМІР ${text.toUpperCase()}</h4><div class="desc-size-grid">`;
-            isTableStarted = true;
-        } 
-        // Якщо це рядок заміру (наприклад "плечі 42")
-        else if (isTableStarted && (text.includes('плечі') || text.includes('груди') || text.includes('довжина') || text.includes('пояс') || text.includes('стегна'))) {
-            let parts = text.split(/(\d+)/); // Розбиваємо на назву та цифру
-            if (parts.length >= 2) {
-                cleanedHTML += `
-                    <div class="size-row">
-                        <span class="size-label">${parts[0].trim()}:</span>
-                        <span class="size-value">${parts[1]} см</span>
-                    </div>`;
-            } else {
-                cleanedHTML += `<div class="size-row-full">${pTag.innerHTML}</div>`;
+        let text = pTag.innerText.trim();
+        let lowText = text.toLowerCase();
+
+        // 1. ПЕРЕВІРКА: Чи це заголовок розміру (напр. "S/M" або "L: заміри")
+        if (sizeMarkers.test(lowText) && !lowText.includes('матеріал')) {
+            if (currentTableHTML) {
+                cleanedHTML += `<div class="desc-size-grid">${currentTableHTML}</div>`;
+                currentTableHTML = '';
             }
+            let sizeLabel = text.split(/[:\-]/)[0].toUpperCase();
+            cleanedHTML += `<h4 class="desc-size-header">📏 РОЗМІР ${sizeLabel}</h4>`;
         } 
-        // Звичайний опис (тканина, принт тощо)
-        else {
-            if (isTableStarted) {
-                cleanedHTML += `</div>`; // Закриваємо сітку замірів перед звичайним текстом
-                isTableStarted = false;
+        // 2. ПЕРЕВІРКА: Чи є в рядку цифри та ключові слова замірів
+        else if (sizeKeys.some(key => lowText.includes(key)) && /\d+/.test(text)) {
+            // Розбиваємо рядок, якщо заміри йдуть через кому (напр. "груди 56, довжина 60")
+            let parts = text.split(/[,;]/);
+            parts.forEach(part => {
+                let foundKey = sizeKeys.find(key => part.toLowerCase().includes(key));
+                let numMatch = part.match(/\d+/);
+                if (foundKey && numMatch) {
+                    currentTableHTML += `
+                        <div class="size-row">
+                            <span class="size-label">${foundKey}:</span>
+                            <span class="size-value">${numMatch[0]} см</span>
+                        </div>`;
+                }
+            });
+        } 
+        // 3. Звичайний текст (склад тканини, особливості)
+        else if (text.length > 2) {
+            if (currentTableHTML) {
+                cleanedHTML += `<div class="desc-size-grid">${currentTableHTML}</div>`;
+                currentTableHTML = '';
             }
             cleanedHTML += `<p class="desc-text">${pTag.innerHTML}</p>`;
         }
     });
 
-    if (isTableStarted) cleanedHTML += `</div>`; // Фінальне закриття
+    if (currentTableHTML) cleanedHTML += `<div class="desc-size-grid">${currentTableHTML}</div>`;
 
-    // Виводимо оновлений опис + картки наявності (які ми робили раніше)
+    // Виводимо опис + картки наявності
     let stockHTML = generateStockCardsHTML(String(p.Sizes), p.Quantity);
     document.getElementById('modal-desc').innerHTML = cleanedHTML + stockHTML;
     
