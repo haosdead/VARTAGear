@@ -345,10 +345,8 @@ function openModal(id, updateUrl = true) {
     
     // ОПИС + КАРТКИ НАЯВНОСТІ
     // ==========================================
-    // 🔥 РОЗУМНА ОБРОБКА ОПИСУ ТА ТАБЛИЦЬ
-    // ==========================================
    // ==========================================
-    // 🛡️ БРОНЕБІЙНИЙ ПАРСЕР ЗАМІРІВ V2.0
+    // 🔪 ХІРУРГІЧНИЙ ПАРСЕР ЗАМІРІВ V3.0
     // ==========================================
     let descriptionText = p.Description || '';
     descriptionText = descriptionText.replace(/&nbsp;/g, ' ');
@@ -357,9 +355,9 @@ function openModal(id, updateUrl = true) {
     tempDiv.innerHTML = descriptionText;
     const paragraphs = tempDiv.querySelectorAll('p');
 
-    // Розширений список ключів (тепер бачимо ВСЕ)
-    const sizeKeys = ['плечі', 'груди', 'довжина', 'пояс', 'стегна', 'бедіра', 'рукав', 'талія', 'стегно', 'shoulders', 'chest', 'length', 'waist', 'hips'];
-    const sizeMarkers = /^(s|m|l|xl|2xl|3xl|4xl|5xl|s\/m|l\/xl|2xl\/3xl|хс|с|м|л|хл|2хл|3хл|4хл|5хл)\b/i;
+    const sizeKeys = ['плечі', 'груди', 'довжина', 'пояс', 'стегна', 'бедіра', 'рукав', 'талія', 'стегно', 'грудь', 'бедра', 'рукава'];
+    // Шукаємо розмір на початку рядка (враховуючи тире, крапки, пробіли)
+    const sizeMarkersRegex = /^[\s\-\*]*([s|m|l|xl|2xl|3xl|4xl|5xl|s\/m|l\/xl|2xl\/3xl|хс|с|м|л|хл|2хл|3хл|4хл|5хл])[:\-\s\.]/i;
 
     let cleanedHTML = '';
     let currentTableHTML = '';
@@ -368,18 +366,25 @@ function openModal(id, updateUrl = true) {
         let text = pTag.innerText.trim();
         let lowText = text.toLowerCase();
 
-        // 1. ПЕРЕВІРКА: Чи це заголовок розміру (напр. "S/M" або "L: заміри")
-        if (sizeMarkers.test(lowText) && !lowText.includes('матеріал')) {
+        // 1. ПЕРЕВІРКА: Чи починається рядок з розміру (напр. "- S: груди 56...")
+        let sizeMatch = text.match(sizeMarkersRegex);
+        
+        if (sizeMatch) {
+            // Якщо була попередня таблиця — закриваємо її
             if (currentTableHTML) {
                 cleanedHTML += `<div class="desc-size-grid">${currentTableHTML}</div>`;
                 currentTableHTML = '';
             }
-            let sizeLabel = text.split(/[:\-]/)[0].toUpperCase();
+            // Витягуємо сам розмір (напр. "S") і робимо заголовок
+            let sizeLabel = sizeMatch[1].toUpperCase();
             cleanedHTML += `<h4 class="desc-size-header">📏 РОЗМІР ${sizeLabel}</h4>`;
-        } 
-        // 2. ПЕРЕВІРКА: Чи є в рядку цифри та ключові слова замірів
-        else if (sizeKeys.some(key => lowText.includes(key)) && /\d+/.test(text)) {
-            // Розбиваємо рядок, якщо заміри йдуть через кому (напр. "груди 56, довжина 60")
+            
+            // Залишок тексту після розміру (самі заміри) відправляємо на розбір
+            text = text.replace(sizeMarkersRegex, '');
+        }
+
+        // 2. РОЗБІР ЗАМІРІВ (шукаємо ключові слова + цифри)
+        if (sizeKeys.some(key => text.toLowerCase().includes(key)) && /\d+/.test(text)) {
             let parts = text.split(/[,;]/);
             parts.forEach(part => {
                 let foundKey = sizeKeys.find(key => part.toLowerCase().includes(key));
@@ -393,8 +398,8 @@ function openModal(id, updateUrl = true) {
                 }
             });
         } 
-        // 3. Звичайний текст (склад тканини, особливості)
-        else if (text.length > 2) {
+        // 3. ЗВИЧАЙНИЙ ТЕКСТ (якщо немає замірів)
+        else if (text.length > 5 && !sizeMatch) {
             if (currentTableHTML) {
                 cleanedHTML += `<div class="desc-size-grid">${currentTableHTML}</div>`;
                 currentTableHTML = '';
@@ -403,11 +408,10 @@ function openModal(id, updateUrl = true) {
         }
     });
 
+    // Закриваємо останню сітку
     if (currentTableHTML) cleanedHTML += `<div class="desc-size-grid">${currentTableHTML}</div>`;
 
-    // Виводимо опис + картки наявності
-    let stockHTML = generateStockCardsHTML(String(p.Sizes), p.Quantity);
-    document.getElementById('modal-desc').innerHTML = cleanedHTML + stockHTML;
+    document.getElementById('modal-desc').innerHTML = cleanedHTML + generateStockCardsHTML(String(p.Sizes), p.Quantity);
     
     document.getElementById('modal-vendor').innerText = `Артикул: ${p.VendorCode}`;
 
