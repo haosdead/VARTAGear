@@ -2809,3 +2809,40 @@ body.no-scroll {
     line-height: 1.6 !important;
     margin-bottom: 15px !important;
 }
+
+/* ================= АДАПТАЦІЯ ТАБЛИЦЬ ПОСТАЧАЛЬНИКА ================= */
+.desc-table-wrapper {
+    overflow-x: auto; /* Щоб таблиця не вилазила за екран на мобілках */
+    margin: 20px 0;
+    border-radius: 8px;
+    border: 1px solid var(--border-gray);
+    background: #111;
+}
+
+.desc-table-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #fff;
+    font-size: 13px;
+    text-align: left;
+}
+
+.desc-table-wrapper th {
+    background: #1a1a1a;
+    color: var(--mono-lime);
+    padding: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--border-gray);
+    white-space: nowrap;
+}
+
+.desc-table-wrapper td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #222;
+    color: #ccc;
+}
+
+.desc-table-wrapper tr:last-child td {
+    border-bottom: none;
+}
