@@ -896,15 +896,7 @@ function removeFromCart(i) {
     localStorage.setItem('varta_cart', JSON.stringify(cart));
     
     updateCartUI();
-} {
-    // Видаляємо елемент з масиву
-    cart.splice(i, 1);
-    
-    // Оновлюємо пам'ять (якщо масив порожній, запишеться [])
-    localStorage.setItem('varta_cart', JSON.stringify(cart));
-    
-    updateCartUI();
-}
+    }
 
 function showCheckoutForm() {
     document.getElementById('cart-items-container').style.display = 'none';
