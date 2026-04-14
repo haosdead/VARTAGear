@@ -3001,3 +3001,46 @@ body.no-scroll {
         max-width: calc(100% - 40px);
     }
 }
+/* =================== МОДАЛКА ЗАМІРІВ =================== */
+.measure-overlay {
+    display: none; /* Сховано за замовчуванням */
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 99999 !important; /* ПОВЕРХ УСЬОГО НА САЙТІ */
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+}
+
+.measure-overlay.active {
+    display: flex !important; /* З'являється при кліку */
+}
+
+.measure-content {
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 12px;
+    max-width: 90%;
+    width: 380px;
+    text-align: center;
+    position: relative;
+    border: 1px solid var(--mono-lime);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+}
+
+.measure-content img {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.measure-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: #fff;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
