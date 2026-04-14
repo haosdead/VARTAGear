@@ -274,14 +274,13 @@ function toggleCategory(catGroupElement) {
 }
 
 // =================== ОНОВЛЕНА openModal ===================
-// =================== ОНОВЛЕНА openModal ===================
-// =================== ОНОВЛЕНА openModal ===================
+// =================== ОНОВЛЕНА openModal (З ФІКСОМ КНОПКИ) ===================
 function openModal(id, updateUrl = true) {
     // ШУКАЄМО ТОВАР ЯК РЯДОК (String)
     const p = allProducts.find(x => String(x.myId) === String(id));
     if(!p) return;
     
-    // === 🔥 АНАЛІТИКА: Відправляємо ПЕРЕГЛЯД товару ===
+    // === 🔥 АНАЛІТИКА ===
     if (typeof gtag === 'function' && p) {
         gtag('event', 'view_item', {
             currency: 'UAH',
@@ -294,9 +293,7 @@ function openModal(id, updateUrl = true) {
                 quantity: 1
             }]
         });
-        console.log("📈 Аналітика: Перегляд товару", p.Name);
     }
-    // === КІНЕЦЬ ===
 
     addToRecentlyViewed(p);
     document.getElementById('modal-name').innerText = p.Name;
@@ -310,13 +307,9 @@ function openModal(id, updateUrl = true) {
         oldPriceEl.style.display = 'none'; 
     }
     
-    // ==========================================
-    // 🔥 ОПИС + КАРТКИ НАЯВНОСТІ
-    // ==========================================
+    // ОПИС + КАРТКИ НАЯВНОСТІ
     let descriptionText = p.Description || 'Опис очікується...';
     descriptionText = descriptionText.replace(/&nbsp;/g, ' ');
-    
-    // Генеруємо HTML карток і приклеюємо в кінець опису
     let stockHTML = generateStockCardsHTML(p.Sizes, p.Quantity);
     document.getElementById('modal-desc').innerHTML = descriptionText + stockHTML;
     
@@ -326,19 +319,12 @@ function openModal(id, updateUrl = true) {
     currentModalPicIndex = 0;
     updateModalGallery();
 
-    // ==========================================
-    // 🔥 ВИПАДАЮЧИЙ СПИСОК РОЗМІРІВ (ФІКС ДЛЯ КОШИКА)
-    // ==========================================
-    // ==========================================
-    // 🔥 ВИПАДАЮЧИЙ СПИСОК РОЗМІРІВ (З ПОКАЗОМ ЗАЛИШКІВ)
-    // ==========================================
+    // ВИПАДАЮЧИЙ СПИСОК РОЗМІРІВ (З ЗАЛИШКАМИ)
     const sizes = p.Sizes ? p.Sizes.split(',') : [];
     const sel = document.getElementById('modal-size-selector');
     
     if (sizes.length > 0 && sizes[0].trim() !== "") {
-        // Сортуємо розміри по порядку (S, M, L...)
         sizes.sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
-
         let optionsHTML = '<option value="">Оберіть розмір</option>';
         
         sizes.forEach(s => {
@@ -347,8 +333,6 @@ function openModal(id, updateUrl = true) {
             let qty = parts.length > 1 ? parts[1].trim() : "";
             
             if (qty) {
-                // Значення (value) для кошика залишаємо чистим ("XL"), 
-                // а текст для клієнта робимо красивим: "XL — є 19 шт."
                 optionsHTML += `<option value="${cleanSizeName}">${cleanSizeName} — є ${qty} шт.</option>`;
             } else {
                 optionsHTML += `<option value="${cleanSizeName}">${cleanSizeName}</option>`;
@@ -361,12 +345,11 @@ function openModal(id, updateUrl = true) {
 
     renderCrossSell(p);
 
-    // Відкриваємо саме вікно
     document.getElementById('product-modal').style.display = 'flex';
     document.getElementById('body-overlay').classList.add('active');
     lockScroll();
 
-    // === 📱 ЛИПКА КНОПКА ДЛЯ МОБІЛЬНИХ (Скрол і ціна) ===
+    // ЛИПКА КНОПКА ДЛЯ МОБІЛЬНИХ
     const stickyPanel = document.getElementById('sticky-mobile-cart');
     const stickyPrice = document.getElementById('sticky-price');
     const stickyAddBtn = document.getElementById('sticky-add-btn');
@@ -392,15 +375,15 @@ function openModal(id, updateUrl = true) {
             }
         };
     }
-    // === КІНЕЦЬ ЛИПКОЇ КНОПКИ ===
 
-    // КНОПКА "ДОДАТИ В КОШИК" (Головна)
+    // === КНОПКА "ДОДАТИ В КОШИК" ===
     document.getElementById('modal-add-btn').onclick = () => {
+        // Перевірка чи обрано розмір
         if (sizes.length > 0 && sizes[0].trim() !== "" && !sel.value) {
             return alert('Оберіть розмір!');
         }
         
-        // === 🔥 АНАЛІТИКА: Відправляємо ДОДАВАННЯ В КОШИК ===
+        // Аналітика додавання
         if (typeof gtag === 'function' && p) {
             gtag('event', 'add_to_cart', {
                 currency: 'UAH',
@@ -413,10 +396,9 @@ function openModal(id, updateUrl = true) {
                     quantity: 1
                 }]
             });
-            console.log("🛒 Аналітика: Додано в кошик", p.Name);
         }
-        // === КІНЕЦЬ ===
 
+        // Додавання в кошик
         cart.push({ ...p, selectedSize: sel.value || 'Універсальний' });
         localStorage.setItem('varta_cart', JSON.stringify(cart));
         
@@ -430,11 +412,8 @@ function openModal(id, updateUrl = true) {
         url.searchParams.set('product', id);
         window.history.pushState({ productId: id }, '', url);
 
-        // ДОДАНО: Оновлюємо canonical для Google
         const canonicalTag = document.getElementById('canonical-url');
-        if (canonicalTag) {
-            canonicalTag.href = url.href; 
-        }
+        if (canonicalTag) canonicalTag.href = url.href; 
     }
 }
 
