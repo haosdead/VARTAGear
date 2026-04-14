@@ -2900,3 +2900,104 @@ body.no-scroll {
     background: var(--mono-lime);
     color: #000;
 }
+/* =================== SOCIAL PROOF (Щойно купили) =================== */
+.social-toast {
+    position: fixed;
+    bottom: 20px;
+    left: -400px; /* Сховано за екраном */
+    background: #161616;
+    border: 1px solid var(--border-gray);
+    border-left: 4px solid var(--mono-lime);
+    padding: 12px 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    z-index: 9999;
+    transition: left 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    max-width: 300px;
+}
+
+.social-toast.show {
+    left: 20px; /* Виїжджає */
+}
+
+.social-toast-img {
+    background: #2a2a2a;
+    color: var(--mono-lime);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.social-toast-text {
+    font-size: 13px;
+    color: #ccc;
+    line-height: 1.4;
+}
+
+.social-toast-text b {
+    color: #fff;
+}
+
+.social-toast-text .time-ago {
+    display: block;
+    font-size: 11px;
+    color: #888;
+    margin-top: 4px;
+}
+
+.social-toast-close {
+    position: absolute;
+    top: 5px;
+    right: 8px;
+    font-size: 12px;
+    color: #888;
+    cursor: pointer;
+}
+
+/* =================== КНОПКА ТА МОДАЛКА ЗАМІРІВ =================== */
+.measure-guide-link {
+    color: var(--mono-lime);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-style: dashed;
+    transition: 0.3s;
+}
+
+.measure-guide-link:hover {
+    color: #fff;
+}
+
+.measure-content {
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 12px;
+    max-width: 90%;
+    width: 400px;
+    text-align: center;
+    position: relative;
+    border: 1px solid var(--border-gray);
+}
+
+.measure-content img {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+/* Адаптація Social Toast для телефонів */
+@media (max-width: 768px) {
+    .social-toast {
+        bottom: 80px; /* Піднімаємо вище, щоб не перекривало меню чи корзину */
+        max-width: calc(100% - 40px);
+    }
+}
