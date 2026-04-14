@@ -317,7 +317,12 @@
                         <span id="modal-price" class="current-price"></span>
                     </div>
                     <div class="selector-block">
-                        <label>Розмір:</label>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px;">
+                            <label style="margin-bottom: 0;">Розмір:</label>
+                            <span class="measure-guide-link" onclick="openMeasureGuide(event)">
+                                <i class="fas fa-ruler"></i> Як підібрати?
+                            </span>
+                        </div>
                         <select id="modal-size-selector" class="size-dropdown"></select>
                     </div>
                     <button id="modal-add-btn" class="add-to-cart-btn">ДОДАТИ В КОШИК</button>
@@ -465,6 +470,23 @@
         <i class="fas fa-comment-dots fab-icon-open"></i>
         <i class="fas fa-times fab-icon-close"></i>
     </button>
+</div>
+    <div id="social-proof-toast" class="social-toast">
+    <div class="social-toast-img">
+        <i class="fas fa-shopping-bag"></i>
+    </div>
+    <div class="social-toast-text" id="social-toast-content">
+        </div>
+    <span class="social-toast-close" onclick="closeSocialToast()">✕</span>
+</div>
+
+<div id="measure-modal" class="lightbox-overlay" onclick="closeMeasureGuide(event)">
+    <div class="measure-content">
+        <span class="lightbox-close" onclick="closeMeasureGuide(event)">✕</span>
+        <h3 style="color: #fff; margin-top: 0;">Як правильно зняти заміри</h3>
+        <img src="https://via.placeholder.com/600x800/111/a2d24a?text=ТАБЛИЦЯ+ЗАМІРІВ" alt="Як міряти">
+        <p style="color: #ccc; font-size: 14px; margin-bottom: 0;">Візьміть свій найзручніший одяг, покладіть на рівну поверхню і поміряйте, як показано на схемі. Не міряйте по тілу!</p>
+    </div>
 </div>
 <script src="script.js"></script>
 </body>
