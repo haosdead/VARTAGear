@@ -344,10 +344,61 @@ function openModal(id, updateUrl = true) {
     }
     
     // ОПИС + КАРТКИ НАЯВНОСТІ
-    let descriptionText = p.Description || 'Опис очікується...';
+    // ==========================================
+    // 🔥 РОЗУМНА ОБРОБКА ОПИСУ ТА ТАБЛИЦЬ
+    // ==========================================
+    let descriptionText = p.Description || '';
     descriptionText = descriptionText.replace(/&nbsp;/g, ' ');
-    let stockHTML = generateStockCardsHTML(p.Sizes, p.Quantity);
-    document.getElementById('modal-desc').innerHTML = descriptionText + stockHTML;
+
+    // АВТО-ФОРМАТУВАННЯ ЗАМІРІВ: 
+    // Шукаємо в тексті розміри (м, л, хл...) та перетворюємо їх на заголовки замірів
+    const sizeMarkers = ['с', 'м', 'л', 'хл', '2хл', '3хл', '4хл', 'xxl', 'xxxl'];
+    
+    // Створюємо тимчасовий елемент, щоб зручно розібрати HTML по тегах <p>
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = descriptionText;
+    const paragraphs = tempDiv.querySelectorAll('p');
+    
+    let cleanedHTML = '';
+    let isTableStarted = false;
+
+    paragraphs.forEach(pTag => {
+        let text = pTag.innerText.toLowerCase().trim();
+        
+        // Якщо це просто одна літера розміру (наприклад "м")
+        if (sizeMarkers.includes(text)) {
+            if (isTableStarted) cleanedHTML += `</div>`; // Закриваємо попередній блок замірів
+            cleanedHTML += `<h4 class="desc-size-header">📏 РОЗМІР ${text.toUpperCase()}</h4><div class="desc-size-grid">`;
+            isTableStarted = true;
+        } 
+        // Якщо це рядок заміру (наприклад "плечі 42")
+        else if (isTableStarted && (text.includes('плечі') || text.includes('груди') || text.includes('довжина') || text.includes('пояс') || text.includes('стегна'))) {
+            let parts = text.split(/(\d+)/); // Розбиваємо на назву та цифру
+            if (parts.length >= 2) {
+                cleanedHTML += `
+                    <div class="size-row">
+                        <span class="size-label">${parts[0].trim()}:</span>
+                        <span class="size-value">${parts[1]} см</span>
+                    </div>`;
+            } else {
+                cleanedHTML += `<div class="size-row-full">${pTag.innerHTML}</div>`;
+            }
+        } 
+        // Звичайний опис (тканина, принт тощо)
+        else {
+            if (isTableStarted) {
+                cleanedHTML += `</div>`; // Закриваємо сітку замірів перед звичайним текстом
+                isTableStarted = false;
+            }
+            cleanedHTML += `<p class="desc-text">${pTag.innerHTML}</p>`;
+        }
+    });
+
+    if (isTableStarted) cleanedHTML += `</div>`; // Фінальне закриття
+
+    // Виводимо оновлений опис + картки наявності (які ми робили раніше)
+    let stockHTML = generateStockCardsHTML(String(p.Sizes), p.Quantity);
+    document.getElementById('modal-desc').innerHTML = cleanedHTML + stockHTML;
     
     document.getElementById('modal-vendor').innerText = `Артикул: ${p.VendorCode}`;
 
