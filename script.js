@@ -272,7 +272,43 @@ function buildCategoryTree() {
 function toggleCategory(catGroupElement) {
     catGroupElement.classList.toggle('active');
 }
-
+function generateStockCardsHTML(sizesString, totalQuantity) {
+    try {
+        let html = `<div class='stock-container'>
+                        <p class='stock-title'>📦 НАЯВНІСТЬ НА СКЛАДІ:</p>
+                        <div class='stock-grid'>`;
+                        
+        if (!sizesString || sizesString.trim() === "" || sizesString === "undefined") {
+            html += `
+                <div class="stock-card universal">
+                    <span class="stock-size">Універсальний</span>
+                    <span class="stock-count">${totalQuantity || 0} шт.</span>
+                </div>`;
+        } else {
+            let sizeItems = sizesString.split(',');
+            // Сортування
+            sizeItems.sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
+            
+            sizeItems.forEach(item => {
+                let parts = item.split('-');
+                if (parts.length >= 2) {
+                    let sizeName = parts[0].trim();
+                    let sizeQty = parts[1].trim();
+                    html += `
+                    <div class="stock-card">
+                        <span class="stock-size">${sizeName}</span>
+                        <span class="stock-count">${sizeQty} шт.</span>
+                    </div>`;
+                }
+            });
+        }
+        html += `</div></div>`;
+        return html;
+    } catch (err) {
+        console.error("Помилка генерації карток:", err);
+        return "";
+    }
+}
 // =================== ОНОВЛЕНА openModal ===================
 // =================== ОНОВЛЕНА openModal (З ФІКСОМ КНОПКИ) ===================
 function openModal(id, updateUrl = true) {
