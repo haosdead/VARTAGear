@@ -270,7 +270,11 @@
                     <span>Повна оплата <b style="color:var(--mono-lime)">(Безкоштовна доставка)</b></span>
                 </label>
             </div>
-            
+            <div class="promo-container">
+                <input type="text" id="promo-input" placeholder="ПРОМОКОД (якщо є)">
+                <button type="button" class="promo-btn" onclick="applyPromoCode()">ЗАСТОСУВАТИ</button>
+            </div>
+            <div id="promo-message" style="text-align: center; font-size: 13px; margin-bottom: 15px;"></div>
             <div class="checkout-actions" style="margin-top: 20px;">
                 <p class="final-sum" style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 15px;">
                     До сплати: <span id="final-total-price">0</span> грн
