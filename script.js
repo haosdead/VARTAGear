@@ -348,75 +348,101 @@ function openModal(id, updateUrl = true) {
    // ==========================================
     // 🛡️ ТИТАНОВИЙ ПАРСЕР ЗАМІРІВ V4.0 (БЕЗ ПОМИЛОК)
     // ==========================================
-    let descriptionText = p.Description || '';
-    descriptionText = descriptionText.replace(/&nbsp;/g, ' ');
+    let desc = p.Description || '';
 
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = descriptionText;
-    const paragraphs = tempDiv.querySelectorAll('p');
+// 1. Попередня очистка: зберігаємо перенесення рядків (br) і відділяємо абзаци
+desc = desc.replace(/<\/(p|div)>/ig, '\n</$1>');
+desc = desc.replace(/<br\s*\/?>/ig, '\n');
+desc = desc.replace(/&nbsp;/ig, ' ');
 
-    // Ключові слова для замірів
-    const sizeKeys = ['плечі', 'груди', 'довжина', 'пояс', 'стегна', 'бедіра', 'рукав', 'талія', 'стегно', 'грудь', 'бедра', 'рукава'];
-    
-    // Регулярка, яка бачить розмір на початку рядка: "S:", "- M.", "* L", або просто "XL"
-    const sizeMarkerRegex = /^(?:[\s\-\*•]*)(s|m|l|xl|2xl|3xl|4xl|5xl|s\/m|l\/xl|2xl\/3xl|хс|с|м|л|хл|2хл|3хл|4хл|5хл)(?:\b|[:\-\s\.])/i;
+// Створюємо тимчасовий елемент лише для зняття HTML-тегів, але залишаємо \n
+const tempDiv = document.createElement('div');
+tempDiv.innerHTML = desc;
+let textContent = tempDiv.innerText || tempDiv.textContent;
 
-    let cleanedHTML = '';
-    let currentTableContent = '';
+// Розбиваємо текст на масив чистих рядків
+let lines = textContent.split('\n').map(line => line.trim()).filter(line => line.length > 0);
 
-    paragraphs.forEach(pTag => {
-        let text = pTag.innerText.trim();
-        if (!text) return;
+// 2. Словник для нормалізації назв замірів (щоб в таблиці все було красиво)
+const keyMap = {
+    'грудь': 'Груди', 'груди': 'Груди',
+    'плечі': 'Плечі', 'плечи': 'Плечі',
+    'довжина': 'Довжина', 'длина': 'Довжина',
+    'пояс': 'Пояс', 
+    'талія': 'Талія', 'талия': 'Талія',
+    'стегна': 'Стегна', 'стегно': 'Стегна', 'бедра': 'Стегна', 'бедіра': 'Стегна',
+    'рукав': 'Рукав', 'рукава': 'Рукав'
+};
+const sizeKeys = Object.keys(keyMap);
 
-        let lowText = text.toLowerCase();
-        let sizeMatch = text.match(sizeMarkerRegex);
+// Регулярка для маркерів розміру (включно зі словом "розмір")
+const sizeMarkerRegex = /^(?:[\s\-\*•]*(?:розмір|размер)?\s*)(s|m|l|xl|2xl|3xl|4xl|5xl|s\/m|m\/l|l\/xl|xl\/xxl|2xl\/3xl|хс|с|м|л|хл|2хл|3хл|4хл|5хл)(?:\b|[:\-\s\.])/i;
 
-        // ЯКЩО ЗНАЙШЛИ РОЗМІР (напр. S, M, L)
-        if (sizeMatch && !lowText.includes('матеріал') && !lowText.includes('тканина')) {
-            // Якщо була попередня таблиця — закриваємо її
-            if (currentTableContent) {
-                cleanedHTML += `<div class="desc-size-grid">${currentTableContent}</div>`;
-                currentTableContent = '';
-            }
-            
-            let sizeLabel = sizeMatch[1].toUpperCase();
-            cleanedHTML += `<h4 class="desc-size-header">📏 РОЗМІР ${sizeLabel}</h4>`;
-            
-            // Видаляємо маркер розміру з тексту, щоб розібрати залишок замірів у цьому ж рядку
-            text = text.replace(sizeMarkerRegex, '').trim();
-        }
+// Нормалізація кириличних розмірів (с -> S, хл -> XL)
+function normalizeSize(s) {
+    s = s.toLowerCase();
+    const map = { 'с': 'S', 'м': 'M', 'л': 'L', 'хл': 'XL', 'хс': 'XS', '2хл': '2XL', '3хл': '3XL', '4хл': '4XL', '5хл': '5XL' };
+    return map[s] || s.toUpperCase();
+}
 
-        // РОЗБИРАЄМО ЗАМІРИ (якщо в рядку є ключові слова + цифри)
-        if (sizeKeys.some(key => text.toLowerCase().includes(key)) && /\d+/.test(text)) {
-            let parts = text.split(/[,;]/);
-            parts.forEach(part => {
-                let foundKey = sizeKeys.find(key => part.toLowerCase().includes(key));
-                let numMatch = part.match(/\d+/);
-                if (foundKey && numMatch) {
-                    currentTableContent += `
-                        <div class="size-row">
-                            <span class="size-label">${foundKey}:</span>
-                            <span class="size-value">${numMatch[0]} см</span>
-                        </div>`;
-                }
-            });
-        } 
-        // ЗВИЧАЙНИЙ ТЕКСТ (матеріал, опис тощо)
-        else if (text.length > 3 && !sizeMatch) {
-            if (currentTableContent) {
-                cleanedHTML += `<div class="desc-size-grid">${currentTableContent}</div>`;
-                currentTableContent = '';
-            }
-            cleanedHTML += `<p class="desc-text">${pTag.innerHTML}</p>`;
-        }
-    });
+let cleanedHTML = '';
+let currentTableContent = '';
 
-    // Фінальне закриття останньої сітки
+const closeTable = () => {
     if (currentTableContent) {
-        cleanedHTML += `<div class="desc-size-grid">${currentTableContent}</div>`;
+        cleanedHTML += `<div class="desc-size-grid">${currentTableContent}</div>\n`;
+        currentTableContent = '';
+    }
+};
+
+// Регулярка для пошуку замірів: (КлючовеСлово) + (будь-який текст без цифр до 30 символів) + (Цифра або діапазон)
+// Ловить: "Груди - 50", "Рукав від шиї 60-62", "Талія: 40,5"
+const keysPattern = sizeKeys.join('|');
+const measurementRegex = new RegExp(`(${keysPattern})([^\\d!?]{0,30}?)(\\d+(?:[.,-]\\d+)?)`, 'gi');
+
+lines.forEach(line => {
+    let lowLine = line.toLowerCase();
+    
+    // Перевіряємо чи це заголовок розміру (виключаємо опис матеріалу)
+    let sizeMatch = line.match(sizeMarkerRegex);
+    let isSizeHeader = sizeMatch && !lowLine.includes('матеріал') && !lowLine.includes('тканина') && !lowLine.includes('склад');
+
+    if (isSizeHeader) {
+        closeTable();
+        let sizeLabel = normalizeSize(sizeMatch[1]);
+        cleanedHTML += `<h4 class="desc-size-header">📏 РОЗМІР ${sizeLabel}</h4>\n`;
+        // Видаляємо маркер розміру з рядка, щоб перевірити, чи немає в цьому ж рядку самих замірів
+        line = line.replace(sizeMarkerRegex, '').trim();
     }
 
-    document.getElementById('modal-desc').innerHTML = cleanedHTML + generateStockCardsHTML(String(p.Sizes), p.Quantity);
+    // Шукаємо заміри в рядку
+    let matches = [...line.matchAll(measurementRegex)];
+    let foundMeasurements = false;
+
+    if (matches.length > 0) {
+        foundMeasurements = true;
+        matches.forEach(m => {
+            let rawKey = m[1].toLowerCase();
+            let standardKey = keyMap[rawKey]; // отримуємо красиву назву з великої літери
+            let valStr = m[3].trim();
+            
+            currentTableContent += `
+            <div class="size-row">
+                <span class="size-label">${standardKey}:</span>
+                <span class="size-value">${valStr} см</span>
+            </div>`;
+        });
+    } 
+    // Якщо замірів не знайдено і це не просто літера розміру — це звичайний текст
+    else if (line.length > 2 && !isSizeHeader) {
+        closeTable();
+        cleanedHTML += `<p class="desc-text">${line}</p>\n`;
+    }
+});
+
+closeTable(); // Закриваємо останню таблицю, якщо вона є
+
+document.getElementById('modal-desc').innerHTML = cleanedHTML + generateStockCardsHTML(String(p.Sizes), p.Quantity);
     
     document.getElementById('modal-vendor').innerText = `Артикул: ${p.VendorCode}`;
 
