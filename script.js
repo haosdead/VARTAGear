@@ -309,6 +309,115 @@ function generateStockCardsHTML(sizesString, totalQuantity) {
         return "";
     }
 }
+
+// ========================================================
+// 🧠 РОЗУМНИЙ ФОРМАТУВАЛЬНИК ОПИСУ (Читає будь-який хаос)
+// ========================================================
+function formatDescription(htmlString) {
+    if (!htmlString) return '';
+    let tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlString.replace(/&nbsp;/g, ' ');
+
+    let finalHTML = '';
+    let currentSize = null;
+    let currentGridHTML = '';
+
+    // Регулярки для пошуку розмірів
+    const sizeStandalone = /^[\s\-\*•]*(s|m|l|xl|xxl|xxxl|2xl|3xl|4xl|5xl|xs|хс|с|м|л|хл|2хл|3хл|4хл|5хл|s\/m|l\/xl|2xl\/3xl)[\s:\.\-]*$/i;
+    const sizeInline = /^[\s\-\*•]*(s|m|l|xl|xxl|xxxl|2xl|3xl|4xl|5xl|xs|хс|с|м|л|хл|2хл|3хл|4хл|5хл|s\/m|l\/xl|2xl\/3xl)[\s:\-]+(.*)/i;
+    const keywords = ['груд', 'плеч', 'довжин', 'рукав', 'пояс', 'стегн', 'бедр', 'бедір', 'ширин', 'крок', 'талі'];
+
+    // Функція закриття блоку розміру
+    function flushGrid() {
+        if (currentSize && currentGridHTML) {
+            finalHTML += `<h4 class="desc-size-header">📏 РОЗМІР ${currentSize.toUpperCase()}</h4>`;
+            finalHTML += `<div class="desc-size-grid">${currentGridHTML}</div>`;
+            currentSize = null;
+            currentGridHTML = '';
+        }
+    }
+
+    // Функція витягування заміру (напр. "Ширина плечей - 41" -> 41)
+    function extractMeasurement(text) {
+        let low = text.toLowerCase();
+        if (!keywords.some(k => low.includes(k))) return null; // Якщо немає ключових слів - ігноруємо
+
+        const match = text.match(/^([^\d]+)(\d+(?:[.,]\d+)?)/);
+        if (match) {
+            let label = match[1].replace(/[:\-;\.,\s]+$/, '').replace(/^[\-\*•\s]+/, '').trim();
+            let val = match[2];
+            if (label.length > 2) {
+                return `<div class="size-row"><span class="size-label">${label}</span><span class="size-value">${val} см</span></div>`;
+            }
+        }
+        return null;
+    }
+
+    // Перебираємо всі елементи опису по черзі
+    Array.from(tempDiv.childNodes).forEach(node => {
+        // 1. ЯКЩО ЦЕ ГОТОВА ТАБЛИЦЯ (Взуття тощо)
+        if (node.nodeName === 'TABLE' || node.nodeName === 'FIGURE' || (node.querySelector && node.querySelector('table'))) {
+            flushGrid();
+            finalHTML += `<div class="desc-table-wrapper">${node.outerHTML || node.textContent}</div>`;
+            return;
+        }
+
+        let text = node.textContent.trim();
+        if (!text) return;
+
+        // Видаляємо сміттєві заголовки
+        if (text.toLowerCase() === 'розмірна сітка' || text.toLowerCase() === 'розміри:') return;
+
+        // 2. ЯКЩО РОЗМІР СТОЇТЬ ОКРЕМО (напр. <p>S</p>)
+        let matchStandalone = text.match(sizeStandalone);
+        if (matchStandalone) {
+            flushGrid();
+            currentSize = matchStandalone[1];
+            return;
+        }
+
+        // 3. ЯКЩО РОЗМІР І ЗАМІРИ В ОДНОМУ РЯДКУ (напр. "- S: груди 50, рукав 60")
+        let matchInline = text.match(sizeInline);
+        if (matchInline && !text.toLowerCase().includes('матеріал')) {
+            let restOfText = matchInline[2];
+            if (/\d/.test(restOfText)) { // Якщо там є цифри
+                flushGrid();
+                currentSize = matchInline[1];
+                let parts = restOfText.split(/[,;]/);
+                parts.forEach(p => {
+                    let row = extractMeasurement(p.trim());
+                    if (row) currentGridHTML += row;
+                });
+                return;
+            }
+        }
+
+        // 4. ЯКЩО ЦЕ РЯДОК ІЗ ЗАМІРОМ
+        let row = extractMeasurement(text);
+        if (row && currentSize) {
+            currentGridHTML += row;
+            return;
+        } else if (row && !currentSize) {
+            // Замір без вказаного розміру (універсальний)
+            currentSize = "УНІВЕРСАЛЬНИЙ";
+            currentGridHTML += row;
+            return;
+        }
+
+        // 5. ЗВИЧАЙНИЙ ТЕКСТ ОПИСУ
+        flushGrid();
+        if (node.nodeName === 'P' || node.nodeName === 'DIV') {
+            finalHTML += `<p class="desc-text">${node.innerHTML}</p>`;
+        } else if (node.nodeType === 3) {
+            finalHTML += `<p class="desc-text">${text}</p>`;
+        } else {
+            finalHTML += node.outerHTML; 
+        }
+    });
+
+    flushGrid(); // Закриваємо останню сітку, якщо вона була
+    return finalHTML;
+}
 // =================== ОНОВЛЕНА openModal ===================
 // =================== ОНОВЛЕНА openModal (З ФІКСОМ КНОПКИ) ===================
 function openModal(id, updateUrl = true) {
@@ -346,103 +455,17 @@ function openModal(id, updateUrl = true) {
     // ОПИС + КАРТКИ НАЯВНОСТІ
     // ==========================================
    // ==========================================
-    // 🛡️ ТИТАНОВИЙ ПАРСЕР ЗАМІРІВ V4.0 (БЕЗ ПОМИЛОК)
     // ==========================================
-    let desc = p.Description || '';
-
-// 1. Попередня очистка: зберігаємо перенесення рядків (br) і відділяємо абзаци
-desc = desc.replace(/<\/(p|div)>/ig, '\n</$1>');
-desc = desc.replace(/<br\s*\/?>/ig, '\n');
-desc = desc.replace(/&nbsp;/ig, ' ');
-
-// Створюємо тимчасовий елемент лише для зняття HTML-тегів, але залишаємо \n
-const tempDiv = document.createElement('div');
-tempDiv.innerHTML = desc;
-let textContent = tempDiv.innerText || tempDiv.textContent;
-
-// Розбиваємо текст на масив чистих рядків
-let lines = textContent.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-
-// 2. Словник для нормалізації назв замірів (щоб в таблиці все було красиво)
-const keyMap = {
-    'грудь': 'Груди', 'груди': 'Груди',
-    'плечі': 'Плечі', 'плечи': 'Плечі',
-    'довжина': 'Довжина', 'длина': 'Довжина',
-    'пояс': 'Пояс', 
-    'талія': 'Талія', 'талия': 'Талія',
-    'стегна': 'Стегна', 'стегно': 'Стегна', 'бедра': 'Стегна', 'бедіра': 'Стегна',
-    'рукав': 'Рукав', 'рукава': 'Рукав'
-};
-const sizeKeys = Object.keys(keyMap);
-
-// Регулярка для маркерів розміру (включно зі словом "розмір")
-const sizeMarkerRegex = /^(?:[\s\-\*•]*(?:розмір|размер)?\s*)(s|m|l|xl|2xl|3xl|4xl|5xl|s\/m|m\/l|l\/xl|xl\/xxl|2xl\/3xl|хс|с|м|л|хл|2хл|3хл|4хл|5хл)(?:\b|[:\-\s\.])/i;
-
-// Нормалізація кириличних розмірів (с -> S, хл -> XL)
-function normalizeSize(s) {
-    s = s.toLowerCase();
-    const map = { 'с': 'S', 'м': 'M', 'л': 'L', 'хл': 'XL', 'хс': 'XS', '2хл': '2XL', '3хл': '3XL', '4хл': '4XL', '5хл': '5XL' };
-    return map[s] || s.toUpperCase();
-}
-
-let cleanedHTML = '';
-let currentTableContent = '';
-
-const closeTable = () => {
-    if (currentTableContent) {
-        cleanedHTML += `<div class="desc-size-grid">${currentTableContent}</div>\n`;
-        currentTableContent = '';
-    }
-};
-
-// Регулярка для пошуку замірів: (КлючовеСлово) + (будь-який текст без цифр до 30 символів) + (Цифра або діапазон)
-// Ловить: "Груди - 50", "Рукав від шиї 60-62", "Талія: 40,5"
-const keysPattern = sizeKeys.join('|');
-const measurementRegex = new RegExp(`(${keysPattern})([^\\d!?]{0,30}?)(\\d+(?:[.,-]\\d+)?)`, 'gi');
-
-lines.forEach(line => {
-    let lowLine = line.toLowerCase();
+    // 🔥 ОПИС + КАРТКИ НАЯВНОСТІ
+    // ==========================================
+    // Проганяємо опис через наш розумний форматувальник
+    let cleanDescription = formatDescription(p.Description);
     
-    // Перевіряємо чи це заголовок розміру (виключаємо опис матеріалу)
-    let sizeMatch = line.match(sizeMarkerRegex);
-    let isSizeHeader = sizeMatch && !lowLine.includes('матеріал') && !lowLine.includes('тканина') && !lowLine.includes('склад');
-
-    if (isSizeHeader) {
-        closeTable();
-        let sizeLabel = normalizeSize(sizeMatch[1]);
-        cleanedHTML += `<h4 class="desc-size-header">📏 РОЗМІР ${sizeLabel}</h4>\n`;
-        // Видаляємо маркер розміру з рядка, щоб перевірити, чи немає в цьому ж рядку самих замірів
-        line = line.replace(sizeMarkerRegex, '').trim();
-    }
-
-    // Шукаємо заміри в рядку
-    let matches = [...line.matchAll(measurementRegex)];
-    let foundMeasurements = false;
-
-    if (matches.length > 0) {
-        foundMeasurements = true;
-        matches.forEach(m => {
-            let rawKey = m[1].toLowerCase();
-            let standardKey = keyMap[rawKey]; // отримуємо красиву назву з великої літери
-            let valStr = m[3].trim();
-            
-            currentTableContent += `
-            <div class="size-row">
-                <span class="size-label">${standardKey}:</span>
-                <span class="size-value">${valStr} см</span>
-            </div>`;
-        });
-    } 
-    // Якщо замірів не знайдено і це не просто літера розміру — це звичайний текст
-    else if (line.length > 2 && !isSizeHeader) {
-        closeTable();
-        cleanedHTML += `<p class="desc-text">${line}</p>\n`;
-    }
-});
-
-closeTable(); // Закриваємо останню таблицю, якщо вона є
-
-document.getElementById('modal-desc').innerHTML = cleanedHTML + generateStockCardsHTML(String(p.Sizes), p.Quantity);
+    // Генеруємо картки залишків ("S - 2 шт")
+    let stockHTML = generateStockCardsHTML(String(p.Sizes), p.Quantity);
+    
+    // Виводимо все на екран
+    document.getElementById('modal-desc').innerHTML = cleanDescription + stockHTML;
     
     document.getElementById('modal-vendor').innerText = `Артикул: ${p.VendorCode}`;
 
