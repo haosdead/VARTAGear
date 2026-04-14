@@ -2755,54 +2755,57 @@ body.no-scroll {
 /* =================== НОВИЙ ДИЗАЙН ЗАМІРІВ В ОПИСІ =================== */
 
 /* ФІКС ЗАМІРІВ: щоб блоки не налізали один на одного */
+/* РОЗМІР: Великий помітний заголовок */
+.desc-size-header {
+    background: #1a1a1a !important; /* Темний фон */
+    color: var(--mono-lime) !important; /* Наш неоновий зелений */
+    padding: 12px 15px !important;
+    border-radius: 8px !important;
+    border-left: 5px solid var(--mono-lime) !important;
+    font-size: 16px !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    margin: 25px 0 10px 0 !important;
+    display: block !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+}
+
+/* СІТКА КАРТОК: Заміри стоять парами */
 .desc-size-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Завжди 2 колонки */
-    gap: 8px;
-    margin: 10px 0 25px 0;
-    padding: 10px;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 8px;
-    border: 1px solid rgba(162, 210, 74, 0.1);
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important; 
+    gap: 8px !important;
+    margin-bottom: 20px !important;
+    padding: 5px !important;
 }
 
 .size-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #111;
-    padding: 10px 12px;
-    border-radius: 6px;
-    border-bottom: 2px solid #1a1a1a;
+    background: #111 !important;
+    border: 1px solid #2a2a2a !important;
+    padding: 10px 12px !important;
+    border-radius: 8px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
 }
 
 .size-label {
-    color: #777;
-    font-size: 11px;
-    text-transform: uppercase;
-    font-weight: 700;
+    color: #888 !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
 }
 
 .size-value {
-    color: var(--mono-lime);
-    font-size: 14px;
-    font-weight: 900;
+    color: #fff !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
 }
 
-/* Вигляд заголовку розміру */
-.desc-size-header {
-    margin: 30px 0 10px 0;
-    font-size: 15px;
-    font-weight: 900;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.desc-size-header::after {
-    content: '';
-    flex-grow: 1;
-    height: 1px;
-    background: linear-gradient(90deg, var(--mono-lime), transparent);
+/* Опис тканини */
+.desc-text {
+    color: #ccc !important;
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+    margin-bottom: 15px !important;
 }
