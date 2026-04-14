@@ -2846,3 +2846,22 @@ body.no-scroll {
 .desc-table-wrapper tr:last-child td {
     border-bottom: none;
 }
+
+/* Фікс обрізаного низу в каруселі */
+/* Фікс обрізаного низу в каруселі */
+.products-carousel {
+    padding-bottom: 25px !important; /* Даємо простір для кнопки та тіні знизу */
+    clip-path: inset(-100vw -100vw -100vw -100vw); /* Знімає жорсткі обрізки в деяких браузерах */
+}
+
+/* Якщо самі картки не розтягуються на всю висоту */
+.product-card {
+    height: 100%; /* Картки будуть однакової висоти */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Притискаємо кнопку "В кошик" завжди до самого низу картки */
+.product-card .add-to-cart-btn {
+    margin-top: auto; 
+}
