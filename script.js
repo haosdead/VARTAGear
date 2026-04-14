@@ -1708,5 +1708,34 @@ function filterByBanner(type) {
 }
 
 // ==========================================
-// ГЕНЕРАТОР ТАКТИЧНИХ КАРТОК РОЗМІРІВ
+// 🎟️ СИСТЕМА ПРОМОКОДІВ
 // ==========================================
+let currentDiscount = 0; // Відсоток знижки
+
+function applyPromoCode() {
+    const inputEl = document.getElementById('promo-input');
+    const msgEl = document.getElementById('promo-message');
+    if (!inputEl || !msgEl) return;
+    
+    const inputCode = inputEl.value.trim().toUpperCase();
+    
+    // 🗄️ БАЗА ПРОМОКОДІВ (Назва : Відсоток знижки)
+    const validCodes = {
+        'VARTA10': 10,   // Знижка 10%
+        'VARTAHOT15': 15,     // Знижка 15% для військових
+        'TGVART5': 5         // Знижка 5% з Telegram
+    };
+
+    if (inputCode === '') {
+        currentDiscount = 0;
+        msgEl.innerHTML = '';
+    } else if (validCodes[inputCode]) {
+        currentDiscount = validCodes[inputCode];
+        msgEl.innerHTML = `<span style="color: var(--mono-lime); font-weight: bold;">✅ Застосовано знижку ${currentDiscount}%!</span>`;
+    } else {
+        currentDiscount = 0;
+        msgEl.innerHTML = `<span style="color: #ff3300;">❌ Промокод не знайдено</span>`;
+    }
+    
+    updateCartUI(); // Перераховуємо ціни в кошику
+}
