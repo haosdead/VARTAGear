@@ -310,9 +310,15 @@ function openModal(id, updateUrl = true) {
         oldPriceEl.style.display = 'none'; 
     }
     
+    // ==========================================
+    // 🔥 ОПИС + КАРТКИ НАЯВНОСТІ
+    // ==========================================
     let descriptionText = p.Description || 'Опис очікується...';
     descriptionText = descriptionText.replace(/&nbsp;/g, ' ');
-    document.getElementById('modal-desc').innerHTML = descriptionText;
+    
+    // Генеруємо HTML карток і приклеюємо в кінець опису
+    let stockHTML = generateStockCardsHTML(p.Sizes, p.Quantity);
+    document.getElementById('modal-desc').innerHTML = descriptionText + stockHTML;
     
     document.getElementById('modal-vendor').innerText = `Артикул: ${p.VendorCode}`;
 
@@ -320,11 +326,23 @@ function openModal(id, updateUrl = true) {
     currentModalPicIndex = 0;
     updateModalGallery();
 
+    // ==========================================
+    // 🔥 ВИПАДАЮЧИЙ СПИСОК РОЗМІРІВ (ФІКС ДЛЯ КОШИКА)
+    // ==========================================
     const sizes = p.Sizes ? p.Sizes.split(',') : [];
     const sel = document.getElementById('modal-size-selector');
-    sel.innerHTML = sizes.length > 0 && sizes[0].trim() !== "" ? 
-        '<option value="">Оберіть розмір</option>' + sizes.map(s => `<option value="${s.trim()}">${s.trim()}</option>`).join('') :
-        '<option value="Універсальний">Універсальний</option>';
+    
+    if (sizes.length > 0 && sizes[0].trim() !== "") {
+        let optionsHTML = '<option value="">Оберіть розмір</option>';
+        sizes.forEach(s => {
+            // Відрізаємо кількість, залишаємо тільки "S", "M" тощо для кошика
+            let cleanSizeName = s.split('-')[0].trim();
+            optionsHTML += `<option value="${cleanSizeName}">${cleanSizeName}</option>`;
+        });
+        sel.innerHTML = optionsHTML;
+    } else {
+        sel.innerHTML = '<option value="Універсальний">Універсальний</option>';
+    }
 
     renderCrossSell(p);
 
@@ -342,21 +360,16 @@ function openModal(id, updateUrl = true) {
     if (stickyPrice) stickyPrice.innerText = `${p.Price} грн`;
     
     if (stickyAddBtn) {
-        // Якщо тиснуть на липку кнопку - імітуємо клік по головній кнопці
         stickyAddBtn.onclick = () => {
             document.getElementById('modal-add-btn').click(); 
         };
     }
 
     if (modalContent && stickyPanel) {
-        // Спочатку завжди ховаємо
         stickyPanel.classList.remove('visible');
-        
-        // Очищаємо старі події, щоб не було глюків
         modalContent.onscroll = null; 
         
         modalContent.onscroll = () => {
-            // Якщо проскролили вниз більше ніж на 200 пікселів
             if (modalContent.scrollTop > 200) {
                 stickyPanel.classList.add('visible');
             } else {
@@ -393,7 +406,7 @@ function openModal(id, updateUrl = true) {
         localStorage.setItem('varta_cart', JSON.stringify(cart));
         
         updateCartUI();
-        closeModal(false); // Закриваємо модалку, але URL не міняємо (бо далі відкриється кошик)
+        closeModal(false); 
         toggleCart(true); 
     };
 
@@ -1540,4 +1553,40 @@ function filterByBanner(type) {
     if (catalogEl) {
         window.scrollTo({ top: catalogEl.offsetTop - 80, behavior: 'smooth' });
     }
+}
+
+// ==========================================
+// ГЕНЕРАТОР ТАКТИЧНИХ КАРТОК РОЗМІРІВ
+// ==========================================
+function generateStockCardsHTML(sizesString, totalQuantity) {
+    let html = `<div class='stock-container'>
+                    <p class='stock-title'>📦 НАЯВНІСТЬ НА СКЛАДІ:</p>
+                    <div class='stock-grid'>`;
+                    
+    if (!sizesString || sizesString.trim() === "") {
+        html += `
+            <div class="stock-card universal">
+                <span class="stock-size">Універсальний</span>
+                <span class="stock-count">${totalQuantity || 0} шт.</span>
+            </div>`;
+    } else {
+        let sizeItems = sizesString.split(',');
+        // Сортуємо розміри, щоб вони завжди йшли по порядку
+        sizeItems.sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
+        
+        sizeItems.forEach(item => {
+            let parts = item.split('-');
+            if (parts.length >= 2) {
+                let sizeName = parts[0].trim();
+                let sizeQty = parts[1].trim();
+                html += `
+                <div class="stock-card">
+                    <span class="stock-size">${sizeName}</span>
+                    <span class="stock-count">${sizeQty} шт.</span>
+                </div>`;
+            }
+        });
+    }
+    html += `</div></div>`;
+    return html;
 }
