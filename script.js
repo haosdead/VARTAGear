@@ -329,19 +329,34 @@ function openModal(id, updateUrl = true) {
     // ==========================================
     // 🔥 ВИПАДАЮЧИЙ СПИСОК РОЗМІРІВ (ФІКС ДЛЯ КОШИКА)
     // ==========================================
+    // ==========================================
+    // 🔥 ВИПАДАЮЧИЙ СПИСОК РОЗМІРІВ (З ПОКАЗОМ ЗАЛИШКІВ)
+    // ==========================================
     const sizes = p.Sizes ? p.Sizes.split(',') : [];
     const sel = document.getElementById('modal-size-selector');
     
     if (sizes.length > 0 && sizes[0].trim() !== "") {
+        // Сортуємо розміри по порядку (S, M, L...)
+        sizes.sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
+
         let optionsHTML = '<option value="">Оберіть розмір</option>';
+        
         sizes.forEach(s => {
-            // Відрізаємо кількість, залишаємо тільки "S", "M" тощо для кошика
-            let cleanSizeName = s.split('-')[0].trim();
-            optionsHTML += `<option value="${cleanSizeName}">${cleanSizeName}</option>`;
+            let parts = s.split('-');
+            let cleanSizeName = parts[0].trim();
+            let qty = parts.length > 1 ? parts[1].trim() : "";
+            
+            if (qty) {
+                // Значення (value) для кошика залишаємо чистим ("XL"), 
+                // а текст для клієнта робимо красивим: "XL — є 19 шт."
+                optionsHTML += `<option value="${cleanSizeName}">${cleanSizeName} — є ${qty} шт.</option>`;
+            } else {
+                optionsHTML += `<option value="${cleanSizeName}">${cleanSizeName}</option>`;
+            }
         });
         sel.innerHTML = optionsHTML;
     } else {
-        sel.innerHTML = '<option value="Універсальний">Універсальний</option>';
+        sel.innerHTML = `<option value="Універсальний">Універсальний — є ${p.Quantity || 0} шт.</option>`;
     }
 
     renderCrossSell(p);
@@ -1558,35 +1573,3 @@ function filterByBanner(type) {
 // ==========================================
 // ГЕНЕРАТОР ТАКТИЧНИХ КАРТОК РОЗМІРІВ
 // ==========================================
-function generateStockCardsHTML(sizesString, totalQuantity) {
-    let html = `<div class='stock-container'>
-                    <p class='stock-title'>📦 НАЯВНІСТЬ НА СКЛАДІ:</p>
-                    <div class='stock-grid'>`;
-                    
-    if (!sizesString || sizesString.trim() === "") {
-        html += `
-            <div class="stock-card universal">
-                <span class="stock-size">Універсальний</span>
-                <span class="stock-count">${totalQuantity || 0} шт.</span>
-            </div>`;
-    } else {
-        let sizeItems = sizesString.split(',');
-        // Сортуємо розміри, щоб вони завжди йшли по порядку
-        sizeItems.sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
-        
-        sizeItems.forEach(item => {
-            let parts = item.split('-');
-            if (parts.length >= 2) {
-                let sizeName = parts[0].trim();
-                let sizeQty = parts[1].trim();
-                html += `
-                <div class="stock-card">
-                    <span class="stock-size">${sizeName}</span>
-                    <span class="stock-count">${sizeQty} шт.</span>
-                </div>`;
-            }
-        });
-    }
-    html += `</div></div>`;
-    return html;
-}
