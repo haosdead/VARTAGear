@@ -1502,3 +1502,42 @@ function closePromoPopup() {
         localStorage.setItem('varta_popup_closed', 'true'); 
     }
 }
+
+// ==========================================
+// ФІЛЬТРАЦІЯ ПО БАНЕРАХ (ТАКТИКА / CASUAL)
+// ==========================================
+function filterByBanner(type) {
+    // 1. Скидаємо інші фільтри
+    window.currentSearchQuery = '';
+    window.currentBadgeFilter = 'all';
+    window.currentColorFilter = 'all';
+    document.querySelectorAll('.filter-tag, .color-btn').forEach(b => b.classList.remove('active'));
+
+    // 2. Фільтруємо масив
+    if (type === 'tactical') {
+        window.currentCategory = 'tactical';
+        filteredProducts = allProducts.filter(p => {
+            const cat = ((p.Category || '') + ' ' + (p.SubCategory || '')).toUpperCase();
+            // Все, що стосується війни, броні та тактики
+            return cat.includes('ВІЙСЬК') || cat.includes('ТАКТИЧ') || cat.includes('БРОНЕ') || cat.includes('МІЛІТАРІ') || cat.includes('ШОЛОМ');
+        });
+    } else if (type === 'casual') {
+        window.currentCategory = 'casual';
+        filteredProducts = allProducts.filter(p => {
+            const cat = ((p.Category || '') + ' ' + (p.SubCategory || '')).toUpperCase();
+            // Все, що стосується цивільного/чоловічого одягу
+            return cat.includes('ЧОЛОВІК') || cat.includes('ПОВСЯКДЕН') || cat.includes('СПОРТИВН') || (cat.includes('ОДЯГ') && !cat.includes('МІЛІТАРІ'));
+        });
+    }
+
+    // 3. Оновлюємо і скролимо
+    applySorting();
+    currentPage = 1;
+    renderCatalog();
+
+    // Плавний скрол прямо до товарів, щоб клієнт одразу бачив результат
+    const catalogEl = document.getElementById('catalog');
+    if (catalogEl) {
+        window.scrollTo({ top: catalogEl.offsetTop - 80, behavior: 'smooth' });
+    }
+}
