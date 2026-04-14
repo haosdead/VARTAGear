@@ -2901,10 +2901,13 @@ body.no-scroll {
     color: #000;
 }
 /* =================== SOCIAL PROOF (Щойно купили) =================== */
+/* =================== SOCIAL PROOF (Щойно купили) =================== */
 .social-toast {
     position: fixed;
     bottom: 20px;
-    left: -400px; /* Сховано за екраном */
+    left: 20px; /* Фіксуємо відступ зліва */
+    /* Ховаємо за екран: 100% власної ширини + 40px для тіні */
+    transform: translateX(calc(-100% - 40px)); 
     background: #161616;
     border: 1px solid var(--border-gray);
     border-left: 4px solid var(--mono-lime);
@@ -2915,12 +2918,14 @@ body.no-scroll {
     gap: 15px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.5);
     z-index: 9999;
-    transition: left 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Анімуємо transform замість left — це набагато плавніше на телефонах */
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     max-width: 300px;
+    box-sizing: border-box; /* Щоб відступи не розтягували блок */
 }
 
 .social-toast.show {
-    left: 20px; /* Виїжджає */
+    transform: translateX(0); /* Повертаємо на видиму позицію */
 }
 
 .social-toast-img {
@@ -2962,85 +2967,10 @@ body.no-scroll {
     cursor: pointer;
 }
 
-/* =================== КНОПКА ТА МОДАЛКА ЗАМІРІВ =================== */
-.measure-guide-link {
-    color: var(--mono-lime);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: underline;
-    text-decoration-style: dashed;
-    transition: 0.3s;
-}
-
-.measure-guide-link:hover {
-    color: #fff;
-}
-
-.measure-content {
-    background: #1a1a1a;
-    padding: 20px;
-    border-radius: 12px;
-    max-width: 90%;
-    width: 400px;
-    text-align: center;
-    position: relative;
-    border: 1px solid var(--border-gray);
-}
-
-.measure-content img {
-    width: 100%;
-    border-radius: 8px;
-    margin-bottom: 15px;
-}
-
 /* Адаптація Social Toast для телефонів */
 @media (max-width: 768px) {
     .social-toast {
-        bottom: 80px; /* Піднімаємо вище, щоб не перекривало меню чи корзину */
+        bottom: 80px; /* Піднімаємо вище, щоб не перекривало меню чи кошик */
         max-width: calc(100% - 40px);
     }
-}
-/* =================== МОДАЛКА ЗАМІРІВ =================== */
-.measure-overlay {
-    display: none; /* Сховано за замовчуванням */
-    position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(0, 0, 0, 0.85);
-    z-index: 99999 !important; /* ПОВЕРХ УСЬОГО НА САЙТІ */
-    justify-content: center;
-    align-items: center;
-    backdrop-filter: blur(4px);
-}
-
-.measure-overlay.active {
-    display: flex !important; /* З'являється при кліку */
-}
-
-.measure-content {
-    background: #1a1a1a;
-    padding: 20px;
-    border-radius: 12px;
-    max-width: 90%;
-    width: 380px;
-    text-align: center;
-    position: relative;
-    border: 1px solid var(--mono-lime);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-}
-
-.measure-content img {
-    width: 100%;
-    border-radius: 8px;
-    margin-bottom: 10px;
-}
-
-.measure-close {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    color: #fff;
-    font-size: 20px;
-    font-weight: bold;
-    cursor: pointer;
 }
