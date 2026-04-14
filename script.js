@@ -346,7 +346,7 @@ function openModal(id, updateUrl = true) {
     // ОПИС + КАРТКИ НАЯВНОСТІ
     // ==========================================
    // ==========================================
-    // 🔪 ХІРУРГІЧНИЙ ПАРСЕР ЗАМІРІВ V3.0
+    // 🛡️ ТИТАНОВИЙ ПАРСЕР ЗАМІРІВ V4.0 (БЕЗ ПОМИЛОК)
     // ==========================================
     let descriptionText = p.Description || '';
     descriptionText = descriptionText.replace(/&nbsp;/g, ' ');
@@ -355,42 +355,45 @@ function openModal(id, updateUrl = true) {
     tempDiv.innerHTML = descriptionText;
     const paragraphs = tempDiv.querySelectorAll('p');
 
+    // Ключові слова для замірів
     const sizeKeys = ['плечі', 'груди', 'довжина', 'пояс', 'стегна', 'бедіра', 'рукав', 'талія', 'стегно', 'грудь', 'бедра', 'рукава'];
-    // Шукаємо розмір на початку рядка (враховуючи тире, крапки, пробіли)
-    const sizeMarkersRegex = /^[\s\-\*]*([s|m|l|xl|2xl|3xl|4xl|5xl|s\/m|l\/xl|2xl\/3xl|хс|с|м|л|хл|2хл|3хл|4хл|5хл])[:\-\s\.]/i;
+    
+    // Регулярка, яка бачить розмір на початку рядка: "S:", "- M.", "* L", або просто "XL"
+    const sizeMarkerRegex = /^(?:[\s\-\*•]*)(s|m|l|xl|2xl|3xl|4xl|5xl|s\/m|l\/xl|2xl\/3xl|хс|с|м|л|хл|2хл|3хл|4хл|5хл)(?:\b|[:\-\s\.])/i;
 
     let cleanedHTML = '';
-    let currentTableHTML = '';
+    let currentTableContent = '';
 
     paragraphs.forEach(pTag => {
         let text = pTag.innerText.trim();
-        let lowText = text.toLowerCase();
+        if (!text) return;
 
-        // 1. ПЕРЕВІРКА: Чи починається рядок з розміру (напр. "- S: груди 56...")
-        let sizeMatch = text.match(sizeMarkersRegex);
-        
-        if (sizeMatch) {
+        let lowText = text.toLowerCase();
+        let sizeMatch = text.match(sizeMarkerRegex);
+
+        // ЯКЩО ЗНАЙШЛИ РОЗМІР (напр. S, M, L)
+        if (sizeMatch && !lowText.includes('матеріал') && !lowText.includes('тканина')) {
             // Якщо була попередня таблиця — закриваємо її
-            if (currentTableHTML) {
-                cleanedHTML += `<div class="desc-size-grid">${currentTableHTML}</div>`;
-                currentTableHTML = '';
+            if (currentTableContent) {
+                cleanedHTML += `<div class="desc-size-grid">${currentTableContent}</div>`;
+                currentTableContent = '';
             }
-            // Витягуємо сам розмір (напр. "S") і робимо заголовок
+            
             let sizeLabel = sizeMatch[1].toUpperCase();
             cleanedHTML += `<h4 class="desc-size-header">📏 РОЗМІР ${sizeLabel}</h4>`;
             
-            // Залишок тексту після розміру (самі заміри) відправляємо на розбір
-            text = text.replace(sizeMarkersRegex, '');
+            // Видаляємо маркер розміру з тексту, щоб розібрати залишок замірів у цьому ж рядку
+            text = text.replace(sizeMarkerRegex, '').trim();
         }
 
-        // 2. РОЗБІР ЗАМІРІВ (шукаємо ключові слова + цифри)
+        // РОЗБИРАЄМО ЗАМІРИ (якщо в рядку є ключові слова + цифри)
         if (sizeKeys.some(key => text.toLowerCase().includes(key)) && /\d+/.test(text)) {
             let parts = text.split(/[,;]/);
             parts.forEach(part => {
                 let foundKey = sizeKeys.find(key => part.toLowerCase().includes(key));
                 let numMatch = part.match(/\d+/);
                 if (foundKey && numMatch) {
-                    currentTableHTML += `
+                    currentTableContent += `
                         <div class="size-row">
                             <span class="size-label">${foundKey}:</span>
                             <span class="size-value">${numMatch[0]} см</span>
@@ -398,18 +401,20 @@ function openModal(id, updateUrl = true) {
                 }
             });
         } 
-        // 3. ЗВИЧАЙНИЙ ТЕКСТ (якщо немає замірів)
-        else if (text.length > 5 && !sizeMatch) {
-            if (currentTableHTML) {
-                cleanedHTML += `<div class="desc-size-grid">${currentTableHTML}</div>`;
-                currentTableHTML = '';
+        // ЗВИЧАЙНИЙ ТЕКСТ (матеріал, опис тощо)
+        else if (text.length > 3 && !sizeMatch) {
+            if (currentTableContent) {
+                cleanedHTML += `<div class="desc-size-grid">${currentTableContent}</div>`;
+                currentTableContent = '';
             }
             cleanedHTML += `<p class="desc-text">${pTag.innerHTML}</p>`;
         }
     });
 
-    // Закриваємо останню сітку
-    if (currentTableHTML) cleanedHTML += `<div class="desc-size-grid">${currentTableHTML}</div>`;
+    // Фінальне закриття останньої сітки
+    if (currentTableContent) {
+        cleanedHTML += `<div class="desc-size-grid">${currentTableContent}</div>`;
+    }
 
     document.getElementById('modal-desc').innerHTML = cleanedHTML + generateStockCardsHTML(String(p.Sizes), p.Quantity);
     
