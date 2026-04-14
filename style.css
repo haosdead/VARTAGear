@@ -2629,13 +2629,17 @@ body.no-scroll {
     }
 }
 
+/* =================== ГОЛОВНІ БАНЕРИ КАТЕГОРІЙ (ЗАЛІЗОБЕТОННІ) =================== */
 .category-banners-wrapper {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
+    width: 100%; /* Фіксує ширину, щоб не ламалось при зникненні каруселі */
     max-width: 1200px;
     margin: 0 auto 30px auto;
     padding: 0 15px;
+    box-sizing: border-box; /* Не дає банерам вилізти за екран */
+    align-items: stretch; /* Завжди однакова висота обох банерів */
 }
 
 .cat-banner {
@@ -2653,13 +2657,15 @@ body.no-scroll {
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     background-size: cover;
     background-position: center;
+    width: 100%; /* Фіксація всередині сітки */
 }
 
-/* Круті фонові фотографії */
+/* НОВЕ ФОТО: Тактичний рюкзак та екіпіровка (без зброї) */
 .banner-tactical {
-    background-image: url('https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=1000&auto=format&fit=crop'); 
+    background-image: url('https://images.unsplash.com/photo-1605380582846-993d3957816f?q=80&w=1000&auto=format&fit=crop'); 
 }
 
+/* ФОТО: Кежуал / Вулиця */
 .banner-casual {
     background-image: url('https://images.unsplash.com/photo-1516257984-b1b4d707412e?q=80&w=1000&auto=format&fit=crop'); 
 }
@@ -2685,6 +2691,7 @@ body.no-scroll {
     position: relative;
     z-index: 2;
     padding: 20px;
+    width: 100%;
 }
 
 .banner-badge {
@@ -2697,7 +2704,6 @@ body.no-scroll {
     text-transform: uppercase;
     display: inline-block;
     margin-bottom: 10px;
-    box-shadow: 0 0 10px rgba(162, 210, 74, 0.5);
 }
 
 .banner-content h3 {
@@ -2707,7 +2713,6 @@ body.no-scroll {
     margin: 0 0 10px 0;
     letter-spacing: 1px;
     text-transform: uppercase;
-    text-shadow: 0 2px 5px rgba(0,0,0,0.8);
 }
 
 .banner-content p {
@@ -2729,25 +2734,16 @@ body.no-scroll {
     transition: all 0.3s;
 }
 
-.cat-banner:hover .banner-btn {
-    background: var(--mono-lime);
-    color: #000;
-    transform: scale(1.05);
-    box-shadow: 0 0 15px rgba(162, 210, 74, 0.5);
-}
-
 /* ІДЕАЛЬНИЙ ВИГЛЯД НА ТЕЛЕФОНІ */
 @media (max-width: 768px) {
     .category-banners-wrapper {
         grid-template-columns: 1fr; /* Стають один під одним */
-        gap: 15px; /* Акуратна щілина між ними */
+        gap: 15px; 
         margin-bottom: 25px;
     }
     .cat-banner {
         min-height: 190px;
-        border-radius: 12px;
     }
     .banner-content h3 { font-size: 22px; }
     .banner-content p { font-size: 13px; margin-bottom: 15px; }
-    .banner-content .banner-btn { padding: 10px 20px; font-size: 12px; }
 }
