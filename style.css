@@ -2865,3 +2865,38 @@ body.no-scroll {
 .product-card .add-to-cart-btn {
     margin-top: auto; 
 }
+
+/* =================== ПРОМОКОД =================== */
+.promo-container {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0 5px 0;
+}
+#promo-input {
+    flex-grow: 1;
+    background: #111;
+    border: 1px solid var(--border-gray);
+    color: #fff;
+    padding: 12px 15px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    font-size: 14px;
+    outline: none;
+}
+#promo-input:focus {
+    border-color: var(--mono-lime);
+}
+.promo-btn {
+    background: #2a2a2a;
+    color: #fff;
+    border: none;
+    padding: 0 15px;
+    border-radius: 6px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.promo-btn:hover {
+    background: var(--mono-lime);
+    color: #000;
+}
