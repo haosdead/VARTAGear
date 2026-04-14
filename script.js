@@ -1767,3 +1767,85 @@ function filterByBanner(type) {
         window.scrollTo({ top: catalogEl.offsetTop - 80, behavior: 'smooth' });
     }
 }
+// ==========================================
+// 📏 МОДАЛКА: ЯК ЗНЯТИ ЗАМІРИ
+// ==========================================
+function openMeasureGuide(e) {
+    if(e) e.stopPropagation();
+    const modal = document.getElementById('measure-modal');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeMeasureGuide(e) {
+    // Закриваємо тільки якщо клікнули на хрестик або на темний фон
+    if (e && e.target.closest('.measure-content') && !e.target.classList.contains('lightbox-close')) {
+        return; 
+    }
+    const modal = document.getElementById('measure-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+// ==========================================
+// 💬 SOCIAL PROOF: ІЛЮЗІЯ ЖИВОЇ ЧЕРГИ
+// ==========================================
+const socialNames = ["Олександр", "Дмитро", "Андрій (ЗСУ)", "Максим", "Ігор", "Сергій", "Влад", "Микола (НГУ)", "Тарас", "Євген"];
+const socialCities = ["Київ", "Львів", "Дніпро", "Одеса", "Харків", "Полтава", "Запоріжжя", "Вінниця", "Кривий Ріг", "Хмельницький"];
+const socialActions = [
+    "щойно замовив",
+    "додав у кошик",
+    "залишив відгук 5 зірок на",
+    "оформив замовлення на"
+];
+// Якщо в allProducts є товари, ми будемо брати назви звідти. Якщо ні - використовуємо ці:
+const fallbackProducts = ["Тактичний Убакс", "Плитоноску Cordura", "Штани Ріп-Стоп", "Бойову сорочку", "Комплект форми Піксель", "Тактичні кросівки"];
+
+let socialToastTimer;
+
+function showSocialToast() {
+    const toast = document.getElementById('social-proof-toast');
+    const content = document.getElementById('social-toast-content');
+    if (!toast || !content) return;
+
+    // Генеруємо випадкові дані
+    const name = socialNames[Math.floor(Math.random() * socialNames.length)];
+    const city = socialCities[Math.floor(Math.random() * socialCities.length)];
+    const action = socialActions[Math.floor(Math.random() * socialActions.length)];
+    const time = Math.floor(Math.random() * 12) + 1; // Від 1 до 12 хвилин тому
+    
+    // Беремо випадковий товар з реальної бази (якщо вона завантажена), або з резервного списку
+    let product = fallbackProducts[Math.floor(Math.random() * fallbackProducts.length)];
+    if (typeof allProducts !== 'undefined' && allProducts.length > 0) {
+        const randomItem = allProducts[Math.floor(Math.random() * allProducts.length)];
+        product = randomItem.Name;
+    }
+
+    content.innerHTML = `
+        <b>${name}</b> (м. ${city})<br>
+        ${action} <b>${product.toLowerCase()}</b>
+        <span class="time-ago">${time} хв. тому</span>
+    `;
+
+    toast.classList.add('show');
+
+    // Ховаємо через 6 секунд
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 6000);
+}
+
+function closeSocialToast() {
+    document.getElementById('social-proof-toast').classList.remove('show');
+}
+
+// Запускаємо інтервал (60 000 мілісекунд = 1 хвилина)
+// Робимо затримку 10 секунд перед першим показом
+setTimeout(() => {
+    showSocialToast();
+    socialToastTimer = setInterval(showSocialToast, 60000);
+}, 10000);
