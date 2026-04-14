@@ -2754,62 +2754,55 @@ body.no-scroll {
 
 /* =================== НОВИЙ ДИЗАЙН ЗАМІРІВ В ОПИСІ =================== */
 
-/* Заголовок кожного розміру в описі */
-.desc-size-header {
-    background: rgba(162, 210, 74, 0.1);
-    color: var(--mono-lime);
-    padding: 8px 15px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 800;
-    margin: 20px 0 10px 0;
-    border-left: 3px solid var(--mono-lime);
-    text-transform: uppercase;
-}
-
-/* Сітка для замірів (плечі, груди тощо) */
+/* ФІКС ЗАМІРІВ: щоб блоки не налізали один на одного */
 .desc-size-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Робимо у два стовпчики! */
+    grid-template-columns: repeat(2, 1fr); /* Завжди 2 колонки */
     gap: 8px;
-    margin-bottom: 20px;
-    padding: 5px;
+    margin: 10px 0 25px 0;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    border: 1px solid rgba(162, 210, 74, 0.1);
 }
 
-/* Один рядок заміру всередині сітки */
 .size-row {
     display: flex;
     justify-content: space-between;
-    background: #161616;
-    padding: 8px 12px;
+    align-items: center;
+    background: #111;
+    padding: 10px 12px;
     border-radius: 6px;
-    border: 1px solid #222;
+    border-bottom: 2px solid #1a1a1a;
 }
 
 .size-label {
-    color: #888;
-    font-size: 12px;
+    color: #777;
+    font-size: 11px;
     text-transform: uppercase;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .size-value {
-    color: #fff;
-    font-size: 13px;
-    font-weight: 800;
-}
-
-/* Звичайні абзаци опису (матеріал, якість) */
-.desc-text {
-    margin-bottom: 12px;
-    line-height: 1.5;
-    color: #ccc;
+    color: var(--mono-lime);
     font-size: 14px;
+    font-weight: 900;
 }
 
-/* Адаптація для дуже маленьких екранів */
-@media (max-width: 360px) {
-    .desc-size-grid {
-        grid-template-columns: 1fr; /* На мікро-телефонах в один стовпчик */
-    }
+/* Вигляд заголовку розміру */
+.desc-size-header {
+    margin: 30px 0 10px 0;
+    font-size: 15px;
+    font-weight: 900;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.desc-size-header::after {
+    content: '';
+    flex-grow: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--mono-lime), transparent);
 }
