@@ -742,6 +742,41 @@ function changePage(page) {
 
 // =================== ЛОГІКА КОШИКА ТА ОФОРМЛЕННЯ ===================
 // =================== ЛОГІКА КОШИКА ТА ДОСТАВКИ ===================
+// ==========================================
+// 🎟️ СИСТЕМА ПРОМОКОДІВ
+// ==========================================
+let currentDiscount = 0; // Відсоток знижки
+
+function applyPromoCode() {
+    const inputEl = document.getElementById('promo-input');
+    const msgEl = document.getElementById('promo-message');
+    if (!inputEl || !msgEl) return;
+    
+    const inputCode = inputEl.value.trim().toUpperCase();
+    
+    const validCodes = {
+        'VARTA10': 10,
+        'ZSU15': 15,
+        'TG5': 5
+    };
+
+    if (inputCode === '') {
+        currentDiscount = 0;
+        msgEl.innerHTML = '';
+    } else if (validCodes[inputCode]) {
+        currentDiscount = validCodes[inputCode];
+        msgEl.innerHTML = `<span style="color: var(--mono-lime); font-weight: bold;">✅ Код прийнято! Перераховуємо...</span>`;
+    } else {
+        currentDiscount = 0;
+        msgEl.innerHTML = `<span style="color: #ff3300;">❌ Промокод не знайдено</span>`;
+    }
+    
+    updateCartUI(); 
+}
+
+// ==========================================
+// 🛒 ОНОВЛЕНИЙ КОШИК З РОЗУМНИМИ ЗНИЖКАМИ
+// ==========================================
 function updateCartUI() {
     const cartCount = document.getElementById('cart-count');
     if (cartCount) cartCount.innerText = cart.length;
@@ -749,7 +784,6 @@ function updateCartUI() {
     const content = document.getElementById('cart-content');
     const footer = document.getElementById('cart-footer');
     
-    // НОВЕ: Поріг безкоштовної доставки (тут стоїть 3000 грн. Якщо треба інша сума - просто зміни цифру)
     const FREE_SHIPPING_THRESHOLD = 3000; 
     const shippingContainer = document.getElementById('free-shipping-container');
     const shippingText = document.getElementById('shipping-text');
@@ -766,11 +800,16 @@ function updateCartUI() {
         
         let total = 0;
         content.innerHTML = cart.map((it, i) => {
-            total += parseFloat(it.Price);
+            total += parseFloat(it.Price) || 0;
+            
+            // НОВЕ: Маркуємо акційні товари прямо в кошику
+            let isSale = String(it.Badge || it.badge || '').toUpperCase().includes('SALE');
+            let saleTag = isSale ? `<span style="color:#ff3300; font-size:10px; border:1px solid #ff3300; padding:1px 4px; border-radius:3px; margin-left:5px;">АКЦІЯ</span>` : '';
+
             return `
             <div class="cart-item">
                 <div class="cart-item-info">
-                    <span class="cart-item-title">${it.Name.toUpperCase()}</span>
+                    <span class="cart-item-title">${it.Name.toUpperCase()} ${saleTag}</span>
                     <span class="cart-item-meta">Розмір: ${it.selectedSize}</span>
                     <span class="cart-item-price">${it.Price} грн</span>
                 </div>
@@ -778,25 +817,43 @@ function updateCartUI() {
             </div>`;
         }).join('');
         
-       const totalPriceEl = document.getElementById('cart-total-price');
+        const totalPriceEl = document.getElementById('cart-total-price');
         const finalPriceEl = document.getElementById('final-total-price');
+        const msgEl = document.getElementById('promo-message');
         
-        if (totalPriceEl) totalPriceEl.innerText = total;
-
-        // 🔥 ЗАСТОСУВАННЯ ПРОМОКОДУ
+        // 🔥 РОЗУМНЕ ЗАСТОСУВАННЯ ПРОМОКОДУ (Ігнорує SALE)
         let finalTotal = total;
-        if (typeof currentDiscount !== 'undefined' && currentDiscount > 0) {
-            // Рахуємо суму зі знижкою
-            finalTotal = Math.round(total - (total * (currentDiscount / 100)));
-            if (finalPriceEl) {
-                // Закреслюємо стару ціну і пишемо нову зеленим
-                finalPriceEl.innerHTML = `<s style="color:#888; font-size:14px; margin-right:8px;">${total}</s> <span style="color:var(--mono-lime)">${finalTotal}</span>`;
+        let discountAmount = 0;
+
+        if (currentDiscount > 0) {
+            let discountableSum = 0;
+            
+            cart.forEach(item => {
+                let badgeText = String(item.Badge || item.badge || '').toUpperCase();
+                if (!badgeText.includes('SALE') && !badgeText.includes('АКЦІЯ')) {
+                    discountableSum += Number(item.Price) || 0;
+                }
+            });
+
+            discountAmount = Math.round(discountableSum * (currentDiscount / 100));
+            finalTotal = total - discountAmount;
+
+            if (discountAmount > 0) {
+                let priceHTML = `<s style="color:#888; font-size:14px; margin-right:8px;">${total}</s> <span style="color:var(--mono-lime)">${finalTotal}</span>`;
+                if (totalPriceEl) totalPriceEl.innerHTML = priceHTML;
+                if (finalPriceEl) finalPriceEl.innerHTML = priceHTML;
+                if (msgEl) msgEl.innerHTML = `<span style="color: var(--mono-lime); font-weight: bold;">✅ Знижка -${discountAmount} грн!</span>`;
+            } else {
+                if (totalPriceEl) totalPriceEl.innerText = total;
+                if (finalPriceEl) finalPriceEl.innerText = total;
+                if (msgEl) msgEl.innerHTML = `<span style="color:#ff3300; font-weight:bold;">❌ Код не діє на акційні товари</span>`;
             }
         } else {
+            if (totalPriceEl) totalPriceEl.innerText = total;
             if (finalPriceEl) finalPriceEl.innerText = total;
         }
 
-        // РОЗРАХУНОК ПОЛОСКИ ДОСТАВКИ (рахуємо від фінальної суми зі знижкою)
+        // РОЗРАХУНОК ПОЛОСКИ ДОСТАВКИ
         const percent = Math.min((finalTotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
         if (shippingBar) shippingBar.style.width = percent + '%';
         
@@ -808,10 +865,10 @@ function updateCartUI() {
             if (shippingText) shippingText.innerHTML = `До безкоштовної доставки залишилося: <b style="color:var(--mono-lime)">${left} грн</b>`;
             if (shippingBar) shippingBar.style.backgroundColor = 'var(--mono-lime)';
         }
- }
+    }
+    
     if (typeof animateCartIcon === 'function') animateCartIcon();
 }
-
 function removeFromCart(i) {
     const itemToRemove = cart[i]; // Запам'ятовуємо товар перед видаленням
     
