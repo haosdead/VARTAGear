@@ -313,6 +313,9 @@ function generateStockCardsHTML(sizesString, totalQuantity) {
 // ========================================================
 // 🧠 РОЗУМНИЙ ФОРМАТУВАЛЬНИК ОПИСУ (Читає будь-який хаос)
 // ========================================================
+// ========================================================
+// 🧠 РОЗУМНИЙ ФОРМАТУВАЛЬНИК ОПИСУ V6.0 (ПИЛОСОС СМІТТЯ)
+// ========================================================
 function formatDescription(htmlString) {
     if (!htmlString) return '';
     let tempDiv = document.createElement('div');
@@ -322,12 +325,10 @@ function formatDescription(htmlString) {
     let currentSize = null;
     let currentGridHTML = '';
 
-    // Регулярки для пошуку розмірів
-    const sizeStandalone = /^[\s\-\*•]*(s|m|l|xl|xxl|xxxl|2xl|3xl|4xl|5xl|xs|хс|с|м|л|хл|2хл|3хл|4хл|5хл|s\/m|l\/xl|2xl\/3xl)[\s:\.\-]*$/i;
-    const sizeInline = /^[\s\-\*•]*(s|m|l|xl|xxl|xxxl|2xl|3xl|4xl|5xl|xs|хс|с|м|л|хл|2хл|3хл|4хл|5хл|s\/m|l\/xl|2xl\/3xl)[\s:\-]+(.*)/i;
+    const sizeStandalone = /^[\s\-\*•<>\/]*(s|m|l|xl|xxl|xxxl|2xl|3xl|4xl|5xl|xs|хс|с|м|л|хл|2хл|3хл|4хл|5хл|s\/m|l\/xl|2xl\/3xl)[\s:\.\-<>\/]*$/i;
+    const sizeInline = /^[\s\-\*•<>\/]*(s|m|l|xl|xxl|xxxl|2xl|3xl|4xl|5xl|xs|хс|с|м|л|хл|2хл|3хл|4хл|5хл|s\/m|l\/xl|2xl\/3xl)[\s:\-]+(.*)/i;
     const keywords = ['груд', 'плеч', 'довжин', 'рукав', 'пояс', 'стегн', 'бедр', 'бедір', 'ширин', 'крок', 'талі'];
 
-    // Функція закриття блоку розміру
     function flushGrid() {
         if (currentSize && currentGridHTML) {
             finalHTML += `<h4 class="desc-size-header">📏 РОЗМІР ${currentSize.toUpperCase()}</h4>`;
@@ -337,14 +338,20 @@ function formatDescription(htmlString) {
         }
     }
 
-    // Функція витягування заміру (напр. "Ширина плечей - 41" -> 41)
-    function extractMeasurement(text) {
+    function extractMeasurement(rawText) {
+        // 🔥 ПИЛОСОС: Знищуємо зламані теги, які пролізли як текст (напр. < p> або < /p>)
+        let text = rawText
+            .replace(/<\/?\s*p\s*>/gi, '') 
+            .replace(/^[<>\-\*•\s]+/, '') 
+            .replace(/[<>\-\*•\s]+$/, '')
+            .trim();
+            
         let low = text.toLowerCase();
-        if (!keywords.some(k => low.includes(k))) return null; // Якщо немає ключових слів - ігноруємо
+        if (!keywords.some(k => low.includes(k))) return null;
 
         const match = text.match(/^([^\d]+)(\d+(?:[.,]\d+)?)/);
         if (match) {
-            let label = match[1].replace(/[:\-;\.,\s]+$/, '').replace(/^[\-\*•\s]+/, '').trim();
+            let label = match[1].replace(/[:\-;\.,\s<>\/]+$/, '').trim();
             let val = match[2];
             if (label.length > 2) {
                 return `<div class="size-row"><span class="size-label">${label}</span><span class="size-value">${val} см</span></div>`;
@@ -353,69 +360,66 @@ function formatDescription(htmlString) {
         return null;
     }
 
-    // Перебираємо всі елементи опису по черзі
     Array.from(tempDiv.childNodes).forEach(node => {
-        // 1. ЯКЩО ЦЕ ГОТОВА ТАБЛИЦЯ (Взуття тощо)
         if (node.nodeName === 'TABLE' || node.nodeName === 'FIGURE' || (node.querySelector && node.querySelector('table'))) {
             flushGrid();
             finalHTML += `<div class="desc-table-wrapper">${node.outerHTML || node.textContent}</div>`;
             return;
         }
 
-        let text = node.textContent.trim();
-        if (!text) return;
+        let text = (node.textContent || '').trim();
+        
+        // 🔥 ПИЛОСОС 2: Видаляємо зламані теги перед перевіркою
+        text = text.replace(/<\/?\s*p\s*>/gi, '').trim();
 
-        // Видаляємо сміттєві заголовки
-        if (text.toLowerCase() === 'розмірна сітка' || text.toLowerCase() === 'розміри:') return;
+        // Ігноруємо пусті рядки та випадкові знаки ">"
+        if (!text || text === '>' || text === '<') return;
+        
+        // Ігноруємо непотрібні заголовки
+        // 🔥 Ігноруємо ТІЛЬКИ пусті технічні заголовки (повномірні/маломірки залишаємо!)
+        let lowText = text.toLowerCase();
+        if (lowText === 'розмірна сітка' || lowText === 'розміри:' || lowText === 'розміри') return;
 
-        // 2. ЯКЩО РОЗМІР СТОЇТЬ ОКРЕМО (напр. <p>S</p>)
         let matchStandalone = text.match(sizeStandalone);
-        if (matchStandalone) {
+        if (matchStandalone && !lowText.includes('матеріал')) {
             flushGrid();
             currentSize = matchStandalone[1];
             return;
         }
 
-        // 3. ЯКЩО РОЗМІР І ЗАМІРИ В ОДНОМУ РЯДКУ (напр. "- S: груди 50, рукав 60")
         let matchInline = text.match(sizeInline);
-        if (matchInline && !text.toLowerCase().includes('матеріал')) {
+        if (matchInline && !lowText.includes('матеріал')) {
             let restOfText = matchInline[2];
-            if (/\d/.test(restOfText)) { // Якщо там є цифри
+            if (/\d/.test(restOfText)) {
                 flushGrid();
                 currentSize = matchInline[1];
                 let parts = restOfText.split(/[,;]/);
                 parts.forEach(p => {
-                    let row = extractMeasurement(p.trim());
+                    let row = extractMeasurement(p);
                     if (row) currentGridHTML += row;
                 });
                 return;
             }
         }
 
-        // 4. ЯКЩО ЦЕ РЯДОК ІЗ ЗАМІРОМ
         let row = extractMeasurement(text);
         if (row && currentSize) {
             currentGridHTML += row;
             return;
         } else if (row && !currentSize) {
-            // Замір без вказаного розміру (універсальний)
             currentSize = "УНІВЕРСАЛЬНИЙ";
             currentGridHTML += row;
             return;
         }
 
-        // 5. ЗВИЧАЙНИЙ ТЕКСТ ОПИСУ
         flushGrid();
-        if (node.nodeName === 'P' || node.nodeName === 'DIV') {
-            finalHTML += `<p class="desc-text">${node.innerHTML}</p>`;
-        } else if (node.nodeType === 3) {
-            finalHTML += `<p class="desc-text">${text}</p>`;
-        } else {
-            finalHTML += node.outerHTML; 
+        let cleanDesc = text.replace(/^[<>\-\*•\s]+/, '').trim();
+        if (cleanDesc.length > 2) {
+            finalHTML += `<p class="desc-text">${cleanDesc}</p>`;
         }
     });
 
-    flushGrid(); // Закриваємо останню сітку, якщо вона була
+    flushGrid();
     return finalHTML;
 }
 // =================== ОНОВЛЕНА openModal ===================
