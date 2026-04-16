@@ -3056,3 +3056,20 @@ body.no-scroll {
     color: var(--mono-lime); /* Твій фірмовий колір */
     font-size: 12px;
 }
+
+/* =================== КНОПКА "ЗНИЖКИ" =================== */
+.sale-tag-btn {
+    color: var(--sale, #ff3300) !important;
+    border-color: rgba(255, 51, 0, 0.3) !important;
+    background: rgba(255, 51, 0, 0.05) !important;
+}
+.sale-tag-btn:hover {
+    background: rgba(255, 51, 0, 0.15) !important;
+    border-color: #ff3300 !important;
+}
+.sale-tag-btn.active {
+    background: #ff3300 !important;
+    color: #fff !important;
+    border-color: #ff3300 !important;
+    box-shadow: 0 0 10px rgba(255, 51, 0, 0.4) !important;
+}
