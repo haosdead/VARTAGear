@@ -3073,3 +3073,39 @@ body.no-scroll {
     border-color: #ff3300 !important;
     box-shadow: 0 0 10px rgba(255, 51, 0, 0.4) !important;
 }
+
+
+/* =================== КНОПКИ КОПІЮВАННЯ (МОДАЛКА) =================== */
+.modal-copy-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+}
+
+.copy-badge {
+    background: #222;
+    color: #ccc;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #333;
+    transition: all 0.2s ease;
+    letter-spacing: 0.5px;
+}
+
+.copy-badge:hover {
+    background: #2a2a2a;
+    color: #fff;
+    border-color: var(--mono-lime);
+}
+
+.copy-badge i {
+    color: var(--mono-lime);
+}
