@@ -548,10 +548,22 @@ function openModal(id, updateUrl = true) {
                 let rawSizesArr = String(rawSizesText).split(/[,;]/);
                 
                 sizeSelector.innerHTML = rawSizesArr.map(s => {
-                    // 🔥 МАГІЯ ОЧИСТКИ: 
-                    // Видаляємо "(4 шт)", "- 4 шт.", ": 4 шт", або просто "(4)"
-                    let cleanSize = s.replace(/[\(\-:]?\s*\d+\s*шт\.?\)?/gi, '').trim();
-                    cleanSize = cleanSize.replace(/\s*\(\d+\)/g, '').trim(); // якщо постачальник пише просто XL (4)
+                    // 🔥 МАГІЯ ОЧИСТКИ V2 (Агресивна, але безпечна): 
+                    let cleanSize = s.trim();
+                    
+                    // 1. Вбиваємо все зі словом "шт" (наприклад: " - 4 шт", "(3шт)")
+                    cleanSize = cleanSize.replace(/[\(\-:]?\s*\d+\s*шт\.?\)?/gi, '');
+                    
+                    // 2. Вбиваємо хвости типу " - 1", " - 5" (Обов'язково з пробілом, щоб не зламати "42-44")
+                    cleanSize = cleanSize.replace(/\s+-\s+\d+$/, '');
+                    
+                    // 3. Вбиваємо хвости типу " (2)" або "(12)"
+                    cleanSize = cleanSize.replace(/\s*\(\d+\)$/, '');
+                    
+                    // 4. Вбиваємо хвости типу ": 3"
+                    cleanSize = cleanSize.replace(/\s*:\s*\d+$/, '');
+                    
+                    cleanSize = cleanSize.trim();
                     
                     // Якщо після очистки нічого не залишилось, пишемо Універсальний
                     if(cleanSize === '') cleanSize = 'Універсальний';
