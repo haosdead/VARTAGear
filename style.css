@@ -3018,3 +3018,41 @@ body.no-scroll {
     font-weight: bold;
     cursor: pointer;
 }
+
+/* =================== ФОРМАТУВАННЯ НОВИХ ОПИСІВ =================== */
+.desc-formatted-text p {
+    color: #cccccc;
+    line-height: 1.6;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.desc-formatted-text strong {
+    color: #ffffff; /* Жирний текст робимо білим, щоб виділявся */
+    font-weight: 700;
+}
+
+.desc-formatted-list ul {
+    list-style: none; /* Прибираємо стандартні крапки */
+    padding-left: 0;
+    margin-bottom: 20px;
+}
+
+.desc-formatted-list ul li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 8px;
+    color: #cccccc;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Кастомний салатовий маркер для списку */
+.desc-formatted-list ul li::before {
+    content: '■'; /* Можна змінити на '✓' або '❯' */
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--mono-lime); /* Твій фірмовий колір */
+    font-size: 12px;
+}
