@@ -92,7 +92,6 @@ function loadCSV() {
             allProducts = res.data.filter(p => p.Name).map((p, i) => ({
                 ...p,
                 // БЕРЕМО СТАБІЛЬНИЙ ID З ТАБЛИЦІ (АБО АРТИКУЛ).
-                // Перевіряємо колонку ID, потім SKU. Якщо їх немає - беремо індекс.
                 myId: p.ID ? p.ID.toString().trim() : (p.SKU ? p.SKU.toString().trim() : i.toString()),
                 Price: parseFloat(p.Price) || 0,
                 OldPrice: p.OldPrice ? parseFloat(p.OldPrice) || null : null,
@@ -100,7 +99,15 @@ function loadCSV() {
                 Priority: parseInt(p.Priority) || 999 
             }));
 
+            // 🔥 ДОДАНО: МІКСЕР ТОВАРІВ (Перемішуємо перед сортуванням)
+            // Алгоритм Фішера-Єйтса ідеально змішає постачальників, щоб вони не йшли блоками
+            for (let i = allProducts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [allProducts[i], allProducts[j]] = [allProducts[j], allProducts[i]];
+            }
+
             // 2. Розумне сортування
+            // SALE і TOP піднімуться нагору, а решта звичайних товарів залишаться ПЕРЕМІШАНИМИ!
             allProducts.sort((a, b) => {
                 if (a.Badge === 'SALE' && b.Badge !== 'SALE') return -1;
                 if (b.Badge === 'SALE' && a.Badge !== 'SALE') return 1;
