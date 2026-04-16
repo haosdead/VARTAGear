@@ -155,6 +155,9 @@ function loadCSV() {
 // ==========================================
 // 1. ОНОВЛЕНИЙ РЕНДЕР КАТАЛОГУ (НОВИНКИ + СЕЙЛ У КАРУСЕЛІ)
 // ==========================================
+// ==========================================
+// 1. ОНОВЛЕНИЙ РЕНДЕР КАТАЛОГУ (НОВИНКИ + ЖОРСТКИЙ СЕЙЛ ФІЛЬТР)
+// ==========================================
 function renderCatalog(page = 1) {
     const catalog = document.getElementById('catalog');
     const pagination = document.getElementById('pagination');
@@ -167,16 +170,35 @@ function renderCatalog(page = 1) {
         (!window.currentSearchQuery || window.currentSearchQuery === '') && 
         (!window.currentBadgeFilter || window.currentBadgeFilter === 'all');
 
+    // Карусель показуємо тільки на головній сторінці
     if (isMainPage) {
         if (carouselSection) carouselSection.style.display = 'block'; 
-        productsToShow = productsToShow.filter(p => p.Badge !== 'SALE' && p.Badge !== 'NEW');
     } else {
         if (carouselSection) carouselSection.style.display = 'none'; 
     }
 
+    // 🔥 ЖОРСТКЕ БЛОКУВАННЯ SALE У ЗВИЧАЙНІЙ СІТЦІ
+    // Якщо НЕ натиснута спеціальна кнопка "ЗНИЖКИ", ми ховаємо акційні товари звідусіль!
+    if (window.currentBadgeFilter !== 'SALE') {
+        productsToShow = productsToShow.filter(p => {
+            let badge = String(p.Badge || p.badge || '').toUpperCase();
+            let oldPrice = parseFloat(p.OldPrice);
+            let currentPrice = parseFloat(p.Price);
+            
+            // Чи це акційний товар? (Є бейдж SALE або стара ціна більша за поточну)
+            let isSaleItem = badge.includes('SALE') || badge.includes('АКЦІЯ') || (!isNaN(oldPrice) && oldPrice > currentPrice);
+
+            // Якщо ми на головній сторінці, ховаємо ще й NEW (бо вони мають свою кнопку)
+            if (isMainPage && badge === 'NEW') return false;
+
+            // Товар проходить у сітку ТІЛЬКИ якщо він НЕ акційний
+            return !isSaleItem; 
+        });
+    }
+
     if (productsToShow.length === 0) {
         catalog.innerHTML = '<p style="text-align:center; grid-column:1/-1; color:#888;">Товарів не знайдено.</p>';
-        pagination.innerHTML = '';
+        if (pagination) pagination.innerHTML = '';
         return;
     }
 
@@ -186,9 +208,9 @@ function renderCatalog(page = 1) {
     const paginated = productsToShow.slice(start, end);
 
     catalog.innerHTML = paginated.map(p => {
-        const isSale = p.Badge === 'SALE';
-        const isNew = p.Badge === 'NEW';
-        const isTop = p.Badge === 'TOP';
+        const isSale = String(p.Badge || '').toUpperCase().includes('SALE') || (parseFloat(p.OldPrice) > parseFloat(p.Price));
+        const isNew = String(p.Badge || '').toUpperCase() === 'NEW';
+        const isTop = String(p.Badge || '').toUpperCase() === 'TOP';
         
         let cardClass = 'card';
         let badgeHTML = '';
@@ -224,7 +246,8 @@ function renderCatalog(page = 1) {
             </div>`;
         }
 
-        const mainPic = p.Pictures ? p.Pictures.split(',')[0].trim() : '';
+        // Тут вже доданий фікс для картинок (Причина 2), який ми обговорювали раніше!
+        const mainPic = p.Pictures ? p.Pictures.split(/[,;\s]+/)[0].trim() : '';
         
         return `
         <div class="${cardClass}" onclick="openModal('${p.myId}')">
@@ -243,7 +266,7 @@ function renderCatalog(page = 1) {
         </div>`;
     }).join('');
 
-    renderPagination(productsToShow.length, page);
+    if (typeof renderPagination === 'function') renderPagination(productsToShow.length, page);
 }
 // ==========================================
 // 2. УЛЬОТНА 3D КАРУСЕЛЬ (Логіка)
@@ -1855,3 +1878,32 @@ setTimeout(() => {
     showSocialToast();
     socialToastTimer = setInterval(showSocialToast, 60000);
 }, 10000);
+
+// ==========================================
+// 🔥 ФІЛЬТР ТОВАРІВ ЗІ ЗНИЖКАМИ (Тільки акційні)
+// ==========================================
+function filterBySale(btnElement) {
+    document.querySelectorAll('.filter-tag, .color-btn').forEach(btn => btn.classList.remove('active'));
+    if (btnElement) btnElement.classList.add('active');
+
+    // Кажемо системі: "Увага, ми хочемо бачити SALE!"
+    window.currentBadgeFilter = 'SALE'; 
+    window.currentCategory = 'all'; 
+    window.currentSearchQuery = '';
+
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) searchInput.value = '';
+
+    // Відбираємо з усієї бази тільки ті товари, де є стара ціна або бейдж SALE
+    filteredProducts = allProducts.filter(p => {
+        let badge = String(p.Badge || p.badge || '').toUpperCase();
+        let oldPrice = parseFloat(p.OldPrice);
+        let currentPrice = parseFloat(p.Price);
+
+        return badge.includes('SALE') || badge.includes('АКЦІЯ') || (!isNaN(oldPrice) && oldPrice > currentPrice);
+    });
+
+    applySorting();
+    currentPage = 1;
+    renderCatalog();
+}
