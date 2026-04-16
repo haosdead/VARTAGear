@@ -516,28 +516,41 @@ function openModal(id, updateUrl = true) {
     updateModalGallery();
 
     // ВИПАДАЮЧИЙ СПИСОК РОЗМІРІВ (З ЗАЛИШКАМИ)
-    const sizes = p.Sizes ? p.Sizes.split(',') : [];
-    const sel = document.getElementById('modal-size-selector');
-    
-    if (sizes.length > 0 && sizes[0].trim() !== "") {
-        sizes.sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
-        let optionsHTML = '<option value="">Оберіть розмір</option>';
+    // ==========================================
+        // 📏 ВИВІД ТА ОЧИСТКА РОЗМІРІВ
+        // ==========================================
+        const sizeSelector = document.getElementById('modal-size-selector');
+        const selectorBlock = document.querySelector('.selector-block'); // Або шукай батьківський елемент
         
-        sizes.forEach(s => {
-            let parts = s.split('-');
-            let cleanSizeName = parts[0].trim();
-            let qty = parts.length > 1 ? parts[1].trim() : "";
+        if (sizeSelector) {
+            // Беремо розміри з колонки Sizes або Size
+            let rawSizesText = p.Sizes || p.Size || '';
             
-            if (qty) {
-                optionsHTML += `<option value="${cleanSizeName}">${cleanSizeName} — є ${qty} шт.</option>`;
+            if (rawSizesText.trim() !== '') {
+                // Розбиваємо по комах або крапках з комою
+                let rawSizesArr = String(rawSizesText).split(/[,;]/);
+                
+                sizeSelector.innerHTML = rawSizesArr.map(s => {
+                    // 🔥 МАГІЯ ОЧИСТКИ: 
+                    // Видаляємо "(4 шт)", "- 4 шт.", ": 4 шт", або просто "(4)"
+                    let cleanSize = s.replace(/[\(\-:]?\s*\d+\s*шт\.?\)?/gi, '').trim();
+                    cleanSize = cleanSize.replace(/\s*\(\d+\)/g, '').trim(); // якщо постачальник пише просто XL (4)
+                    
+                    // Якщо після очистки нічого не залишилось, пишемо Універсальний
+                    if(cleanSize === '') cleanSize = 'Універсальний';
+                    
+                    return `<option value="${cleanSize}">${cleanSize}</option>`;
+                }).join('');
+                
+                // Показуємо блок вибору розміру
+                if (sizeSelector.parentElement) sizeSelector.parentElement.style.display = 'block';
             } else {
-                optionsHTML += `<option value="${cleanSizeName}">${cleanSizeName}</option>`;
+                // Якщо розмірів взагалі немає в базі
+                sizeSelector.innerHTML = `<option value="Універсальний">Універсальний</option>`;
+                // Ховаємо блок вибору, бо розмір лише один
+                if (sizeSelector.parentElement) sizeSelector.parentElement.style.display = 'none';
             }
-        });
-        sel.innerHTML = optionsHTML;
-    } else {
-        sel.innerHTML = `<option value="Універсальний">Універсальний — є ${p.Quantity || 0} шт.</option>`;
-    }
+        }
 
     renderCrossSell(p);
 
