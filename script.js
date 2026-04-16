@@ -316,6 +316,9 @@ function generateStockCardsHTML(sizesString, totalQuantity) {
 // ========================================================
 // 🧠 РОЗУМНИЙ ФОРМАТУВАЛЬНИК ОПИСУ V6.0 (ПИЛОСОС СМІТТЯ)
 // ========================================================
+// ========================================================
+// 🧠 РОЗУМНИЙ ФОРМАТУВАЛЬНИК ОПИСУ V7.0 (VIP-ВЕРСІЯ)
+// ========================================================
 function formatDescription(htmlString) {
     if (!htmlString) return '';
     let tempDiv = document.createElement('div');
@@ -339,13 +342,7 @@ function formatDescription(htmlString) {
     }
 
     function extractMeasurement(rawText) {
-        // 🔥 ПИЛОСОС: Знищуємо зламані теги, які пролізли як текст (напр. < p> або < /p>)
-        let text = rawText
-            .replace(/<\/?\s*p\s*>/gi, '') 
-            .replace(/^[<>\-\*•\s]+/, '') 
-            .replace(/[<>\-\*•\s]+$/, '')
-            .trim();
-            
+        let text = rawText.replace(/<\/?\s*p\s*>/gi, '').replace(/^[<>\-\*•\s]+/, '').replace(/[<>\-\*•\s]+$/, '').trim();
         let low = text.toLowerCase();
         if (!keywords.some(k => low.includes(k))) return null;
 
@@ -361,24 +358,30 @@ function formatDescription(htmlString) {
     }
 
     Array.from(tempDiv.childNodes).forEach(node => {
+        // 1. Зберігаємо існуючі таблиці
         if (node.nodeName === 'TABLE' || node.nodeName === 'FIGURE' || (node.querySelector && node.querySelector('table'))) {
             flushGrid();
             finalHTML += `<div class="desc-table-wrapper">${node.outerHTML || node.textContent}</div>`;
             return;
         }
 
-        let text = (node.textContent || '').trim();
-        
-        // 🔥 ПИЛОСОС 2: Видаляємо зламані теги перед перевіркою
-        text = text.replace(/<\/?\s*p\s*>/gi, '').trim();
+        // 2. ЗБЕРІГАЄМО КРАСИВІ СПИСКИ (UL, OL) ЯК Є!
+        if (node.nodeName === 'UL' || node.nodeName === 'OL') {
+            flushGrid();
+            finalHTML += `<div class="desc-formatted-list">${node.outerHTML}</div>`;
+            return;
+        }
 
-        // Ігноруємо пусті рядки та випадкові знаки ">"
+        let text = (node.textContent || '').trim();
+        let lowText = text.toLowerCase();
+
+        // 3. Ігноруємо пусті рядки
         if (!text || text === '>' || text === '<') return;
         
-        // Ігноруємо непотрібні заголовки
-        // 🔥 Ігноруємо ТІЛЬКИ пусті технічні заголовки (повномірні/маломірки залишаємо!)
-        let lowText = text.toLowerCase();
-        if (lowText === 'розмірна сітка' || lowText === 'розміри:' || lowText === 'розміри') return;
+        // 4. 🔥 АГРЕСИВНЕ ВИДАЛЕННЯ "РОЗМІРНОЇ СІТКИ"
+        if (lowText.includes('розмірна сітка') || lowText.includes('таблиця розмірів') || lowText === 'розміри:' || lowText === 'розміри') {
+            return; // Скрипт просто пропустить цей рядок і не покаже його!
+        }
 
         let matchStandalone = text.match(sizeStandalone);
         if (matchStandalone && !lowText.includes('матеріал')) {
@@ -412,10 +415,15 @@ function formatDescription(htmlString) {
             return;
         }
 
+        // 5. ЗВИЧАЙНИЙ ТЕКСТ: Зберігаємо теги <p> та <strong>
         flushGrid();
-        let cleanDesc = text.replace(/^[<>\-\*•\s]+/, '').trim();
-        if (cleanDesc.length > 2) {
-            finalHTML += `<p class="desc-text">${cleanDesc}</p>`;
+        if (node.nodeType === 1 && (node.nodeName === 'P' || node.nodeName === 'H3' || node.nodeName === 'DIV')) {
+            finalHTML += `<div class="desc-formatted-text">${node.outerHTML}</div>`;
+        } else {
+            let cleanDesc = text.replace(/^[<>\-\*•\s]+/, '').trim();
+            if (cleanDesc.length > 2) {
+                finalHTML += `<p class="desc-text">${cleanDesc}</p>`;
+            }
         }
     });
 
