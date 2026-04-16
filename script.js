@@ -1889,11 +1889,13 @@ setTimeout(() => {
 // ==========================================
 // 🔥 ФІЛЬТР ТОВАРІВ ЗІ ЗНИЖКАМИ (Тільки акційні)
 // ==========================================
+// ==========================================
+// 🔥 ФІЛЬТР ТОВАРІВ ЗІ ЗНИЖКАМИ
+// ==========================================
 function filterBySale(btnElement) {
     document.querySelectorAll('.filter-tag, .color-btn').forEach(btn => btn.classList.remove('active'));
     if (btnElement) btnElement.classList.add('active');
 
-    // Кажемо системі: "Увага, ми хочемо бачити SALE!"
     window.currentBadgeFilter = 'SALE'; 
     window.currentCategory = 'all'; 
     window.currentSearchQuery = '';
@@ -1901,12 +1903,10 @@ function filterBySale(btnElement) {
     const searchInput = document.getElementById('search-input');
     if (searchInput) searchInput.value = '';
 
-    // Відбираємо з усієї бази тільки ті товари, де є стара ціна або бейдж SALE
     filteredProducts = allProducts.filter(p => {
         let badge = String(p.Badge || p.badge || '').toUpperCase();
         let oldPrice = parseFloat(p.OldPrice);
         let currentPrice = parseFloat(p.Price);
-
         return badge.includes('SALE') || badge.includes('АКЦІЯ') || (!isNaN(oldPrice) && oldPrice > currentPrice);
     });
 
