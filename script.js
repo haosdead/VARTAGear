@@ -1944,3 +1944,29 @@ function filterBySale(btnElement) {
     currentPage = 1;
     renderCatalog();
 }
+
+// ==========================================
+// 📋 ФУНКЦІЯ КОПІЮВАННЯ В БУФЕР ОБМІНУ
+// ==========================================
+window.copyToClipboard = function(text, type, event) {
+    if (event) event.stopPropagation(); // Блокуємо випадкові кліки під кнопкою
+    
+    navigator.clipboard.writeText(text).then(() => {
+        // Шукаємо твій існуючий тост-повідомлення
+        const toast = document.getElementById('toast-notification');
+        const toastMsg = document.getElementById('toast-message');
+        
+        if (typeof showToast === 'function') {
+            showToast(`✅ ${type} скопійовано!`);
+        } else if (toast && toastMsg) {
+            toastMsg.innerText = `${type} скопійовано!`;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        } else {
+            alert(`✅ ${type} скопійовано!`);
+        }
+    }).catch(err => {
+        console.error('Помилка копіювання: ', err);
+        alert('Не вдалося скопіювати. Перевірте дозволи браузера.');
+    });
+};
