@@ -1,4 +1,4 @@
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQbyMki6lBczqgrhuK20OMPP-XeXjGEeDHPqJCPR84MMMOYvGrqU4Y-stTmajVxW55cpgUJ-199Hu7M/pub?gid=534882426&single=true&output=csv';
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTNJEvmAeBRHDj3yMxPLIN9RHWFmVJCvMdUqiwDCajVPdicnaEmnV9tk66uTgMVanY0kqIgfyU0twSw/pub?gid=0&single=true&output=csv';
 const ITEMS_PER_PAGE = 21;
 // === РОЗУМНЕ БЛОКУВАННЯ СКРОЛУ ===
 let savedScrollY = 0;
