@@ -483,7 +483,24 @@ function openModal(id, updateUrl = true) {
     }
 
     addToRecentlyViewed(p);
-    document.getElementById('modal-name').innerText = p.Name;
+    // 🔥 ВИВІД НАЗВИ ТА КНОПОК КОПІЮВАННЯ
+        const sku = p.VendorCode || p.SKU || p.myId || 'Немає';
+        
+        // Робимо текст безпечним для JS (якщо в назві є лапки)
+        const safeName = p.Name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const safeSku = String(sku).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+        document.getElementById('modal-name').innerHTML = `
+            ${p.Name}
+            <div class="modal-copy-actions">
+                <span onclick="copyToClipboard('${safeName}', 'Назву', event)" class="copy-badge" title="Скопіювати назву">
+                    <i class="far fa-copy"></i> Копіювати назву
+                </span>
+                <span onclick="copyToClipboard('${safeSku}', 'Артикул', event)" class="copy-badge" title="Скопіювати артикул">
+                    <i class="far fa-copy"></i> Арт: ${sku}
+                </span>
+            </div>
+        `;
     document.getElementById('modal-price').innerText = `${p.Price} грн`;
     
     const oldPriceEl = document.getElementById('modal-old-price');
