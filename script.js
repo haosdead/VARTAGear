@@ -48,58 +48,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function setupAddToCart(p, sel) {
     const addButton = document.getElementById('modal-add-btn');
-    
-    if (!addButton) return; // Захист, якщо кнопки немає на сторінці
+    if (!addButton) return;
 
     addButton.onclick = () => {
-        // 1. Перевіряємо значення селектора безпосередньо в момент кліку
-        const selectedSize = sel ? sel.value : 'Універсальний';
-
-        if (!selectedSize || selectedSize === "") {
-            return alert('Будь ласка, оберіть розмір!');
-        }
+        // 1. Визначаємо розмір: якщо селектор є — беремо значення, якщо ні — пишемо "Універсальний"
+        let selectedSize = "Універсальний";
         
-        // 2. Додаємо товар у масив кошика
-        // Використовуємо spread (...p), щоб зберегти всі дані товару
+        if (sel && sel.value && sel.value.trim() !== "") {
+            selectedSize = sel.value;
+        } else if (p.Sizes || p.Size) {
+            // Якщо в даних товарів розміри є, а в селекторі чомусь порожньо
+            const rawSizes = (p.Sizes || p.Size).split(/[,;]/);
+            if (rawSizes.length > 0) selectedSize = rawSizes[0].trim();
+        }
+
+        // 2. Додаємо в масив кошика
         cart.push({ 
             ...p, 
             selectedSize: selectedSize,
-            cartId: Date.now() // Додаємо унікальний мітку, щоб розрізняти однакові товари різних розмірів
+            cartId: Date.now() 
         });
         
-        // 3. Зберігаємо оновлений масив у localStorage
+        // 3. Зберігаємо в пам'ять
         localStorage.setItem('varta_cart', JSON.stringify(cart));
         
-        // 4. Надсилаємо подію в GA4 (Google Analytics)
+        // 4. Аналітика GA4
         if (typeof gtag === 'function') {
-            const productPrice = parseFloat(p.Price) || 0;
             gtag('event', 'add_to_cart', {
                 currency: 'UAH',
-                value: productPrice,
+                value: parseFloat(p.Price) || 0,
                 items: [{
                     item_id: String(p.myId || p.VendorCode),
                     item_name: p.Name,
-                    item_category: p.Category || 'Tactical Gear',
                     item_variant: selectedSize,
-                    price: productPrice,
+                    price: parseFloat(p.Price) || 0,
                     quantity: 1
                 }]
             });
         }
 
-        // 5. Оновлюємо інтерфейс та повідомляємо користувача
+        // 5. Ефекти (оновлення UI)
         if (typeof updateCartUI === 'function') updateCartUI();
         if (typeof closeModal === 'function') closeModal();
         
-        // Виклик візуального сповіщення
-        if (typeof showToast === 'function') {
-            showToast(p.Name);
-        } else {
-            console.log(`Додано в кошик: ${p.Name} (Розмір: ${selectedSize})`);
-        }
-        
-        // Автоматично відкриваємо кошик після додавання
+        // Показуємо кошик, щоб клієнт бачив, що товар додався
         if (typeof toggleCart === 'function') toggleCart(true);
+        
+        console.log("Товар додано успішно:", p.Name, selectedSize);
     };
 }
 function loadCSV() {
