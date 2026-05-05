@@ -51,50 +51,41 @@ function setupAddToCart(p, sel) {
     if (!addButton) return;
 
     addButton.onclick = () => {
-        // 1. Визначаємо розмір: якщо селектор є — беремо значення, якщо ні — пишемо "Універсальний"
+        // Замість змінної sizes, якої немає, перевіряємо дані прямо з об'єкта p
+        const rawSizesText = p.Sizes || p.Size || '';
         let selectedSize = "Універсальний";
-        
+
         if (sel && sel.value && sel.value.trim() !== "") {
             selectedSize = sel.value;
-        } else if (p.Sizes || p.Size) {
-            // Якщо в даних товарів розміри є, а в селекторі чомусь порожньо
-            const rawSizes = (p.Sizes || p.Size).split(/[,;]/);
-            if (rawSizes.length > 0) selectedSize = rawSizes[0].trim();
+        } else if (rawSizesText.trim() !== '') {
+            selectedSize = String(rawSizesText).split(/[,;]/)[0].trim();
         }
 
-        // 2. Додаємо в масив кошика
-        cart.push({ 
-            ...p, 
-            selectedSize: selectedSize,
-            cartId: Date.now() 
-        });
-        
-        // 3. Зберігаємо в пам'ять
-        localStorage.setItem('varta_cart', JSON.stringify(cart));
-        
-        // 4. Аналітика GA4
-        if (typeof gtag === 'function') {
+        // Аналітика (твій блок з 540 рядка)
+        if (typeof gtag === 'function' && p) {
             gtag('event', 'add_to_cart', {
                 currency: 'UAH',
-                value: parseFloat(p.Price) || 0,
+                value: Number(p.Price) || 0,
                 items: [{
-                    item_id: String(p.myId || p.VendorCode),
+                    item_id: p.VendorCode || p.myId || 'SKU_UNKNOWN',
                     item_name: p.Name,
+                    item_category: p.Category || 'Без категорії',
                     item_variant: selectedSize,
-                    price: parseFloat(p.Price) || 0,
+                    price: Number(p.Price) || 0,
                     quantity: 1
                 }]
             });
         }
 
-        // 5. Ефекти (оновлення UI)
+        // Додавання в кошик
+        if (typeof cart === 'undefined') window.cart = JSON.parse(localStorage.getItem('varta_cart')) || [];
+        cart.push({ ...p, selectedSize: selectedSize, cartId: Date.now() });
+        localStorage.setItem('varta_cart', JSON.stringify(cart));
+
+        // Оновлення інтерфейсу
         if (typeof updateCartUI === 'function') updateCartUI();
         if (typeof closeModal === 'function') closeModal();
-        
-        // Показуємо кошик, щоб клієнт бачив, що товар додався
         if (typeof toggleCart === 'function') toggleCart(true);
-        
-        console.log("Товар додано успішно:", p.Name, selectedSize);
     };
 }
 function loadCSV() {
@@ -526,12 +517,7 @@ function openModal(id, updateUrl = true) {
         oldPriceEl.style.display = 'none'; 
     }
     
-    // ОПИС + КАРТКИ НАЯВНОСТІ
-    // ==========================================
-   // ==========================================
-    // ==========================================
-    // 🔥 ОПИС + КАРТКИ НАЯВНОСТІ
-    // ==========================================
+
     // Проганяємо опис через наш розумний форматувальник
     let cleanDescription = formatDescription(p.Description);
     
@@ -552,6 +538,7 @@ function openModal(id, updateUrl = true) {
         // 📏 ВИВІД ТА ОЧИСТКА РОЗМІРІВ
         // ==========================================
         const sizeSelector = document.getElementById('modal-size-selector');
+        setupAddToCart(p, sizeSelector);
         const selectorBlock = document.querySelector('.selector-block'); // Або шукай батьківський елемент
         
         if (sizeSelector) {
@@ -628,37 +615,6 @@ function openModal(id, updateUrl = true) {
             }
         };
     }
-
-    // === КНОПКА "ДОДАТИ В КОШИК" ===
-    document.getElementById('modal-add-btn').onclick = () => {
-        // Перевірка чи обрано розмір
-        if (sizes.length > 0 && sizes[0].trim() !== "" && !sel.value) {
-            return alert('Оберіть розмір!');
-        }
-        
-        // Аналітика додавання
-        if (typeof gtag === 'function' && p) {
-            gtag('event', 'add_to_cart', {
-                currency: 'UAH',
-                value: Number(p.Price) || 0,
-                items: [{
-                    item_id: p.VendorCode || 'SKU_UNKNOWN',
-                    item_name: p.Name,
-                    item_category: p.Category || 'Без категорії',
-                    price: Number(p.Price) || 0,
-                    quantity: 1
-                }]
-            });
-        }
-
-        // Додавання в кошик
-        cart.push({ ...p, selectedSize: sel.value || 'Універсальний' });
-        localStorage.setItem('varta_cart', JSON.stringify(cart));
-        
-        updateCartUI();
-        closeModal(false); 
-        toggleCart(true); 
-    };
 
     if (updateUrl) {
         const url = new URL(window.location);
