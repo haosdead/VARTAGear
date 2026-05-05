@@ -92,11 +92,11 @@ function loadCSV() {
             allProducts = res.data.filter(p => p.Name).map((p, i) => ({
                 ...p,
                 // БЕРЕМО СТАБІЛЬНИЙ ID З ТАБЛИЦІ (АБО АРТИКУЛ).
-                myId: p.ID ? p.ID.toString().trim() : (p.SKU ? p.SKU.toString().trim() : i.toString()),
-                Price: parseFloat(p.Price) || 0,
-                OldPrice: p.OldPrice ? parseFloat(p.OldPrice) || null : null,
-                Badge: p.Badge ? p.Badge.trim().toUpperCase() : "",
-                Priority: parseInt(p.Priority) || 999 
+                myId: p.VendorCode ? p.VendorCode.toString().trim() : (p.ID ? p.ID.toString().trim() : (p.SKU ? p.SKU.toString().trim() : i.toString())),
+    Price: parseFloat(p.Price) || 0,
+    OldPrice: p.OldPrice ? parseFloat(p.OldPrice) || null : null,
+    Badge: p.Badge ? p.Badge.trim().toUpperCase() : "",
+    Priority: parseInt(p.Priority) || 999
             }));
 
             // 🔥 ДОДАНО: МІКСЕР ТОВАРІВ (Перемішуємо перед сортуванням)
