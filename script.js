@@ -47,39 +47,59 @@ document.addEventListener('DOMContentLoaded', () => {
 // ========================================================
 
 function setupAddToCart(p, sel) {
-    document.getElementById('modal-add-btn').onclick = () => {
-        if (!sel.value) return alert('Оберіть розмір!');
+    const addButton = document.getElementById('modal-add-btn');
+    
+    if (!addButton) return; // Захист, якщо кнопки немає на сторінці
+
+    addButton.onclick = () => {
+        // 1. Перевіряємо значення селектора безпосередньо в момент кліку
+        const selectedSize = sel ? sel.value : 'Універсальний';
+
+        if (!selectedSize || selectedSize === "") {
+            return alert('Будь ласка, оберіть розмір!');
+        }
         
-        // 1. Додаємо товар у масив кошика
-        cart.push({ ...p, selectedSize: sel.value });
+        // 2. Додаємо товар у масив кошика
+        // Використовуємо spread (...p), щоб зберегти всі дані товару
+        cart.push({ 
+            ...p, 
+            selectedSize: selectedSize,
+            cartId: Date.now() // Додаємо унікальний мітку, щоб розрізняти однакові товари різних розмірів
+        });
         
-        // 2. ЗБЕРІГАЄМО ОНОВЛЕНИЙ МАСИВ У ПАМ'ЯТЬ (localStorage)
+        // 3. Зберігаємо оновлений масив у localStorage
         localStorage.setItem('varta_cart', JSON.stringify(cart));
         
-        // 3. НАДСИЛАЄМО ПОДІЮ В GOOGLE ANALYTICS 4
+        // 4. Надсилаємо подію в GA4 (Google Analytics)
         if (typeof gtag === 'function') {
-            const productPrice = parseFloat(p.Price) || 0; // Захист від помилок у ціні
+            const productPrice = parseFloat(p.Price) || 0;
             gtag('event', 'add_to_cart', {
                 currency: 'UAH',
                 value: productPrice,
                 items: [{
-                    item_id: String(p.myId),
+                    item_id: String(p.myId || p.VendorCode),
                     item_name: p.Name,
-                    item_category: p.Category,
-                    item_variant: sel.value,
+                    item_category: p.Category || 'Tactical Gear',
+                    item_variant: selectedSize,
                     price: productPrice,
                     quantity: 1
                 }]
             });
         }
 
-        // 4. Оновлюємо інтерфейс
-        updateCartUI();
-        closeModal();
-        showToast(p.Name);
+        // 5. Оновлюємо інтерфейс та повідомляємо користувача
+        if (typeof updateCartUI === 'function') updateCartUI();
+        if (typeof closeModal === 'function') closeModal();
         
-        // Якщо захочете автоматично відкривати кошик — розкоментуйте нижче:
-        // toggleCart(true);
+        // Виклик візуального сповіщення
+        if (typeof showToast === 'function') {
+            showToast(p.Name);
+        } else {
+            console.log(`Додано в кошик: ${p.Name} (Розмір: ${selectedSize})`);
+        }
+        
+        // Автоматично відкриваємо кошик після додавання
+        if (typeof toggleCart === 'function') toggleCart(true);
     };
 }
 function loadCSV() {
