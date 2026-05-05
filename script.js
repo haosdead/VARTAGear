@@ -632,7 +632,6 @@ function toggleModalDescription() {
     const descEl = document.getElementById('modal-desc');
     const containerEl = document.getElementById('modal-desc-container');
     const textEl = document.getElementById('desc-toggle-text');
-
     descEl.classList.toggle('expanded');
     containerEl.classList.toggle('active');
 
