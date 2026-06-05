@@ -15,10 +15,12 @@ jobs:
       - name: Налаштування Node.js
         uses: actions/setup-node@v4
         with:
-          node-size: 20
+          node-version: 20
 
       - name: Встановлення залежностей
-        run: npm install axios csv-parse
+        run: |
+          npm init -y
+          npm install axios csv-parse
 
       - name: Запуск скрипта генерації файлів
         run: node generate_feeds.js
@@ -30,4 +32,4 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add data.csv sitemap.xml merchant.xml
-          git diff --quiet && git diff --staged --quiet || (git commit -m "🔄 Авто-оновлення sitemap та merchant фідів" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🔄 Авто-оновлення бази товарів та фідів" && git push)
