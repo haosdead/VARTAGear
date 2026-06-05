@@ -25,7 +25,7 @@ jobs:
       - name: Запуск скрипта генерації файлів
         run: node generate_feeds.js
         env:
-          SHEET_CSV_URL: "ВАШЕ_ПОСИЛАННЯ_НА_CSV_З_КРОКУ_1"
+          SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTNJEvmAeBRHDj3yMxPLIN9RHWFmVJCvMdUqiwDCajVPdicnaEmnV9tk66uTgMVanY0kqIgfyU0twSw/pub?gid=0&single=true&output=csv"
 
       - name: Комміт та Пуш оновлених файлів
         run: |
