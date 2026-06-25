@@ -273,8 +273,21 @@ input, textarea, .search-box input {
 
 .card { background: var(--card-gray); border-radius: 16px; border: 1px solid var(--border-gray); overflow: hidden; transition: 0.2s ease-out; cursor: pointer; display: flex; flex-direction: column; }
 .card:hover { border-color: var(--mono-lime); transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
-.card-img-wrap { width: 100%; aspect-ratio: 1/1; background: #080808; overflow: hidden; position: relative; }
-.card-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.card-img-wrap { 
+    width: 100%; 
+    aspect-ratio: 1 / 1; 
+    background: #080808; 
+    overflow: hidden; 
+    position: relative; 
+}
+
+.card-img-wrap img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    aspect-ratio: 1 / 1; /* ФІКС CLS: Браузер заздалегідь знає пропорції */
+    background-color: #111; /* Темна заглушка, поки вантажиться фото */
+}
 .card-info { padding: 12px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
 .card-info small { color: #888; font-size: 12px; margin-bottom: 4px; display: block; }
 .card h4 { margin: 0 0 8px 0; font-size: 14px; height: 40px; overflow: hidden; line-height: 1.4; font-weight: 600; text-transform: uppercase; }
