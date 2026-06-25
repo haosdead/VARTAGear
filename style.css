@@ -23,7 +23,7 @@ body {
 }
 
 /* ФІКС ЛАГІВ ПРИ СКРОЛІ: Фон на окремому апаратному шарі */
-body::before {
+body:before {
     content: '';
     position: fixed;
     top: 0; left: 0;
@@ -47,9 +47,26 @@ input, textarea, .search-box input {
     -webkit-user-select: text !important;
     cursor: text !important;
 }
-/* =================== ШАПКА (HEADER) ТА ЛОГОТИП =================== */
-/* ================= ЗАКРІПЛЕНА ШАПКА (FIXED HEADER) ================= */
-/* ================= ФІКС ЗАКРІПЛЕНОЇ ШАПКИ (ГОТОВИЙ БЛОК) ================= */
+/* =================== КАСТОМНИЙ СКРОЛБАР =================== */
+::-webkit-scrollbar {
+    width: 8px; /* Ширина повзунка */
+    height: 8px; /* Висота для горизонтального скролу, якщо з'явиться */
+}
+
+::-webkit-scrollbar-track {
+    background: #080808; /* Глибокий темний фон треку */
+}
+
+::-webkit-scrollbar-thumb {
+    background: #222222; /* Стриманий колір повзунка за замовчуванням */
+    border-radius: 4px;
+    border: 1px solid #111111;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--mono-lime); /* Яскравий неоновий колір при наведенні */
+    box-shadow: 0 0 10px var(--mono-lime);
+}
 .header {
     background: #000;
     height: 90px;
