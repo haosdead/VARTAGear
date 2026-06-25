@@ -19,6 +19,12 @@ function unlockScroll() {
     // Миттєво повертаємо клієнта на ту ж висоту
     window.scrollTo({ top: savedScrollY, behavior: 'instant' }); 
 }
+// Функція легкої тактильної вібрації (50 мілісекунд)
+function hapticFeedback() {
+    if (navigator.vibrate) {
+        navigator.vibrate(50); 
+    }
+}
 // ==================================
 let allProducts = [], filteredProducts = [], cart = [], currentPage = 1;
 let currentModalPics = [], currentModalPicIndex = 0;
