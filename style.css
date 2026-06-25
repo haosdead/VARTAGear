@@ -1,11 +1,22 @@
 /* =================== ЗМІННІ КОЛЬОРІВ =================== */
+/* =================== ЗМІННІ КОЛЬОРІВ ТА НАЛАШТУВАНЬ =================== */
 :root {
+    /* Кольори */
     --bg-black: #0c0c0c;
     --card-gray: #161616;
     --border-gray: #2a2a2a;
     --text-white: #FFFFFF;
-    --mono-lime: #a2d24a; /* Неоновий зелений */
-    --sale: #ff3300;      /* Оранжево-червоний SALE */
+    --mono-lime: #a2d24a;
+    --sale: #ff3300;      
+
+    /* Системні змінні (Нове) */
+    --transition-speed: 0.3s ease;
+    --border-radius-main: 12px;   /* Для банерів, карток, панелей */
+    --border-radius-btn: 8px;     /* Для кнопок та дрібних елементів */
+    
+    /* Тіні (Нове) */
+    --shadow-glow: 0 0 15px rgba(162, 210, 74, 0.2); /* Неонове світіння */
+    --shadow-card: 0 8px 20px rgba(0, 0, 0, 0.5);    /* Темна тінь для карток */
 }
 
 /* =================== БАЗОВІ СТИЛІ ТА ТАКТИЧНИЙ ФОН =================== */
@@ -97,24 +108,7 @@ input, textarea, .search-box input {
     position: relative; /* Щоб логотип міг зачепитися за центр */
 }
 
-/* ЦЕНТРУВАННЯ ЛОГОТИПУ ПРЯМО ПО ЦЕНТРУ ЕКРАНА */
-.brand-wrapper {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    text-decoration: none !important;
-    color: #ffffff !important;
-    padding: 8px 25px;
-    border-radius: 50px;
-    border: 2px solid var(--mono-lime);
-    background: rgba(162, 210, 74, 0.05);
-    box-shadow: 0 0 15px rgba(162, 210, 74, 0.2);
-    transition: all 0.3s ease;
-    white-space: nowrap; /* Щоб назва не переносилася */
-}
+
 
 /* Блок іконок справа (Обране + Кошик) */
 .header-actions {
@@ -147,16 +141,6 @@ input, textarea, .search-box input {
         padding-top: 0 !important;
     }
 
-    .brand-wrapper {
-        padding: 6px 15px;
-        gap: 8px;
-    }
-    .logo-main {
-        font-size: 16px !important;
-    }
-    .logo-sub {
-        display: none !important; /* На мобілці ховаємо підпис, щоб не було каші */
-    }
     .flag-ua, .emblem-ua {
         font-size: 16px !important;
     }
@@ -168,14 +152,6 @@ input, textarea, .search-box input {
 }
 
 /* Твої стилі лого та іконок (залишаю як були) */
-.brand-wrapper:hover {
-    background: rgba(162, 210, 74, 0.12);
-    box-shadow: 0 0 25px rgba(162, 210, 74, 0.4);
-    transform: translate(-50%, -2px); /* Додаємо -50%, щоб при ховері лого не тікало */
-}
-
-.brand-text { display: flex; flex-direction: column; align-items: center; text-align: center; }
-.logo-main { font-weight: 900; font-size: 20px; letter-spacing: 2px; text-transform: uppercase; line-height: 1; color: #fff; }
 .logo-main .accent { color: var(--mono-lime); }
 .logo-sub { font-size: 10px; color: #888; font-weight: 600; letter-spacing: 0.5px; margin-top: 5px; text-transform: none; }
 .flag-ua, .emblem-ua { font-size: 20px; filter: drop-shadow(0 0 5px rgba(0,0,0,0.5)); }
@@ -271,8 +247,21 @@ input, textarea, .search-box input {
 @media (min-width: 768px) { .products-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; padding: 0 15px; } }
 @media (min-width: 1024px) { .products-grid { grid-template-columns: repeat(5, 1fr); } }
 
-.card { background: var(--card-gray); border-radius: 16px; border: 1px solid var(--border-gray); overflow: hidden; transition: 0.2s ease-out; cursor: pointer; display: flex; flex-direction: column; }
-.card:hover { border-color: var(--mono-lime); transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
+.card { 
+    background: var(--card-gray); 
+    border-radius: var(--border-radius-main); /* Змінна заокруглення */
+    border: 1px solid var(--border-gray); 
+    overflow: hidden; 
+    transition: all var(--transition-speed); /* Змінна швидкості */
+    cursor: pointer; 
+    display: flex; 
+    flex-direction: column; 
+}
+.card:hover { 
+    border-color: var(--mono-lime); 
+    transform: translateY(-4px); 
+    box-shadow: var(--shadow-card); /* Змінна тіні */
+}
 .card-img-wrap { 
     width: 100%; 
     aspect-ratio: 1 / 1; 
@@ -1588,16 +1577,7 @@ body {
 
 /* ================= АДАПТАЦІЯ ШАПКИ ДЛЯ МОБІЛЬНИХ (Щоб не налізало) ================= */
 @media (max-width: 768px) {
-    /* 1. Ховаємо довгий підпис під логотипом на телефонах (економить купу місця!) */
-    .logo-sub {
-        display: none !important;
-    }
 
-    /* 2. Трохи зменшуємо головний текст логотипу */
-    .logo-main {
-        font-size: 18px !important;
-        letter-spacing: 0.5px !important;
-    }
 
     /* 3. Зменшуємо прапорець і тризуб */
     .flag-ua, .emblem-ua {
@@ -2806,60 +2786,57 @@ body.no-scroll {
 
 /* =================== НОВИЙ ДИЗАЙН ЗАМІРІВ В ОПИСІ =================== */
 
-/* ФІКС ЗАМІРІВ: щоб блоки не налізали один на одного */
-/* РОЗМІР: Великий помітний заголовок */
-.desc-size-header {
-    background: #1a1a1a !important; /* Темний фон */
-    color: var(--mono-lime) !important; /* Наш неоновий зелений */
-    padding: 12px 15px !important;
-    border-radius: 8px !important;
-    border-left: 5px solid var(--mono-lime) !important;
-    font-size: 16px !important;
-    font-weight: 900 !important;
-    text-transform: uppercase !important;
-    margin: 25px 0 10px 0 !important;
-    display: block !important;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+/* Додано #modal-desc попереду, що автоматично робить ці стилі головними без !important */
+#modal-desc .desc-size-header {
+    background: #1a1a1a;
+    color: var(--mono-lime);
+    padding: 12px 15px;
+    border-radius: var(--border-radius-btn); /* Використали змінну */
+    border-left: 5px solid var(--mono-lime);
+    font-size: 16px;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin: 25px 0 10px 0;
+    display: block;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-/* СІТКА КАРТОК: Заміри стоять парами */
-.desc-size-grid {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important; 
-    gap: 8px !important;
-    margin-bottom: 20px !important;
-    padding: 5px !important;
+#modal-desc .desc-size-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 5px;
 }
 
-.size-row {
-    background: #111 !important;
-    border: 1px solid #2a2a2a !important;
-    padding: 10px 12px !important;
-    border-radius: 8px !important;
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
+#modal-desc .size-row {
+    background: #111;
+    border: 1px solid var(--border-gray);
+    padding: 10px 12px;
+    border-radius: var(--border-radius-btn);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.size-label {
-    color: #888 !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
+#modal-desc .size-label {
+    color: #888;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
-.size-value {
-    color: #fff !important;
-    font-size: 14px !important;
-    font-weight: 800 !important;
+#modal-desc .size-value {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 800;
 }
 
-/* Опис тканини */
-.desc-text {
-    color: #ccc !important;
-    font-size: 14px !important;
-    line-height: 1.6 !important;
-    margin-bottom: 15px !important;
+#modal-desc .desc-text {
+    color: #ccc;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 15px;
 }
 
 /* ================= АДАПТАЦІЯ ТАБЛИЦЬ ПОСТАЧАЛЬНИКА ================= */
@@ -3190,4 +3167,51 @@ h1, h2, h3, h4,
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+}
+
+/* =================== ОНОВЛЕНИЙ ЛОГОТИП (БЕЗ !IMPORTANT) =================== */
+.header .brand-wrapper {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #ffffff;
+    padding: 8px 25px;
+    border-radius: 50px;
+    border: 2px solid var(--mono-lime);
+    background: rgba(162, 210, 74, 0.05);
+    box-shadow: var(--shadow-glow); 
+    transition: all var(--transition-speed); 
+    white-space: nowrap;
+}
+
+.header .brand-wrapper:hover {
+    background: rgba(162, 210, 74, 0.12);
+    box-shadow: 0 0 25px rgba(162, 210, 74, 0.4);
+    transform: translate(-50%, -2px);
+}
+
+.header .brand-wrapper .logo-main {
+    font-weight: 900; 
+    font-size: 20px; 
+    letter-spacing: 2px; 
+    text-transform: uppercase; 
+    line-height: 1; 
+}
+
+/* АДАПТАЦІЯ ДЛЯ ТЕЛЕФОНУ (Без !important) */
+@media (max-width: 768px) {
+    .header .brand-wrapper {
+        padding: 6px 15px;
+        gap: 8px;
+    }
+    .header .brand-wrapper .logo-main {
+        font-size: 16px; 
+    }
+    .header .brand-wrapper .logo-sub {
+        display: none; 
+    }
 }
