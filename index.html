@@ -62,7 +62,7 @@
 
 <header class="header">
    <div class="header-inner">
-    <button class="nav-icon" onclick="toggleMobileMenu(true)"><i class="fas fa-bars"></i></button>
+   <button class="nav-icon" aria-label="Відкрити меню" onclick="toggleMobileMenu(true)"><i class="fas fa-bars"></i></button>
     
     <a href="#" onclick="goHome(event)" class="brand-wrapper">
         <span class="flag-ua">🇺🇦</span>
@@ -74,13 +74,13 @@
     </a>
 
     <div class="header-actions" style="display: flex; gap: 10px;">
-        <button class="nav-icon" onclick="toggleWishlist(true)">
+       <button class="nav-icon" aria-label="Відкрити обране" onclick="toggleWishlist(true)">
             <i class="far fa-heart"></i>
             <span id="wishlist-count" class="badge-count">0</span>
         </button>
 
-        <button id="cart-icon-btn" class="nav-icon" onclick="toggleCart(true)">
-            <i class="fas fa-shopping-bag"></i>
+        <button id="cart-icon-btn" class="nav-icon" aria-label="Відкрити кошик" onclick="toggleCart(true)">
+             <i class="fas fa-shopping-bag"></i>
             <span id="cart-count">0</span>
         </button>
     </div>
@@ -101,8 +101,8 @@
             <h3>ГАРЯЧІ ПРОПОЗИЦІЇ <span class="ua-mini-flag">🇺🇦</span></h3>
         </div>
         <div class="carousel-nav">
-            <button class="nav-arrow" onclick="moveCarousel3D(-1)">❮</button>
-            <button class="nav-arrow" onclick="moveCarousel3D(1)">❯</button>
+            <button class="nav-arrow" aria-label="Попередній товар" onclick="moveCarousel3D(-1)">❮</button>
+            <button class="nav-arrow" aria-label="Наступний товар" onclick="moveCarousel3D(1)">❯</button>
         </div>
     </div>
     
@@ -135,7 +135,7 @@
 <aside id="mobile-menu" class="side-panel">
     <div class="panel-header">
         <h3>КАТЕГОРІЇ</h3>
-        <button class="close-btn" onclick="toggleMobileMenu(false)">✕</button>
+        <button class="close-btn" aria-label="Закрити меню" onclick="toggleMobileMenu(false)">✕</button>
     </div>
     
     <a href="#" onclick="goHome(event)" class="home-link-sidebar">
@@ -217,14 +217,14 @@
 <aside id="wishlist-sidebar" class="side-panel right">
     <div class="panel-header">
         <h3>ОБРАНЕ ❤️</h3>
-        <button class="close-btn" onclick="toggleWishlist(false)">✕</button>
+        <button class="close-btn" aria-label="Закрити обране" onclick="toggleWishlist(false)">✕</button>
     </div>
     <div id="wishlist-content" class="cart-items-list"></div>
 </aside>
 <aside id="cart-sidebar" class="side-panel right">
     <div class="panel-header">
         <h3>КОШИК</h3>
-        <button class="close-btn" onclick="toggleCart(false)">✕</button>
+       <button class="close-btn" aria-label="Закрити кошик" onclick="toggleCart(false)">✕</button>
     </div>
 
     <div id="cart-items-container">
@@ -301,13 +301,13 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="modal-name"></h2>
-                <span class="close-modal" onclick="closeModal()">✕</span>
+                <span class="close-modal" role="button" aria-label="Закрити вікно товару" tabindex="0" onclick="closeModal()">✕</span>
             </div>
             <div class="modal-body-top">
                 <div class="modal-photo-container">
-                    <button class="nav-pic prev" onclick="changeModalPic(-1)">❮</button>
-                    <img id="modal-main-img" src="" alt="" onclick="openLightbox()" style="cursor: zoom-in;" title="Натисніть для збільшення">
-                    <button class="nav-pic next" onclick="changeModalPic(1)">❯</button>
+                   <button class="nav-pic prev" aria-label="Попереднє фото" onclick="changeModalPic(-1)">❮</button>
+                    <img id="modal-main-img" src="" alt="Головне фото товару" onclick="openLightbox()" style="cursor: zoom-in;" title="Натисніть для збільшення">
+                    <button class="nav-pic next" aria-label="Наступне фото" onclick="changeModalPic(1)">❯</button>
                     <div id="modal-sale-badge" class="badge-sale-modal" style="display:none;"></div>
                 </div>
                 <div class="modal-actions-area">
@@ -435,9 +435,9 @@
         </div>
         <div class="footer-block social-block">
             <h4><i class="fas fa-mobile-alt"></i> Ми в соцмережах</h4>
-            <div class="social-icons">
-                <a href="https://www.instagram.com/vartagear.ua/" target="_blank" class="social-btn inst-btn"><i class="fab fa-instagram"></i></a>
-                <a href="https://www.tiktok.com/@vartagearua" target="_blank" class="social-btn tt-btn"><i class="fab fa-tiktok"></i></a>
+         <div class="social-icons">
+                <a href="https://www.instagram.com/vartagear.ua/" target="_blank" class="social-btn inst-btn" aria-label="Наш Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.tiktok.com/@vartagearua" target="_blank" class="social-btn tt-btn" aria-label="Наш TikTok"><i class="fab fa-tiktok"></i></a>
             </div>
         </div>
     </div>
@@ -453,13 +453,13 @@
 </div>
 </footer>
 
-<button id="scrollTopBtn" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i></button>
+<button id="scrollTopBtn" aria-label="Повернутися вгору" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i></button>
 <div id="toast-notification" class="toast">
     <i class="fas fa-check-circle"></i>
     <span id="toast-message">Товар додано!</span>
 </div>
 <div id="image-lightbox" class="lightbox-overlay" onclick="closeLightbox()">
-    <span class="lightbox-close">✕</span>
+   <span class="lightbox-close" role="button" aria-label="Закрити фото" tabindex="0" onclick="closeLightbox()">✕</span>
     <img id="lightbox-img" src="" alt="Zoomed Product">
 </div>
 <div class="floating-contact-wrap">
@@ -468,7 +468,7 @@
         <a href="https://wa.me/+380933923810" target="_blank" class="fab-item wa-fab" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
         <a href="https://t.me/vartagear" target="_blank" class="fab-item tg-fab" title="Telegram"><i class="fab fa-telegram-plane"></i></a>
     </div>
-    <button class="fab-main" onclick="toggleFabMenu()">
+    <button class="fab-main" aria-label="Відкрити меню зв'язку" onclick="toggleFabMenu()">
         <i class="fas fa-comment-dots fab-icon-open"></i>
         <i class="fas fa-times fab-icon-close"></i>
     </button>
@@ -479,12 +479,12 @@
     </div>
     <div class="social-toast-text" id="social-toast-content">
         </div>
-    <span class="social-toast-close" onclick="closeSocialToast()">✕</span>
+  <span class="social-toast-close" role="button" aria-label="Закрити сповіщення" tabindex="0" onclick="closeSocialToast()">✕</span>
 </div>
 
 <div id="measure-modal" class="lightbox-overlay" onclick="closeMeasureGuide(event)">
     <div class="measure-content">
-        <span class="lightbox-close" onclick="closeMeasureGuide(event)">✕</span>
+        <span class="lightbox-close" role="button" aria-label="Закрити інструкцію" tabindex="0" onclick="closeMeasureGuide(event)">✕</span>
         <h3 style="color: #fff; margin-top: 0;">Як правильно зняти заміри</h3>
         <img src="https://via.placeholder.com/600x800/111/a2d24a?text=ТАБЛИЦЯ+ЗАМІРІВ" alt="Як міряти">
         <p style="color: #ccc; font-size: 14px; margin-bottom: 0;">Візьміть свій найзручніший одяг, покладіть на рівну поверхню і поміряйте, як показано на схемі. Не міряйте по тілу!</p>
