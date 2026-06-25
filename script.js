@@ -856,7 +856,14 @@ function updateCartUI() {
     const shippingBar = document.getElementById('shipping-bar-fill');
     
     if (cart.length === 0) {
-        content.innerHTML = '<div style="text-align:center; padding:50px 0; color:#666; user-select:none;">Кошик порожній</div>';
+        content.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-shopping-cart empty-icon"></i>
+                <p>Ваш кошик наразі порожній</p>
+                <button class="add-to-cart-btn" onclick="closeAllPanels(); window.scrollTo({top: 0, behavior: 'smooth'});">
+                    ПЕРЕЙТИ ДО КАТАЛОГУ
+                </button>
+            </div>`;
         if (footer) footer.style.display = 'none';
         if (shippingContainer) shippingContainer.style.display = 'none';
         localStorage.removeItem('varta_cart');
@@ -1558,7 +1565,14 @@ function updateWishlistUI() {
     document.getElementById('wishlist-count').innerText = wishlist.length;
     const content = document.getElementById('wishlist-content');
     if (wishlist.length === 0) {
-        content.innerHTML = '<p style="text-align:center; padding:20px;">Список порожній</p>';
+        content.innerHTML = `
+            <div class="empty-state">
+                <i class="far fa-heart empty-icon"></i>
+                <p>Список обраного порожній</p>
+                <button class="add-to-cart-btn" onclick="closeAllPanels(); window.scrollTo({top: 0, behavior: 'smooth'});">
+                    ПЕРЕЙТИ ДО КАТАЛОГУ
+                </button>
+            </div>`;
     } else {
         content.innerHTML = wishlist.map(it => `
             <div class="cart-item">
