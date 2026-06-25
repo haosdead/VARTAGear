@@ -3215,3 +3215,56 @@ h1, h2, h3, h4,
         display: none; 
     }
 }
+
+/* =================== ПОРОЖНІ СТАНИ (EMPTY STATES) =================== */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.empty-state .empty-icon {
+    font-size: 60px;
+    color: #222;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+}
+
+.empty-state p {
+    color: #888;
+    font-size: 15px;
+    font-weight: 500;
+    margin: 0 0 15px 0;
+}
+
+.empty-state .add-to-cart-btn {
+    width: 100%;
+    margin-top: 0;
+    font-size: 14px;
+}
+
+/* =================== МІКРОІНТЕРАКЦІЇ ТА ДОСТУПНІСТЬ (FOCUS-VISIBLE) =================== */
+a:focus-visible, 
+button:focus-visible, 
+input:focus-visible, 
+select:focus-visible, 
+textarea:focus-visible,
+.card:focus-visible, 
+.trust-oval:focus-visible,
+.carousel-3d-item:focus-visible,
+.close-modal:focus-visible {
+    outline: 2px solid var(--mono-lime) !important;
+    outline-offset: 4px !important;
+    box-shadow: 0 0 15px rgba(162, 210, 74, 0.4) !important;
+    border-radius: inherit;
+    transition: outline-offset 0.2s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: var(--mono-lime);
+    box-shadow: 0 0 10px rgba(162, 210, 74, 0.2);
+}
