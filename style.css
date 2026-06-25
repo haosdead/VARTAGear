@@ -68,10 +68,12 @@ input, textarea, .search-box input {
     box-shadow: 0 0 10px var(--mono-lime);
 }
 .header {
-    background: #000;
+    background: rgba(12, 12, 12, 0.75); /* Було #000 */
+    backdrop-filter: blur(12px);        /* ДОДАНО: Розмиття фону */
+    -webkit-backdrop-filter: blur(12px);/* ДОДАНО: Підтримка Safari */
     height: 90px;
-    border-bottom: 2px solid var(--border-gray);
-    position: fixed; /* Закріплено намертво */
+    border-bottom: 1px solid rgba(42, 42, 42, 0.5); /* Зроблено лінію тоншою і прозорішою */
+    position: fixed; 
     top: 0;
     left: 0;
     width: 100%;
@@ -301,7 +303,24 @@ input, textarea, .search-box input {
 .page-btn.active { background: var(--mono-lime); color: #000; border-color: var(--mono-lime); }
 
 /* =================== БОКОВІ ПАНЕЛІ ТА МЕНЮ =================== */
-.side-panel { position: fixed; top: 0; left: -100%; width: 85%; max-width: 320px; height: 100dvh; background: #0f0f0f; z-index: 2000; transition: 0.4s ease-out; padding: 25px; padding-bottom: 90px; border-right: 1px solid var(--border-gray); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.side-panel { 
+    position: fixed; 
+    top: 0; 
+    left: -100%; 
+    width: 85%; 
+    max-width: 320px; 
+    height: 100dvh; 
+    background: rgba(22, 22, 22, 0.85); /* Було #0f0f0f */
+    backdrop-filter: blur(15px);        /* ДОДАНО: Розмиття фону */
+    -webkit-backdrop-filter: blur(15px);/* ДОДАНО: Підтримка Safari */
+    z-index: 2000; 
+    transition: 0.4s ease-out; 
+    padding: 25px; 
+    padding-bottom: 90px; 
+    border-right: 1px solid rgba(42, 42, 42, 0.5); 
+    overflow-y: auto; 
+    -webkit-overflow-scrolling: touch; 
+}
 .side-panel.active { left: 0; }
 .side-panel.right { left: auto; right: -100%; border-right: none; border-left: 1px solid var(--border-gray); }
 .side-panel.right.active { right: 0; }
@@ -3125,4 +3144,34 @@ body.no-scroll {
 
 .copy-badge i {
     color: var(--mono-lime);
+}
+
+/* =================== ТАКТИЧНА ТИПОГРАФІКА (OSWALD) =================== */
+/* Логотип */
+.logo-main, .brand-wrapper h1, .brand-logo {
+    font-family: 'Oswald', sans-serif !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em; 
+}
+
+/* Всі заголовки */
+h1, h2, h3, h4, 
+.section-title h3, 
+.modal-header h2,
+.panel-header h3,
+.cross-sell-title,
+.banner-content h3 {
+    font-family: 'Oswald', sans-serif !important;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* Кнопки у головних банерах */
+.banner-btn, .category-btn {
+    font-family: 'Oswald', sans-serif !important;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
