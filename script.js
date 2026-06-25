@@ -88,87 +88,103 @@ function setupAddToCart(p, sel) {
         if (typeof toggleCart === 'function') toggleCart(true);
     };
 }
+// ========================================================
+// РОЗУМНЕ ЗАВАНТАЖЕННЯ З КЕШУВАННЯМ (Оптимізація)
+// ========================================================
 function loadCSV() {
-    Papa.parse(CSV_URL, {
-        download: true, 
-        header: true, 
-        skipEmptyLines: true,
-        complete: function(res) {
-            // 1. Парсинг даних та підготовка об'єктів
-            allProducts = res.data.filter(p => p.Name).map((p, i) => ({
-                ...p,
-                // БЕРЕМО СТАБІЛЬНИЙ ID З ТАБЛИЦІ (АБО АРТИКУЛ).
-                myId: p.VendorCode ? p.VendorCode.toString().trim() : (p.ID ? p.ID.toString().trim() : (p.SKU ? p.SKU.toString().trim() : i.toString())),
-    Price: parseFloat(p.Price) || 0,
-    OldPrice: p.OldPrice ? parseFloat(p.OldPrice) || null : null,
-    Badge: p.Badge ? p.Badge.trim().toUpperCase() : "",
-    Priority: parseInt(p.Priority) || 999
-            }));
+    const CACHE_KEY = 'varta_catalog_data';
+    const TIME_KEY = 'varta_catalog_time';
+    const CACHE_LIFETIME = 60 * 60 * 1000; // Кеш живе 1 годину (у мілісекундах)
 
-            // 🔥 ДОДАНО: МІКСЕР ТОВАРІВ (Перемішуємо перед сортуванням)
-            // Алгоритм Фішера-Єйтса ідеально змішає постачальників, щоб вони не йшли блоками
-            for (let i = allProducts.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [allProducts[i], allProducts[j]] = [allProducts[j], allProducts[i]];
+    const cachedData = localStorage.getItem(CACHE_KEY);
+    const cachedTime = localStorage.getItem(TIME_KEY);
+
+    // Якщо кеш існує і йому менше ніж 1 година - беремо дані з пам'яті
+    if (cachedData && cachedTime && (Date.now() - cachedTime < CACHE_LIFETIME)) {
+        console.log("⚡ Каталог завантажено миттєво з кешу");
+        processProducts(JSON.parse(cachedData));
+    } else {
+        // Якщо кешу немає або він старий - тягнемо з Google Sheets
+        console.log("🔄 Оновлення бази з Google Sheets...");
+        Papa.parse(CSV_URL, {
+            download: true, 
+            header: true, 
+            skipEmptyLines: true,
+            complete: function(res) {
+                // Зберігаємо нові дані в кеш
+                try {
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(res.data));
+                    localStorage.setItem(TIME_KEY, Date.now());
+                } catch (e) {
+                    console.warn("Кеш переповнено (можливо забагато товарів)", e);
+                }
+                processProducts(res.data);
+            },
+            error: function(err) { 
+                console.error("Помилка завантаження CSV:", err); 
+                hidePreloader();
             }
-
-            // 2. Розумне сортування
-            // SALE і TOP піднімуться нагору, а решта звичайних товарів залишаться ПЕРЕМІШАНИМИ!
-            allProducts.sort((a, b) => {
-                if (a.Badge === 'SALE' && b.Badge !== 'SALE') return -1;
-                if (b.Badge === 'SALE' && a.Badge !== 'SALE') return 1;
-                if (a.Badge === 'TOP' && b.Badge !== 'TOP') return -1;
-                if (b.Badge === 'TOP' && a.Badge !== 'TOP') return 1;
-                return a.Priority - b.Priority;
-            });
-            
-            // 3. Копіюємо у відфільтровані товари для початкового показу
-            filteredProducts = [...allProducts];
-
-            // 4. Оновлюємо інтерфейс
-            renderCatalog();       
-            buildCategoryTree();   
-            renderSaleCarousel();  
-
-            // 5. Перевірка URL-параметрів (БЕЗ parseInt, бо ID може бути текстом)
-            const params = new URLSearchParams(window.location.search);
-            const prodId = params.get('product');
-            if (prodId !== null) {
-                setTimeout(() => openModal(prodId, false), 300); 
-            }
-
-            // ==========================================
-            // 6. ХОВАЄМО ПРЕЛОАДЕР ПІСЛЯ ЗАВАНТАЖЕННЯ
-            // ==========================================
-            const loader = document.getElementById('varta-preloader');
-            if (loader && loader.style.display !== 'none') {
-                setTimeout(() => {
-                    loader.classList.remove('active'); 
-                    setTimeout(() => {
-                        loader.style.display = 'none';
-                    }, 1000);
-                }, 500); 
-            }
-        },
-        error: function(err) { 
-            console.error("Помилка завантаження CSV:", err); 
-            const loader = document.getElementById('varta-preloader');
-            if (loader && loader.style.display !== 'none') {
-                loader.classList.remove('active');
-                setTimeout(() => {
-                    loader.style.display = 'none';
-                }, 1000);
-            }
-        }
-    });
+        });
+    }
 }
-// ==========================================
-// 1. ОНОВЛЕНИЙ РЕНДЕР КАТАЛОГУ (НОВИНКИ + СЕЙЛ У КАРУСЕЛІ)
-// ==========================================
-// ==========================================
-// 1. ОНОВЛЕНИЙ РЕНДЕР КАТАЛОГУ (НОВИНКИ + СЕЙЛ У КАРУСЕЛІ)
-// ==========================================
-// ==========================================
+
+// Допоміжна функція, яка обробляє дані (щоб не дублювати код)
+function processProducts(rawData) {
+    // 1. Парсинг даних
+    allProducts = rawData.filter(p => p.Name).map((p, i) => ({
+        ...p,
+        myId: p.VendorCode ? p.VendorCode.toString().trim() : (p.ID ? p.ID.toString().trim() : (p.SKU ? p.SKU.toString().trim() : i.toString())),
+        Price: parseFloat(p.Price) || 0,
+        OldPrice: p.OldPrice ? parseFloat(p.OldPrice) || null : null,
+        Badge: p.Badge ? p.Badge.trim().toUpperCase() : "",
+        Priority: parseInt(p.Priority) || 999
+    }));
+
+    // 2. Перемішування (Алгоритм Фішера-Єйтса)
+    for (let i = allProducts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allProducts[i], allProducts[j]] = [allProducts[j], allProducts[i]];
+    }
+
+    // 3. Сортування (SALE і TOP нагору)
+    allProducts.sort((a, b) => {
+        if (a.Badge === 'SALE' && b.Badge !== 'SALE') return -1;
+        if (b.Badge === 'SALE' && a.Badge !== 'SALE') return 1;
+        if (a.Badge === 'TOP' && b.Badge !== 'TOP') return -1;
+        if (b.Badge === 'TOP' && a.Badge !== 'TOP') return 1;
+        return a.Priority - b.Priority;
+    });
+    
+    filteredProducts = [...allProducts];
+
+    // 4. Оновлюємо інтерфейс
+    renderCatalog();       
+    buildCategoryTree();   
+    renderSaleCarousel();  
+
+    // 5. Відкриття товару за посиланням
+    const params = new URLSearchParams(window.location.search);
+    const prodId = params.get('product');
+    if (prodId !== null) {
+        setTimeout(() => openModal(prodId, false), 300); 
+    }
+
+    hidePreloader();
+}
+
+// Функція для приховування прелоадера
+function hidePreloader() {
+    const loader = document.getElementById('varta-preloader');
+    if (loader && loader.style.display !== 'none') {
+        setTimeout(() => {
+            loader.classList.remove('active'); 
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 1000);
+        }, 500); 
+    }
+}
+
 // 1. ОНОВЛЕНИЙ РЕНДЕР КАТАЛОГУ (НОВИНКИ + ЖОРСТКИЙ СЕЙЛ ФІЛЬТР)
 // ==========================================
 function renderCatalog(page = 1) {
