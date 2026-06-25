@@ -3268,3 +3268,15 @@ input:focus, textarea:focus, select:focus {
     border-color: var(--mono-lime);
     box-shadow: 0 0 10px rgba(162, 210, 74, 0.2);
 }
+
+/* Ефект продавлювання кнопок на телефонах */
+@media (max-width: 768px) {
+    button:active, 
+    .card:active, 
+    .trust-oval:active,
+    .social-btn:active,
+    .fab-item:active {
+        transform: scale(0.95) !important; /* Легке зменшення при тапі */
+        transition: transform 0.1s ease !important; /* Дуже швидка реакція */
+    }
+}
