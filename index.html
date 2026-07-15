@@ -510,6 +510,18 @@
         <p style="color: #ccc; font-size: 14px; margin-bottom: 0;">Візьміть свій найзручніший одяг, покладіть на рівну поверхню і поміряйте, як показано на схемі. Не міряйте по тілу!</p>
     </div>
 </div>
+    <!-- Підключення Service Worker для роботи як PWA -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js').then(function(registration) {
+        console.log('Service Worker успішно зареєстровано! Scope:', registration.scope);
+      }, function(err) {
+        console.log('Помилка реєстрації Service Worker:', err);
+      });
+    });
+  }
+</script>
 <script src="script.js"></script>
 </body>
 </html>
