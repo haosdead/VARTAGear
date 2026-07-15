@@ -2113,3 +2113,28 @@ window.addEventListener('appinstalled', () => {
     deferredPrompt = null;
     console.log('Додаток VARTA GEAR успішно встановлено на пристрій!');
 });
+// ==========================================
+// РОЗУМНА ШАПКА (ХОВАЄТЬСЯ ПРИ СКРОЛІ ВНИЗ)
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    let lastScrollTop = 0;
+    const header = document.querySelector('.header');
+    
+    window.addEventListener('scroll', () => {
+        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        if (scrollTop > 120) { // Починаємо ховати тільки якщо прокрутили більше ніж на 120px
+            if (scrollTop > lastScrollTop) {
+                // Скрол вниз -> Ховаємо
+                header.classList.add('hide-header');
+            } else {
+                // Скрол вгору -> Показуємо
+                header.classList.remove('hide-header');
+            }
+        } else {
+            // На самому верху сторінки шапка завжди є
+            header.classList.remove('hide-header');
+        }
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+    }, { passive: true });
+});
