@@ -57,6 +57,7 @@ function setupAddToCart(p, sel) {
     if (!addButton) return;
 
     addButton.onclick = () => {
+        if (typeof hapticFeedback === 'function') hapticFeedback();
         // Замість змінної sizes, якої немає, перевіряємо дані прямо з об'єкта p
         const rawSizesText = p.Sizes || p.Size || '';
         let selectedSize = "Універсальний";
