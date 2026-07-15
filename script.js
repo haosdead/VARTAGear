@@ -2057,3 +2057,59 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+// ==========================================
+// ЛОГІКА ВСТАНОВЛЕННЯ ДОДАТКУ (PWA)
+// ==========================================
+let deferredPrompt;
+const pwaBanner = document.getElementById('pwa-install-banner');
+const pwaInstallBtn = document.getElementById('pwa-install-btn');
+const pwaCloseBtn = document.getElementById('pwa-close-btn');
+
+// Перевіряємо, чи клієнт вже закривав цей банер
+const isPwaDismissed = localStorage.getItem('varta_pwa_dismissed');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Зупиняємо автоматичний показ стандартного вікна браузера
+    e.preventDefault();
+    // Зберігаємо подію, щоб викликати її нашою зеленою кнопкою
+    deferredPrompt = e;
+    
+    // Показуємо наш красивий банер, якщо клієнт його ще не закривав
+    if (pwaBanner && !isPwaDismissed) {
+        setTimeout(() => {
+            pwaBanner.classList.add('visible');
+        }, 3000); // З'явиться через 3 секунди після заходу на сайт
+    }
+});
+
+// Що відбувається при натисканні "ВСТАНОВИТИ"
+if (pwaInstallBtn) {
+    pwaInstallBtn.addEventListener('click', async () => {
+        if (pwaBanner) pwaBanner.classList.remove('visible');
+        
+        if (deferredPrompt) {
+            // Показуємо системне вікно встановлення від Google
+            deferredPrompt.prompt();
+            // Чекаємо на відповідь (Встановив чи Відхилив)
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`Результат встановлення PWA: ${outcome}`);
+            deferredPrompt = null;
+        }
+    });
+}
+
+// Що відбувається при натисканні на хрестик "✕"
+if (pwaCloseBtn) {
+    pwaCloseBtn.addEventListener('click', () => {
+        if (pwaBanner) pwaBanner.classList.remove('visible');
+        // Запам'ятовуємо, що клієнту це зараз не цікаво, щоб не спамити
+        localStorage.setItem('varta_pwa_dismissed', 'true');
+    });
+}
+
+// Якщо додаток успішно встановлено - ховаємо все назавжди
+window.addEventListener('appinstalled', () => {
+    if (pwaBanner) pwaBanner.classList.remove('visible');
+    deferredPrompt = null;
+    console.log('Додаток VARTA GEAR успішно встановлено на пристрій!');
+});
