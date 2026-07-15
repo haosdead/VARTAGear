@@ -82,11 +82,11 @@ input, textarea, .search-box input {
     box-shadow: 0 0 10px var(--mono-lime);
 }
 .header {
-    background: rgba(12, 12, 12, 0.75); /* Було #000 */
-    backdrop-filter: blur(12px);        /* ДОДАНО: Розмиття фону */
-    -webkit-backdrop-filter: blur(12px);/* ДОДАНО: Підтримка Safari */
+    background: rgba(12, 12, 12, 0.75); 
+    backdrop-filter: blur(12px);        
+    -webkit-backdrop-filter: blur(12px);
     height: 90px;
-    border-bottom: 1px solid rgba(42, 42, 42, 0.5); /* Зроблено лінію тоншою і прозорішою */
+    border-bottom: 1px solid rgba(42, 42, 42, 0.5); 
     position: fixed; 
     top: 0;
     left: 0;
@@ -95,6 +95,12 @@ input, textarea, .search-box input {
     display: flex;
     align-items: center;
     box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s; /* Додано анімацію */
+}
+
+/* Клас, який ховатиме шапку */
+.header.hide-header {
+    transform: translateY(-100%);
 }
 
 .header-inner {
