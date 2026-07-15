@@ -2024,3 +2024,35 @@ function updateProductMicrodata(p) {
     // Вставляємо згенерований код у <head>
     script.innerText = JSON.stringify(microdata, null, 2);
 }
+
+// ==========================================
+// СВАЙПИ ДЛЯ ФОТО У МОДАЛЬНОМУ ВІКНІ
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    const modalImg = document.getElementById('modal-main-img');
+    let swipeStartX = 0;
+    let swipeEndX = 0;
+
+    if (modalImg) {
+        modalImg.addEventListener('touchstart', (e) => {
+            swipeStartX = e.touches[0].clientX;
+        }, { passive: true });
+
+        modalImg.addEventListener('touchend', (e) => {
+            swipeEndX = e.changedTouches[0].clientX;
+            handleModalPhotoSwipe();
+        }, { passive: true });
+    }
+
+    function handleModalPhotoSwipe() {
+        const minSwipeDistance = 40; // Чутливість свайпу (в пікселях)
+        
+        if (swipeStartX - swipeEndX > minSwipeDistance) {
+            // Свайп вліво -> Наступне фото
+            changeModalPic(1); 
+        } else if (swipeEndX - swipeStartX > minSwipeDistance) {
+            // Свайп вправо -> Попереднє фото
+            changeModalPic(-1); 
+        }
+    }
+});
