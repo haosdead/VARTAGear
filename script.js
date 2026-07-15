@@ -1032,6 +1032,9 @@ function submitOrder(platform, event) {
         const total = totalEl ? totalEl.innerText : "0";
 
         txt += `\n💰 РАЗОМ: ${total} грн\n\n`;
+        if (numericTotal >= 3000) {
+            txt += `🎁 ДОСТАВКА: БЕЗКОШТОВНА\n`;
+        }
         
         txt += `📦 ДАНІ ДОСТАВКИ:\n`;
         txt += `👤 ПІБ: ${name}\n`;
