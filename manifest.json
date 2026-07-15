@@ -1,0 +1,17 @@
+{
+  "name": "VARTA GEAR | Тактичний одяг",
+  "short_name": "VARTA GEAR",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#A2D24A",
+  "description": "Магазин надійного тактичного одягу, взуття та амуніції.",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
