@@ -494,7 +494,7 @@ function openModal(id, updateUrl = true) {
     // ШУКАЄМО ТОВАР ЯК РЯДОК (String)
     const p = allProducts.find(x => String(x.myId) === String(id));
     if(!p) return;
-    
+    updateProductMicrodata(p);
     // === 🔥 АНАЛІТИКА ===
     if (typeof gtag === 'function' && p) {
         gtag('event', 'view_item', {
@@ -1988,3 +1988,39 @@ window.copyToClipboard = function(text, type, event) {
         alert('Не вдалося скопіювати. Перевірте дозволи браузера.');
     });
 };
+
+// Функція для генерації SEO-мікророзмітки товару
+function updateProductMicrodata(p) {
+    let script = document.getElementById('seo-product-microdata');
+    if (!script) {
+        script = document.createElement('script');
+        script.id = 'seo-product-microdata';
+        script.type = 'application/ld+json';
+        document.head.appendChild(script);
+    }
+    
+    // Дістаємо головне фото
+    const mainPic = p.Pictures ? p.Pictures.split(/[,;\s]+/)[0].trim() : '';
+    // Формуємо точне посилання на товар
+    const productUrl = window.location.origin + window.location.pathname + '?product=' + p.myId;
+    
+    const microdata = {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": p.Name,
+        "image": mainPic,
+        "description": p.Name + " - купити в інтернет-магазині VARTA GEAR.",
+        "sku": p.VendorCode || p.myId || "VG-000",
+        "offers": {
+            "@type": "Offer",
+            "url": productUrl,
+            "priceCurrency": "UAH",
+            "price": p.Price,
+            "availability": "https://schema.org/InStock",
+            "itemCondition": "https://schema.org/NewCondition"
+        }
+    };
+    
+    // Вставляємо згенерований код у <head>
+    script.innerText = JSON.stringify(microdata, null, 2);
+}
