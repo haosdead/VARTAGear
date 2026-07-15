@@ -3362,3 +3362,99 @@ body {
     /* БЛОКУВАННЯ PULL-TO-REFRESH ДЛЯ НАТИВНОГО ВИГЛЯДУ */
     overscroll-behavior-y: none; 
 }
+
+/* ==========================================
+   БАНЕР ВСТАНОВЛЕННЯ ДОДАТКУ (PWA)
+========================================== */
+.pwa-banner {
+    position: fixed;
+    bottom: 80px; /* Над нижнім меню (65px) + запас */
+    left: 15px;
+    right: 15px;
+    background: rgba(20, 20, 20, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(162, 210, 74, 0.4);
+    border-radius: 12px;
+    padding: 12px;
+    z-index: 2500;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(162, 210, 74, 0.1);
+    
+    /* Ховаємо за межами екрану для плавної появи */
+    transform: translateY(150%);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Клас, який скрипт додасть для показу */
+.pwa-banner.visible {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+}
+
+.pwa-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pwa-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.pwa-text {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.pwa-text strong {
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 0.5px;
+}
+
+.pwa-text span {
+    color: #aaa;
+    font-size: 11px;
+    line-height: 1.2;
+}
+
+.pwa-btn {
+    background: var(--mono-lime);
+    color: #000;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: 800;
+    font-size: 12px;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 0 4px 10px rgba(162, 210, 74, 0.3);
+}
+
+.pwa-btn:active {
+    transform: scale(0.95);
+}
+
+.pwa-close {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 18px;
+    padding: 0 5px;
+    cursor: pointer;
+}
+
+/* На комп'ютерах банер не потрібен - ховаємо */
+@media (min-width: 769px) {
+    .pwa-banner {
+        display: none !important;
+    }
+}
