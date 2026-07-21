@@ -40,40 +40,60 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// 3. ПЕРЕХОПЛЕННЯ ЗАПИТІВ: Робота в офлайні
+// 3. ПЕРЕХОПЛЕННЯ ЗАПИТІВ: Робота в офлайні та кешування картинок
 self.addEventListener('fetch', event => {
-  // Кешуємо тільки GET-запити до власних файлів
-  if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin)) {
-      return;
+  // Тільки GET-запити
+  if (event.request.method !== 'GET') return;
+
+  // ЛОГІКА 1: Кешування фотографій товарів з CDN
+  if (event.request.url.includes('cdn.buymeua.shop')) {
+    event.respondWith(
+      caches.match(event.request).then(cachedResponse => {
+        // Якщо фото вже є в кеші телефону — віддаємо миттєво
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        // Якщо немає — завантажуємо з інтернету
+        return fetch(event.request).then(networkResponse => {
+          // Перевіряємо, чи успішна відповідь
+          if (!networkResponse || networkResponse.status !== 200) {
+            return networkResponse;
+          }
+          // Зберігаємо нове фото в окремий кеш 'vartagear-images-v1'
+          const responseToCache = networkResponse.clone();
+          caches.open('vartagear-images-v1').then(cache => {
+            cache.put(event.request, responseToCache);
+          });
+          return networkResponse;
+        }).catch(() => {
+          // Ігноруємо помилки завантаження картинок в офлайні
+        });
+      })
+    );
+    return; // Зупиняємо подальшу обробку, щоб не спрацювала логіка нижче
   }
+
+  // ЛОГІКА 2: Кешування локальних файлів сайту (оригінальна логіка)
+  if (!event.request.url.startsWith(self.location.origin)) return;
 
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Якщо файл є в кеші (наприклад, style.css) — віддаємо миттєво
         if (response) {
           return response;
         }
-        // Якщо немає — завантажуємо з інтернету
-        return fetch(event.request).then(
-          function(networkResponse) {
-            // Перевіряємо, чи відповідь нормальна
-            if(!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-              return networkResponse;
-            }
-
-            // Зберігаємо нові файли в кеш для наступного разу
-            var responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME)
-              .then(function(cache) {
-                cache.put(event.request, responseToCache);
-              });
-
+        return fetch(event.request).then(networkResponse => {
+          if(!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
             return networkResponse;
           }
-        ).catch(() => {
-            // Якщо немає інтернету і файла немає в кеші - можна показати офлайн-сторінку
-            // console.log('Немає підключення до мережі');
+          var responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME)
+            .then(function(cache) {
+              cache.put(event.request, responseToCache);
+            });
+          return networkResponse;
+        }).catch(() => {
+            // Офлайн-режим
         });
       })
   );
