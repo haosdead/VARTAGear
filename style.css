@@ -315,6 +315,7 @@ input, textarea, .search-box input {
 
 /* =================== БОКОВІ ПАНЕЛІ ТА МЕНЮ =================== */
 .side-panel { 
+    box-sizing: border-box;              /* Враховує padding у загальну висоту 100dvh */
     position: fixed; 
     top: 0; 
     left: 0; 
@@ -322,16 +323,40 @@ input, textarea, .search-box input {
     max-width: 85vw;
     height: 100dvh; 
     right: auto;
-    background: rgba(22, 22, 22, 0.85); /* Було #0f0f0f */
-    backdrop-filter: blur(15px);        /* ДОДАНО: Розмиття фону */
-    -webkit-backdrop-filter: blur(15px);/* ДОДАНО: Підтримка Safari */
+    background: rgba(22, 22, 22, 0.95); /* Трохи щільніший фон для кращої читабельності */
+    backdrop-filter: blur(15px);        
+    -webkit-backdrop-filter: blur(15px);
     z-index: 2000; 
     transition: 0.4s ease-out; 
-    padding: 25px; 
-    padding-bottom: 90px; 
+    padding: 20px; 
     border-right: 1px solid rgba(42, 42, 42, 0.5); 
-    overflow-y: auto; 
-    -webkit-overflow-scrolling: touch; 
+
+    /* Перетворюємо панель на flex-коробку */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;                    /* Контейнер зафіксовано, скрол буде всередині */
+}
+
+/* Шапка (Заголовок + Хрестик) зафіксована вгорі і завжди видима */
+.side-panel-header, 
+.side-panel .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;                      /* Не дозволяє шапці стискатися */
+}
+
+/* Прокручується ТІЛЬКИ цей внутрішній блок зі списком */
+.side-panel-content,
+.side-panel .categories-list,
+.side-panel nav {
+    flex: 1;
+    overflow-y: auto;                    /* Працюючий внутрішній скрол */
+    -webkit-overflow-scrolling: touch;   /* Плавність для iOS */
+    padding-top: 15px;
+    padding-bottom: 30px;
 }
 .side-panel.active { left: 0; }
 .side-panel.right { left: auto; right: -100%; border-right: none; border-left: 1px solid var(--border-gray); }
