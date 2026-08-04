@@ -3,6 +3,17 @@ const ITEMS_PER_PAGE = 21;
 // === РОЗУМНЕ БЛОКУВАННЯ СКРОЛУ ===
 let savedScrollY = 0;
 
+document.addEventListener("DOMContentLoaded", function() {
+    // Якщо через 3 секунди прелоадер все ще висить — примусово його вбиваємо
+    setTimeout(() => {
+        const preloader = document.querySelector('.varta-preloader');
+        if (preloader && preloader.classList.contains('active')) {
+            preloader.classList.remove('active');
+            console.warn('Прелоадер вимкнено примусово через таймаут (можлива помилка в JS).');
+        }
+    }, 3000);
+});
+
 function lockScroll() {
     savedScrollY = window.scrollY; // Запам'ятовуємо, де був клієнт
     document.body.style.position = 'fixed';
