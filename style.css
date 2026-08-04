@@ -317,10 +317,11 @@ input, textarea, .search-box input {
 .side-panel { 
     position: fixed; 
     top: 0; 
-    left: -100%; 
-    width: 85%; 
-    max-height: 100vh; 
+    left: 0; 
+    width: 320px;
+    max-width: 85vw;
     height: 100dvh; 
+    right: auto;
     background: rgba(22, 22, 22, 0.85); /* Було #0f0f0f */
     backdrop-filter: blur(15px);        /* ДОДАНО: Розмиття фону */
     -webkit-backdrop-filter: blur(15px);/* ДОДАНО: Підтримка Safari */
@@ -3455,4 +3456,9 @@ input:focus, textarea:focus, select:focus {
     .pwa-banner {
         display: none !important;
     }
+}
+
+/* Піднімаємо бічну панель вище за всі кнопки чатів та виджети */
+.side-panel {
+    z-index: 999999 !important;
 }
