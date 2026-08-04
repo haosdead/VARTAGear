@@ -1523,13 +1523,13 @@ body {
     }
 
     /* Жорстко зменшуємо самі картки, щоб вони влізли в екран */
-    recently-viewed-grid .card {
+    #recently-viewed-grid .card {
         padding: 6px !important;
         margin-bottom: 0 !important;
         transform: none !important; /* Відключаємо старе масштабування */
     }
 
-    recently-viewed-grid .card-img-wrap {
+    #recently-viewed-grid .card-img-wrap {
         height: 100px !important; /* Маленька картинка */
     }
 
@@ -1922,7 +1922,7 @@ html, body {
     }
 
     /* Жорстко зменшуємо всі деталі ВСЕРЕДИНІ картки історії */
-    recently-viewed-grid .card-img-wrap { 
+    #recently-viewed-grid .card-img-wrap { 
         height: 120px !important; /* Менша картинка */
     } 
     
