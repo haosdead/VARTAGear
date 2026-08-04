@@ -1016,48 +1016,47 @@ function submitOrder(platform, event) {
         
         // БЕЗПЕЧНЕ отримання оплати (фікс для повної оплати)
        // БЕЗПЕЧНЕ отримання оплати (фікс для повної оплати)
-        const paymentRadio = document.querySelector('input[name="payment-method"]:checked');
-        const paymentMethod = paymentRadio ? paymentRadio.value : "Не вказано";
- 
-        if (!name || !phone || !city || !np) {
-            alert('Будь ласка, заповніть всі поля для доставки!');
-            return;
-        }
- 
-        let txt = "🪖 НОВЕ ЗАМОВЛЕННЯ VARTA GEAR:\n\n";
-        cart.forEach((it, i) => { 
-            txt += `${i+1}. ${it.Name} (Розмір: ${it.selectedSize}) - ${it.Price} грн\n`; 
-        });
-        
-        const totalEl = document.getElementById('cart-total-price');
-        const total = totalEl ? totalEl.innerText : "0";
-        const numericTotal = parseFloat(String(total).replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
- 
-        txt += `\n💰 РАЗОМ: ${total} грн\n\n`;
-        if (numericTotal >= 3000) {
-            txt += `🎁 ДОСТАВКА: БЕЗКОШТОВНА\n`;
-        }
-        
-        txt += `📦 ДАНІ ДОСТАВКИ:\n`;
-        txt += `👤 ПІБ: ${name}\n`;
-        txt += `📞 Тел: ${phone}\n`;
-        txt += `🏙 Місто: ${city}\n`;
-        txt += `📮 Відділення НП: ${np}\n`;
-        txt += `💳 Оплата: ${paymentMethod}\n`;
- 
-        const encoded = encodeURIComponent(txt);
-        
-        // Відправляємо тільки в TG або WA
-        if (platform === 'tg') {
-            window.open(`https://t.me/vartagear?text=${encoded}`);
-        } else if (platform === 'wa') {
-            window.open(`https://wa.me/+380933923810?text=${encoded}`);
-        }
-    } catch (error) {
-        // Якщо стається якась помилка, ми побачимо її тут!
-        console.error("Помилка формування замовлення:", error);
-        alert("Сталася помилка: " + error.message);
+       try {
+    const paymentRadio = document.querySelector('input[name="payment-method"]:checked');
+    const paymentMethod = paymentRadio ? paymentRadio.value : "Не вказано";
+
+    if (!name || !phone || !city || !np) {
+        alert('Будь ласка, заповніть всі поля для доставки!');
+        return;
     }
+
+    const totalEl = document.getElementById('cart-total-price');
+    const total = totalEl ? totalEl.innerText : "0";
+    const numericTotal = parseFloat(String(total).replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
+
+    let txt = "🪖 НОВЕ ЗАМОВЛЕННЯ VARTA GEAR:\n\n";
+    cart.forEach((it, i) => { 
+        txt += `${i+1}. ${it.Name} (Розмір: ${it.selectedSize}) - ${it.Price} грн\n`; 
+    });
+    
+    txt += `\n💰 РАЗОМ: ${total} грн\n\n`;
+    if (numericTotal >= 3000) {
+        txt += `🎁 ДОСТАВКА: БЕЗКОШТОВНА\n`;
+    }
+    
+    txt += `📦 ДАНІ ДОСТАВКИ:\n`;
+    txt += `👤 ПІБ: ${name}\n`;
+    txt += `📞 Тел: ${phone}\n`;
+    txt += `🏙 Місто: ${city}\n`;
+    txt += `📮 Відділення НП: ${np}\n`;
+    txt += `💳 Оплата: ${paymentMethod}\n`;
+
+    const encoded = encodeURIComponent(txt);
+    
+    // Відправляємо тільки в TG або WA
+    if (platform === 'tg') {
+        window.open(`https://t.me/vartagear?text=${encoded}`);
+    } else if (platform === 'wa') {
+        window.open(`https://wa.me/+380933923810?text=${encoded}`);
+    }
+} catch (error) {
+    console.error("Помилка формування замовлення:", error);
+    alert("Сталася помилка: " + error.message);
 }
 // Функція для блоку довіри (Ovals)
 function openTrustInfo(type) {
