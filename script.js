@@ -43,20 +43,23 @@ let wishlist = JSON.parse(localStorage.getItem('varta_wishlist')) || [];
 let recentlyViewed = JSON.parse(localStorage.getItem('varta_recent')) || [];
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Спочатку дістаємо дані з пам'яті браузера
+    // 1. Відновлення кошика
     const savedCart = localStorage.getItem('varta_cart');
     if (savedCart) {
         cart = JSON.parse(savedCart);
     }
-    
-    // Оновлюємо інтерфейс (лічильник та список)
     updateCartUI();
     
-    // Завантажуємо товари
+    // 2. Скелетони та завантаження товарів
+    if (typeof renderSkeletons === 'function') renderSkeletons();
     loadCSV();
 
-    updateWishlistUI();        // <--- ДОДАЄМО ТУТ (відновлює сердечка)
+    // 3. Відновлення UI елементів
+    updateWishlistUI();        
     renderRecentlyViewedUI();
+    
+    // 4. Запуск інших модулів
+    if (typeof renderReviews === 'function') renderReviews();
 });
 
 // ========================================================
@@ -97,7 +100,7 @@ function setupAddToCart(p, sel) {
 
         // Додавання в кошик
         if (typeof cart === 'undefined') window.cart = JSON.parse(localStorage.getItem('varta_cart')) || [];
-        cart.push({ ...p, selectedSize: selectedSize, cartId: Date.now() });
+        cart.push({ ...p, selectedSize: selectedSize, cartId: Date.now(), quantity: 1 });
         localStorage.setItem('varta_cart', JSON.stringify(cart));
 
         // Оновлення інтерфейсу
@@ -1038,7 +1041,7 @@ function submitOrder(platform, event) {
 
     const totalEl = document.getElementById('cart-total-price');
     const total = totalEl ? totalEl.innerText : "0";
-    const numericTotal = parseFloat(String(total).replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
+   const numericTotal = parseFloat(total) || 0
 
     let txt = "🪖 НОВЕ ЗАМОВЛЕННЯ VARTA GEAR:\n\n";
     cart.forEach((it, i) => { 
@@ -1119,12 +1122,6 @@ function closeModal(updateUrl = true) {
 }
 function closeAllPanels() { toggleMobileMenu(false); toggleCart(false); closeModal(); }
 function resetFilters() { document.getElementById('search-input').value = ''; filterByBadge('all', document.querySelector('.filter-tag')); }
-function toggleModalDescription() {
-    const descEl = document.getElementById('modal-desc');
-    const containerEl = document.getElementById('modal-desc-container');
-    descEl.classList.toggle('expanded');
-    containerEl.classList.toggle('active'); // Повертає іконку стрілки
-}
 // =================== ПЛАВНА ПРОКРУТКА ВГОРУ ===================
 window.onscroll = function() {
     const btn = document.getElementById("scrollTopBtn");
@@ -1140,21 +1137,6 @@ function scrollToTop() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// =================== НАВІГАЦІЯ БРАУЗЕРА (КНОПКА НАЗАД) ===================
-window.addEventListener('popstate', () => {
-    const params = new URLSearchParams(window.location.search);
-    const prodId = params.get('product');
-    
-    if (prodId !== null) {
-        // Якщо натиснули "Вперед" і там є товар
-        openModal(parseInt(prodId), false); 
-    } else {
-        // Якщо натиснули "Назад" на головну сторінку - ховаємо всі панелі
-        closeModal(false);
-        toggleMobileMenu(false);
-        toggleCart(false);
-    }
-});
 
 
 function renderSaleCarousel() {
@@ -1253,26 +1235,6 @@ window.addEventListener('resize', update3DCarousel);
 let touchStartX = 0;
 let touchEndX = 0;
 
-// Чекаємо завантаження сторінки
-document.addEventListener('DOMContentLoaded', () => {
-    // Спочатку дістаємо дані з пам'яті браузера
-    const savedCart = localStorage.getItem('varta_cart');
-    if (savedCart) {
-        cart = JSON.parse(savedCart);
-    }
-    
-    // Оновлюємо інтерфейс кошика
-    updateCartUI();
-    
-    // НОВЕ: Показуємо преміальні скелети, поки вантажиться база
-    renderSkeletons(); 
-    
-    // Завантажуємо товари
-    loadCSV();
-
-    updateWishlistUI();        
-    renderRecentlyViewedUI();
-});
 
 // НОВЕ: ФУНКЦІЯ СКЕЛЕТНОГО ЗАВАНТАЖЕННЯ (Адаптивна)
 function renderSkeletons() {
