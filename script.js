@@ -3,17 +3,6 @@ const ITEMS_PER_PAGE = 21;
 // === РОЗУМНЕ БЛОКУВАННЯ СКРОЛУ ===
 let savedScrollY = 0;
 
-document.addEventListener("DOMContentLoaded", function() {
-    // Якщо через 3 секунди прелоадер все ще висить — примусово його вбиваємо
-    setTimeout(() => {
-        const preloader = document.querySelector('.varta-preloader');
-        if (preloader && preloader.classList.contains('active')) {
-            preloader.classList.remove('active');
-            console.warn('Прелоадер вимкнено примусово через таймаут (можлива помилка в JS).');
-        }
-    }, 3000);
-});
-
 function lockScroll() {
     savedScrollY = window.scrollY; // Запам'ятовуємо, де був клієнт
     document.body.style.position = 'fixed';
@@ -31,8 +20,11 @@ function unlockScroll() {
     window.scrollTo({ top: savedScrollY, behavior: 'instant' }); 
 }
 // Функція легкої тактильної вібрації (50 мілісекунд)
+// Нативна вібрація для Telegram + запасний варіант
 function hapticFeedback() {
-    if (navigator.vibrate) {
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
+        window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+    } else if (navigator.vibrate) {
         navigator.vibrate(50); 
     }
 }
@@ -43,23 +35,20 @@ let wishlist = JSON.parse(localStorage.getItem('varta_wishlist')) || [];
 let recentlyViewed = JSON.parse(localStorage.getItem('varta_recent')) || [];
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Відновлення кошика
+    // Спочатку дістаємо дані з пам'яті браузера
     const savedCart = localStorage.getItem('varta_cart');
     if (savedCart) {
         cart = JSON.parse(savedCart);
     }
+    
+    // Оновлюємо інтерфейс (лічильник та список)
     updateCartUI();
     
-    // 2. Скелетони та завантаження товарів
-    if (typeof renderSkeletons === 'function') renderSkeletons();
+    // Завантажуємо товари
     loadCSV();
 
-    // 3. Відновлення UI елементів
-    updateWishlistUI();        
+    updateWishlistUI();        // <--- ДОДАЄМО ТУТ (відновлює сердечка)
     renderRecentlyViewedUI();
-    
-    // 4. Запуск інших модулів
-    if (typeof renderReviews === 'function') renderReviews();
 });
 
 // ========================================================
@@ -100,7 +89,7 @@ function setupAddToCart(p, sel) {
 
         // Додавання в кошик
         if (typeof cart === 'undefined') window.cart = JSON.parse(localStorage.getItem('varta_cart')) || [];
-        cart.push({ ...p, selectedSize: selectedSize, cartId: Date.now(), quantity: 1 });
+        cart.push({ ...p, selectedSize: selectedSize, cartId: Date.now() });
         localStorage.setItem('varta_cart', JSON.stringify(cart));
 
         // Оновлення інтерфейсу
@@ -1002,8 +991,7 @@ function hideCheckoutForm() {
     document.getElementById('checkout-form-container').style.display = 'none';
 }
 
-function submitOrder(platform, event) {
-    // Зупиняємо стандартну поведінку кнопки, щоб не кидало в порожній чат при помилках
+function submitDirectOrder(platform, event) {
     if (event) event.preventDefault(); 
 
     try {
@@ -1012,65 +1000,63 @@ function submitOrder(platform, event) {
             return;
         }
         
-        // Перевіряємо, чи всі текстові поля існують
+        // Збираємо дані
         const nameEl = document.getElementById('order-name');
         const phoneEl = document.getElementById('order-phone');
         const cityEl = document.getElementById('order-city');
         const npEl = document.getElementById('order-np');
 
-        if (!nameEl || !phoneEl || !cityEl || !npEl) {
-            alert("Системна помилка: Не знайдено поля форми в HTML.");
+        const name = nameEl ? nameEl.value.trim() : "";
+        const phone = phoneEl ? phoneEl.value.trim() : "";
+        const city = cityEl ? cityEl.value.trim() : "";
+        const np = npEl ? npEl.value.trim() : "";
+        
+        const paymentRadio = document.querySelector('input[name="payment-method"]:checked');
+        const paymentMethod = paymentRadio ? paymentRadio.value : "Не вказано";
+
+        if (!name || !phone || !city || !np) {
+            alert('Будь ласка, заповніть всі поля для доставки!');
             return;
         }
-
-        const name = nameEl.value.trim();
-        const phone = phoneEl.value.trim();
-        const city = cityEl.value.trim();
-        const np = npEl.value.trim();
         
-        // БЕЗПЕЧНЕ отримання оплати (фікс для повної оплати)
-       // БЕЗПЕЧНЕ отримання оплати (фікс для повної оплати)
-       try {
-    const paymentRadio = document.querySelector('input[name="payment-method"]:checked');
-    const paymentMethod = paymentRadio ? paymentRadio.value : "Не вказано";
+        const totalEl = document.getElementById('final-total-price') || document.getElementById('cart-total-price');
+        const total = totalEl ? totalEl.innerText : "0";
+        const numericTotal = parseFloat(total) || 0;
 
-    if (!name || !phone || !city || !np) {
-        alert('Будь ласка, заповніть всі поля для доставки!');
-        return;
+        // Формуємо красиве повідомлення
+        let txt = "🪖 НОВЕ ЗАМОВЛЕННЯ VARTA GEAR:\n\n";
+        cart.forEach((it, i) => { 
+            txt += `${i+1}. ${it.Name} (Розмір: ${it.selectedSize}) - ${it.Price} грн\n`; 
+        });
+        
+        txt += `\n💰 РАЗОМ: ${total} грн\n`;
+        
+        // Виправлено помилку з numericTotal
+        if (numericTotal >= 3000) {
+            txt += `🎁 ДОСТАВКА: БЕЗКОШТОВНА\n`;
+        }
+        
+        txt += `\n📦 ДАНІ ДОСТАВКИ:\n`;
+        txt += `👤 ПІБ: ${name}\n`;
+        txt += `📞 Тел: ${phone}\n`;
+        txt += `🏙 Місто: ${city}\n`;
+        txt += `📮 Відділення НП: ${np}\n`;
+        txt += `💳 Оплата: ${paymentMethod}\n`;
+
+        // Кодуємо текст для посилання
+        const encoded = encodeURIComponent(txt);
+        
+        // Перенаправляємо в потрібний месенджер
+        if (platform === 'tg') {
+            window.location.href = `https://t.me/vartagear?text=${encoded}`;
+        } else if (platform === 'wa') {
+            // Для WhatsApp номер має бути без плюса на початку
+            window.location.href = `https://wa.me/380933923810?text=${encoded}`;
+        }
+    } catch (error) {
+        console.error("Помилка формування замовлення:", error);
+        alert("Сталася помилка: " + error.message);
     }
-
-    const totalEl = document.getElementById('cart-total-price');
-    const total = totalEl ? totalEl.innerText : "0";
-   const numericTotal = parseFloat(total) || 0
-
-    let txt = "🪖 НОВЕ ЗАМОВЛЕННЯ VARTA GEAR:\n\n";
-    cart.forEach((it, i) => { 
-        txt += `${i+1}. ${it.Name} (Розмір: ${it.selectedSize}) - ${it.Price} грн\n`; 
-    });
-    
-    txt += `\n💰 РАЗОМ: ${total} грн\n\n`;
-    if (numericTotal >= 3000) {
-        txt += `🎁 ДОСТАВКА: БЕЗКОШТОВНА\n`;
-    }
-    
-    txt += `📦 ДАНІ ДОСТАВКИ:\n`;
-    txt += `👤 ПІБ: ${name}\n`;
-    txt += `📞 Тел: ${phone}\n`;
-    txt += `🏙 Місто: ${city}\n`;
-    txt += `📮 Відділення НП: ${np}\n`;
-    txt += `💳 Оплата: ${paymentMethod}\n`;
-
-    const encoded = encodeURIComponent(txt);
-    
-    // Відправляємо тільки в TG або WA
-    if (platform === 'tg') {
-        window.open(`https://t.me/vartagear?text=${encoded}`);
-    } else if (platform === 'wa') {
-        window.open(`https://wa.me/+380933923810?text=${encoded}`);
-    }
-} catch (error) {
-    console.error("Помилка формування замовлення:", error);
-    alert("Сталася помилка: " + error.message);
 }
 // Функція для блоку довіри (Ovals)
 function openTrustInfo(type) {
@@ -1122,6 +1108,12 @@ function closeModal(updateUrl = true) {
 }
 function closeAllPanels() { toggleMobileMenu(false); toggleCart(false); closeModal(); }
 function resetFilters() { document.getElementById('search-input').value = ''; filterByBadge('all', document.querySelector('.filter-tag')); }
+function toggleModalDescription() {
+    const descEl = document.getElementById('modal-desc');
+    const containerEl = document.getElementById('modal-desc-container');
+    descEl.classList.toggle('expanded');
+    containerEl.classList.toggle('active'); // Повертає іконку стрілки
+}
 // =================== ПЛАВНА ПРОКРУТКА ВГОРУ ===================
 window.onscroll = function() {
     const btn = document.getElementById("scrollTopBtn");
@@ -1137,6 +1129,21 @@ function scrollToTop() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// =================== НАВІГАЦІЯ БРАУЗЕРА (КНОПКА НАЗАД) ===================
+window.addEventListener('popstate', () => {
+    const params = new URLSearchParams(window.location.search);
+    const prodId = params.get('product');
+    
+    if (prodId !== null) {
+        // Якщо натиснули "Вперед" і там є товар
+        openModal(parseInt(prodId), false); 
+    } else {
+        // Якщо натиснули "Назад" на головну сторінку - ховаємо всі панелі
+        closeModal(false);
+        toggleMobileMenu(false);
+        toggleCart(false);
+    }
+});
 
 
 function renderSaleCarousel() {
@@ -1235,6 +1242,31 @@ window.addEventListener('resize', update3DCarousel);
 let touchStartX = 0;
 let touchEndX = 0;
 
+// Чекаємо завантаження сторінки
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.Telegram && window.Telegram.WebApp) {
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand(); // Автоматично розгортає магазин на весь екран телефону
+    }
+    // Спочатку дістаємо дані з пам'яті браузера
+    const savedCart = localStorage.getItem('varta_cart');
+    if (savedCart) {
+        cart = JSON.parse(savedCart);
+    }
+    
+    // Оновлюємо інтерфейс кошика
+    updateCartUI();
+    
+    // НОВЕ: Показуємо преміальні скелети, поки вантажиться база
+    renderSkeletons(); 
+    
+    // Завантажуємо товари
+    loadCSV();
+
+    updateWishlistUI();        
+    renderRecentlyViewedUI();
+});
 
 // НОВЕ: ФУНКЦІЯ СКЕЛЕТНОГО ЗАВАНТАЖЕННЯ (Адаптивна)
 function renderSkeletons() {
@@ -1855,65 +1887,7 @@ function closeMeasureGuide(e) {
 }
 
 
-const socialNames = ["Олександр", "Дмитро", "Андрій (ЗСУ)", "Максим", "Ігор", "Сергій", "Влад", "Микола (НГУ)", "Тарас", "Євген", "Коля Мирний", "Олег Сафронов", "Богдан"];
-const socialCities = ["Київ", "Львів", "Дніпро", "Одеса", "Харків", "Полтава", "Запоріжжя", "Вінниця", "Кривий Ріг", "Хмельницький", "Вінниця", "Рівне"];
-const socialActions = [
-    "щойно замовив",
-    "додав у кошик",
-    "залишив відгук 5 зірок на",
-    "оформив замовлення на"
-];
-// Якщо в allProducts є товари, ми будемо брати назви звідти. Якщо ні - використовуємо ці:
-const fallbackProducts = ["Тактичний Убакс", "Куртку Ріп-стоп", "Штани Ріп-Стоп", "Бойову сорочку", "Комплект форми Піксель", "Тактичні кросівки", "Тактичний ремінь", "Убакс (Олива)", "Штани (Койот)"];
 
-let socialToastTimer;
-
-function showSocialToast() {
-    const toast = document.getElementById('social-proof-toast');
-    const content = document.getElementById('social-toast-content');
-    if (!toast || !content) return;
-
-    // Генеруємо випадкові дані
-    const name = socialNames[Math.floor(Math.random() * socialNames.length)];
-    const city = socialCities[Math.floor(Math.random() * socialCities.length)];
-    const action = socialActions[Math.floor(Math.random() * socialActions.length)];
-    const time = Math.floor(Math.random() * 12) + 1; // Від 1 до 12 хвилин тому
-    
-    // Беремо випадковий товар з реальної бази (якщо вона завантажена), або з резервного списку
-    let product = fallbackProducts[Math.floor(Math.random() * fallbackProducts.length)];
-    if (typeof allProducts !== 'undefined' && allProducts.length > 0) {
-        const randomItem = allProducts[Math.floor(Math.random() * allProducts.length)];
-        product = randomItem.Name;
-    }
-
-    content.innerHTML = `
-        <b>${name}</b> (м. ${city})<br>
-        ${action} <b>${product.toLowerCase()}</b>
-        <span class="time-ago">${time} хв. тому</span>
-    `;
-
-    toast.classList.add('show');
-
-    // Ховаємо через 6 секунд
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 6000);
-}
-
-function closeSocialToast() {
-    document.getElementById('social-proof-toast').classList.remove('show');
-}
-
-// Запускаємо інтервал (60 000 мілісекунд = 1 хвилина)
-// Робимо затримку 10 секунд перед першим показом
-setTimeout(() => {
-    showSocialToast();
-    socialToastTimer = setInterval(showSocialToast, 60000);
-}, 10000);
-
-// ==========================================
-// 🔥 ФІЛЬТР ТОВАРІВ ЗІ ЗНИЖКАМИ (Тільки акційні)
-// ==========================================
 // ==========================================
 // 🔥 ФІЛЬТР ТОВАРІВ ЗІ ЗНИЖКАМИ
 // ==========================================

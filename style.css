@@ -315,48 +315,22 @@ input, textarea, .search-box input {
 
 /* =================== БОКОВІ ПАНЕЛІ ТА МЕНЮ =================== */
 .side-panel { 
-    box-sizing: border-box;              /* Враховує padding у загальну висоту 100dvh */
     position: fixed; 
     top: 0; 
-    left: 0; 
-    width: 320px;
-    max-width: 85vw;
+    left: -100%; 
+    width: 85%; 
+    max-width: 320px; 
     height: 100dvh; 
-    right: auto;
-    background: rgba(22, 22, 22, 0.95); /* Трохи щільніший фон для кращої читабельності */
-    backdrop-filter: blur(15px);        
-    -webkit-backdrop-filter: blur(15px);
+    background: rgba(22, 22, 22, 0.85); /* Було #0f0f0f */
+    backdrop-filter: blur(15px);        /* ДОДАНО: Розмиття фону */
+    -webkit-backdrop-filter: blur(15px);/* ДОДАНО: Підтримка Safari */
     z-index: 2000; 
     transition: 0.4s ease-out; 
-    padding: 20px; 
+    padding: 25px; 
+    padding-bottom: 90px; 
     border-right: 1px solid rgba(42, 42, 42, 0.5); 
-
-    /* Перетворюємо панель на flex-коробку */
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;                    /* Контейнер зафіксовано, скрол буде всередині */
-}
-
-/* Шапка (Заголовок + Хрестик) зафіксована вгорі і завжди видима */
-.side-panel-header, 
-.side-panel .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    flex-shrink: 0;                      /* Не дозволяє шапці стискатися */
-}
-
-/* Прокручується ТІЛЬКИ цей внутрішній блок зі списком */
-.side-panel-content,
-.side-panel .categories-list,
-.side-panel nav {
-    flex: 1;
-    overflow-y: auto;                    /* Працюючий внутрішній скрол */
-    -webkit-overflow-scrolling: touch;   /* Плавність для iOS */
-    padding-top: 15px;
-    padding-bottom: 30px;
+    overflow-y: auto; 
+    -webkit-overflow-scrolling: touch; 
 }
 .side-panel.active { left: 0; }
 .side-panel.right { left: auto; right: -100%; border-right: none; border-left: 1px solid var(--border-gray); }
@@ -603,6 +577,31 @@ input, textarea, .search-box input {
     transform-style: preserve-3d;
 }
 
+/* 3D КАРТКА - ФІКС ВИПАДАННЯ ВНИЗ */
+.carousel-3d-item {
+    position: absolute;
+    top: 50%; left: 50%;
+    margin-top: -180px; 
+    margin-left: -120px; 
+    width: 240px;
+    height: 360px;
+    
+    background: var(--card-gray);
+    border: 2px solid #333;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    display: flex; flex-direction: column;
+    
+    /* ВИДАЛИЛИ will-change, бо він забивав пам'ять Андроїда при скролі! */
+    -webkit-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    
+    box-shadow: none; /* Тінь вимкнена під час руху */
+    transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+}
 
 /* Активна картка (отримує тінь ТІЛЬКИ коли зупинилась по центру) */
 .carousel-3d-item.active-3d {
@@ -631,6 +630,7 @@ input, textarea, .search-box input {
     .nav-arrow { width: 38px; height: 38px; font-size: 14px; }
 }
 
+/* =================== ОПТИМІЗАЦІЯ 3D КАРТКИ =================== */
 /* =================== ОПТИМІЗОВАНА 3D КАРТКА =================== */
 .carousel-3d-item {
     position: absolute;
@@ -657,13 +657,14 @@ input, textarea, .search-box input {
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
     
-    /* ФІКС ЛАГІВ: Анімуємо ТІЛЬКИ рух і прозорість */
+    /* ФІКС ЛАГІВ: Анімуємо ТІЛЬКИ рух і прозорість (ніякого transition: all!) */
     transition: transform 0.4s ease-out, opacity 0.4s ease-out;
 }
 
 /* Активна картка (отримує тінь ТІЛЬКИ коли зупинилась по центру) */
 .carousel-3d-item.active-3d {
     border-color: var(--sale);
+    /* Спрощена тінь для Андроїда (без подвійних шарів) */
     box-shadow: 0 10px 25px rgba(255, 51, 0, 0.4); 
 }
 
@@ -671,10 +672,11 @@ input, textarea, .search-box input {
 
 .carousel-3d-item .carousel-info {
     padding: 10px 12px; text-align: center; flex-grow: 1; 
-    display: flex; flex-direction: column; justify-content: space-between;
+    display: flex; flex-direction: column; justify-content: space-between; /* Розподіляє простір */
     background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(22,22,22,1));
 }
 .carousel-3d-item h4 { color: #fff; font-size: 13px; margin: 0 0 5px 0; text-transform: uppercase; }
+
 /* =================== НЕОНОВА КНОПКА КУПИТИ В КАРУСЕЛІ =================== */
 .btn-buy-carousel {
     width: 100%;
@@ -1581,6 +1583,8 @@ body {
 
 /* ================= АДАПТАЦІЯ ШАПКИ ДЛЯ МОБІЛЬНИХ (Щоб не налізало) ================= */
 @media (max-width: 768px) {
+
+
     /* 3. Зменшуємо прапорець і тризуб */
     .flag-ua, .emblem-ua {
         font-size: 16px !important;
@@ -1603,13 +1607,13 @@ body {
         justify-content: center;
     }
 
-    /* 6. Значки кількості товарів (виправлено) */
-    #cart-count, #wishlist-count {
-        width: 16px;
-        height: 16px;
-        font-size: 10px;
-        top: -3px;
-        right: -3px;
+    /* 6. Значки кількості товарів (червоні кружечки) робимо трохи меншими */
+    .badge-count, #cart-count {
+        width: 16px !important;
+        height: 16px !important;
+        font-size: 10px !important;
+        top: -2px !important;
+        right: -2px !important;
     }
 }
 /* ==================================================================================== */

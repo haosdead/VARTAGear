@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
     <nav class="mobile-bottom-nav">
     <button class="bottom-nav-item" onclick="hapticFeedback(); toggleMobileMenu(true)">
@@ -301,14 +302,12 @@
                 <p class="final-sum" style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 15px;">
                     До сплати: <span id="final-total-price">0</span> грн
                 </p>
-                
                 <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <button type="button" class="btn-tg" onclick="submitOrder('tg', event)" style="width: 100%; padding: 12px; border: none; border-radius: 6px; background: #2AABEE; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <i class="fab fa-telegram-plane" style="font-size: 18px;"></i> Замовити в Телеграм
+                    <button type="button" class="btn-tg" onclick="submitDirectOrder('tg', event)" style="width: 100%; padding: 12px; border: none; border-radius: 6px; background: #24A1DE; color: #FFF; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase;">
+                             <i class="fab fa-telegram-plane" style="font-size: 18px;"></i> Замовити в Telegram
                     </button>
-                    
-                    <button type="button" class="btn-wa" onclick="submitOrder('wa', event)" style="width: 100%; padding: 12px; border: none; border-radius: 6px; background: #25D366; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <i class="fab fa-whatsapp" style="font-size: 18px;"></i> Замовити в Вотсап
+                    <button type="button" class="btn-wa" onclick="submitDirectOrder('wa', event)" style="width: 100%; padding: 12px; border: none; border-radius: 6px; background: #25D366; color: #FFF; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase;">
+                             <i class="fab fa-whatsapp" style="font-size: 18px;"></i> Замовити у WhatsApp
                     </button>
                 </div>
             </div>
@@ -490,14 +489,7 @@
         <i class="fas fa-times fab-icon-close"></i>
     </button>
 </div>
-    <div id="social-proof-toast" class="social-toast">
-    <div class="social-toast-img">
-        <i class="fas fa-shopping-bag"></i>
-    </div>
-    <div class="social-toast-text" id="social-toast-content">
-        </div>
-  <span class="social-toast-close" role="button" aria-label="Закрити сповіщення" tabindex="0" onclick="closeSocialToast()">✕</span>
-</div>
+   
 
 <div id="measure-modal" class="lightbox-overlay" onclick="closeMeasureGuide(event)">
     <div class="measure-content">
