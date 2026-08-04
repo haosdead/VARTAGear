@@ -319,7 +319,7 @@ input, textarea, .search-box input {
     top: 0; 
     left: -100%; 
     width: 85%; 
-    max-width: 320px; 
+    max-height: 100vh; 
     height: 100dvh; 
     background: rgba(22, 22, 22, 0.85); /* Було #0f0f0f */
     backdrop-filter: blur(15px);        /* ДОДАНО: Розмиття фону */
