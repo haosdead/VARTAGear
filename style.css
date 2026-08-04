@@ -3457,8 +3457,3 @@ input:focus, textarea:focus, select:focus {
         display: none !important;
     }
 }
-
-/* Піднімаємо бічну панель вище за всі кнопки чатів та виджети */
-.side-panel {
-    z-index: 999999 !important;
-}
