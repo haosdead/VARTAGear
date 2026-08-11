@@ -10,7 +10,6 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#080808">
     <link rel="icon" href="favicon.png" type="image/png">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-RCEEK505XF"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -98,6 +97,9 @@
        <button class="nav-icon" aria-label="Відкрити обране" onclick="toggleWishlist(true)">
             <i class="far fa-heart"></i>
             <span id="wishlist-count" class="badge-count">0</span>
+        </button>
+        <button id="account-btn" class="nav-icon" aria-label="Особистий кабінет" onclick="hapticFeedback(); handleAccountClick()">
+            <i class="fas fa-user"></i>
         </button>
 
        <button id="cart-icon-btn" class="nav-icon" aria-label="Відкрити кошик" onclick="hapticFeedback(); toggleCart(true)">
@@ -523,6 +525,7 @@
     });
   }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="script.js"></script>
 </body>
 </html>
