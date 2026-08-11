@@ -420,32 +420,34 @@ function setupAddToCart(p, sel) {
 // ========================================================
 // РОЗУМНЕ ЗАВАНТАЖЕННЯ З КЕШУВАННЯМ (Оптимізація)
 // ========================================================
+// РОЗУМНЕ ЗАВАНТАЖЕННЯ З КЕШУВАННЯМ (Оптимізація)
 function loadCSV() {
     const CACHE_KEY = 'varta_catalog_data';
     const TIME_KEY = 'varta_catalog_time';
-    const CACHE_LIFETIME = 60 * 60 * 1000; // Кеш живе 1 годину (у мілісекундах)
+    const CACHE_LIFETIME = 60 * 60 * 1000; // Кеш живе 1 годину
 
     const cachedData = localStorage.getItem(CACHE_KEY);
     const cachedTime = localStorage.getItem(TIME_KEY);
 
-    // Якщо кеш існує і йому менше ніж 1 година - беремо дані з пам'яті
     if (cachedData && cachedTime && (Date.now() - cachedTime < CACHE_LIFETIME)) {
         console.log("⚡ Каталог завантажено миттєво з кешу");
         processProducts(JSON.parse(cachedData));
     } else {
-        // Якщо кешу немає або він старий - тягнемо з Google Sheets
         console.log("🔄 Оновлення бази з Google Sheets...");
         Papa.parse(CSV_URL, {
             download: true, 
             header: true, 
             skipEmptyLines: true,
             complete: function(res) {
-                // Зберігаємо нові дані в кеш
                 try {
+                    // Очищаємо перед записом, щоб точно вистачило місця
+                    localStorage.removeItem(CACHE_KEY);
                     localStorage.setItem(CACHE_KEY, JSON.stringify(res.data));
                     localStorage.setItem(TIME_KEY, Date.now());
                 } catch (e) {
-                    console.warn("Кеш переповнено (можливо забагато товарів)", e);
+                    console.warn("🧹 Кеш переповнено, робимо повну очистку...", e);
+                    localStorage.clear(); // Звільняємо всю пам'ять
+                    try { localStorage.setItem(CACHE_KEY, JSON.stringify(res.data)); } catch(err) {}
                 }
                 processProducts(res.data);
             },
@@ -456,7 +458,6 @@ function loadCSV() {
         });
     }
 }
-
 // Допоміжна функція, яка обробляє дані (щоб не дублювати код)
 function processProducts(rawData) {
     // 1. Парсинг даних
