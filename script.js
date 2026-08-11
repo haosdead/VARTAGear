@@ -246,7 +246,18 @@ const ORDER_STATUS_LABELS = {
 
 async function loadAccountOrders() {
     const container = document.getElementById('account-orders-list');
-    if (!container || !currentUser) return;
+    if (!container) return;
+    
+    if (!currentUser) {
+        const { data: { session } } = await sb.auth.getSession();
+        if (session?.user) {
+            currentUser = session.user;
+        } else {
+            container.innerHTML = '<p class="account-empty">Будь ласка, увійдіть в акаунт</p>';
+            return;
+        }
+    }
+
     container.innerHTML = '<div class="account-loading"><i class="fas fa-spinner fa-spin"></i> Завантаження...</div>';
 
     const { data: orders, error } = await sb.from('orders')
@@ -288,10 +299,23 @@ async function loadAccountOrders() {
 
 async function loadAccountPromos() {
     const container = document.getElementById('account-promos-list');
-    if (!container || !currentUser) return;
+    if (!container) return;
+    
+    // Якщо користувач не визначився одразу, беремо його з сесії Supabase напряму
+    if (!currentUser) {
+        const { data: { session } } = await sb.auth.getSession();
+        if (session?.user) {
+            currentUser = session.user;
+            await loadUserProfile(currentUser);
+        } else {
+            container.innerHTML = '<p class="account-empty-small">Будь ласка, увійдіть в акаунт</p>';
+            return;
+        }
+    }
+
     container.innerHTML = '<div class="account-loading"><i class="fas fa-spinner fa-spin"></i> Завантаження...</div>';
 
-    await loadUserProfile(currentUser); // Оновлюємо профіль, щоб знати статус заявок
+    await loadUserProfile(currentUser);
 
     let query = sb.from('promo_codes').select('*').eq('active', true);
     const { data: globalPromos } = await query.eq('is_global', true);
@@ -308,7 +332,7 @@ async function loadAccountPromos() {
     let socialHTML = '';
     
     // Блок Telegram
-    if (currentProfile.tg_status === 'none') {
+    if (currentProfile && currentProfile.tg_status === 'none') {
         socialHTML += `<div class="promo-card">
             <div class="promo-discount" style="font-size: 20px;"><i class="fab fa-telegram-plane"></i> 10% ЗНИЖКА</div>
             <p class="promo-desc">За підписку на наш закритий Telegram-канал</p>
@@ -317,7 +341,7 @@ async function loadAccountPromos() {
                 <button class="promo-use-btn" onclick="requestSocialPromo('tg')" style="border-color:#2AABEE; color:#2AABEE; padding:10px;">Я ПІДПИСАВСЯ</button>
             </div>
         </div>`;
-    } else if (currentProfile.tg_status === 'pending') {
+    } else if (currentProfile && currentProfile.tg_status === 'pending') {
         socialHTML += `<div class="promo-card" style="border-color:#2AABEE; background:rgba(42, 171, 238, 0.05);">
             <p class="promo-desc" style="color:#2AABEE; font-weight:bold; margin:0; font-size:13px;">
                 <i class="fas fa-clock"></i> Перевіряємо підписку на Telegram...<br>Персональний промокод скоро з'явиться тут!
@@ -326,7 +350,7 @@ async function loadAccountPromos() {
     }
 
     // Блок Instagram
-    if (currentProfile.inst_status === 'none') {
+    if (currentProfile && currentProfile.inst_status === 'none') {
         socialHTML += `<div class="promo-card">
             <div class="promo-discount" style="font-size: 20px;"><i class="fab fa-instagram"></i> 10% ЗНИЖКА</div>
             <p class="promo-desc">За підписку на наш Instagram</p>
@@ -335,7 +359,7 @@ async function loadAccountPromos() {
                 <button class="promo-use-btn" onclick="requestSocialPromo('inst')" style="border-color:#E1306C; color:#E1306C; padding:10px;">Я ПІДПИСАВСЯ</button>
             </div>
         </div>`;
-    } else if (currentProfile.inst_status === 'pending') {
+    } else if (currentProfile && currentProfile.inst_status === 'pending') {
         socialHTML += `<div class="promo-card" style="border-color:#E1306C; background:rgba(225, 48, 108, 0.05);">
             <p class="promo-desc" style="color:#E1306C; font-weight:bold; margin:0; font-size:13px;">
                 <i class="fas fa-clock"></i> Перевіряємо підписку на Instagram...<br>Персональний промокод скоро з'явиться тут!
