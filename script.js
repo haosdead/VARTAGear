@@ -159,7 +159,7 @@ function updateCheckoutAuthHint() {
         if (hint) hint.style.display = 'none';
         if (btn) {
             // Клієнт НЕ авторизований
-            btn.innerHTML = '<i class="fas fa-user-plus"></i> Створити акаунт і відстежувати замовлення + бонуси';
+            btn.innerHTML = '<i class="fas fa-user-plus"></i> Зареєструватись (Отримати бонуси)';
             btn.style.background = 'linear-gradient(135deg, rgba(162, 210, 74, 0.2), rgba(162, 210, 74, 0.05))';
             btn.style.color = 'var(--mono-lime)';
         }
