@@ -259,12 +259,37 @@ async function grantBonus(userId, email) {
     if (!amount || isNaN(amount)) return;
     const pts = parseInt(amount);
 
-    const { data: prof } = await sb.from('profiles').select('bonus_points').eq('id', userId).single();
-    await sb.from('profiles').update({ bonus_points: (prof?.bonus_points || 0) + pts }).eq('id', userId);
-    await sb.from('bonus_transactions').insert([{
-        user_id: userId, amount: pts, type: 'admin_grant', description: 'Нараховано адміністратором'
+    // 1. Отримуємо поточний баланс
+    const { data: prof, error: fetchErr } = await sb.from('profiles').select('bonus_points').eq('id', userId).single();
+    if (fetchErr) {
+        alert('Помилка читання профілю: ' + fetchErr.message);
+        return;
+    }
+
+    // 2. Оновлюємо баланс
+    const { error: updateErr } = await sb.from('profiles')
+        .update({ bonus_points: (prof?.bonus_points || 0) + pts })
+        .eq('id', userId);
+        
+    if (updateErr) {
+        alert('Помилка нарахування: ' + updateErr.message);
+        return;
+    }
+
+    // 3. Записуємо в історію
+    const { error: insertErr } = await sb.from('bonus_transactions').insert([{
+        user_id: userId, 
+        amount: pts, 
+        type: 'admin_grant', 
+        description: 'Нараховано адміністратором'
     }]);
-    alert(`✅ Нараховано ${pts} бонусів`);
+
+    if (insertErr) {
+        alert('Помилка історії транзакцій: ' + insertErr.message);
+        return;
+    }
+
+    alert(`✅ Успішно нараховано ${pts} бонусів для ${email}!`);
     loadAdminClients();
 }
 
