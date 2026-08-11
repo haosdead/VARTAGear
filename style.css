@@ -327,9 +327,10 @@ input, textarea, .search-box input {
     z-index: 2000; 
     transition: 0.4s ease-out; 
     padding: 25px; 
-    padding-bottom: 90px; 
+    padding-bottom: 120px !important;
     border-right: 1px solid rgba(42, 42, 42, 0.5); 
     overflow-y: auto; 
+    overscroll-behavior: none;
     -webkit-overflow-scrolling: touch; 
 }
 .side-panel.active { left: 0; }
@@ -2529,11 +2530,13 @@ html, body {
 }
 
 /* Блокуємо прокрутку основної сторінки */
+/* Блокуємо прокрутку основної сторінки */
 body.no-scroll {
     overflow: hidden !important;
     height: 100vh !important; /* Важливо для iOS */
-    touch-action: none; /* Забороняє скрол свайпом на фоні */
+    /* touch-action: none; --- ВИДАЛИ ЦЕЙ РЯДОК, ВІН БЛОКУВАВ СКРОЛ! */
 }
+
 
 /* Дозволяємо скролити ТІЛЬКИ модальне вікно/кошик/меню */
 #product-modal,
