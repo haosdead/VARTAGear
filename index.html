@@ -24,14 +24,15 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-    <nav class="mobile-bottom-nav">
+   <nav class="mobile-bottom-nav">
     <button class="bottom-nav-item" onclick="hapticFeedback(); toggleMobileMenu(true)">
         <i class="fas fa-bars"></i>
         <span>Каталог</span>
     </button>
-    <button class="bottom-nav-item" onclick="hapticFeedback(); document.getElementById('search-input').focus(); window.scrollTo({top: 0, behavior: 'smooth'});">
-        <i class="fas fa-search"></i>
-        <span>Пошук</span>
+    <!-- Замінили пошук на Кабінет -->
+    <button class="bottom-nav-item" onclick="hapticFeedback(); handleAccountClick()">
+        <i class="fas fa-user"></i>
+        <span>Кабінет</span>
     </button>
     <button class="bottom-nav-item" onclick="hapticFeedback(); toggleWishlist(true)">
         <i class="far fa-heart"></i>
@@ -40,7 +41,7 @@
     <button class="bottom-nav-item" onclick="hapticFeedback(); toggleCart(true)">
         <i class="fas fa-shopping-bag"></i>
         <span>Кошик</span>
-        </button>
+    </button>
 </nav>
 <body>
 <div id="tg-discount-popup" class="popup-overlay">
