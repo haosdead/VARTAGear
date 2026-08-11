@@ -3930,3 +3930,12 @@ input:focus, textarea:focus, select:focus {
         to { transform: translateY(0); }
     }
 }
+/* ФІКС КНОПКИ АВТОРИЗАЦІЇ В КОШИКУ НА МОБІЛЬНОМУ */
+.checkout-account-btn {
+    white-space: normal !important; /* Дозволяємо тексту переноситися на новий рядок */
+    line-height: 1.4 !important;
+    height: auto !important;
+    padding: 12px 15px !important;
+    margin-bottom: 70px !important; /* Даємо великий відступ знизу, щоб не ховалося за меню */
+    text-align: center;
+}
