@@ -86,13 +86,14 @@ async function registerWithEmail() {
     });
     if (error) return showAuthMessage(error.message, true);
     if (data.user && !data.session) {
-    showAuthMessage('Перевірте пошту — надіслали лист для підтвердження', false);
-} else if (data.session) {
-    showAuthMessage('Ви успішно зареєстровані!', false);
-    await loadUserProfile(data.user);
-    updateAuthUI(data.user);
-    switchAuthTab('login');
-}
+        showAuthMessage('Перевірте пошту — надіслали лист для підтвердження', false);
+    } else if (data.session) {
+        showAuthMessage('Ви успішно зареєстровані!', false);
+        await loadUserProfile(data.user);
+        updateAuthUI(data.user);
+        switchAuthTab('login');
+    }
+} 
 
 async function logout() {
     await sb.auth.signOut();
