@@ -144,13 +144,12 @@ function updateAuthUI(user) {
 
 function updateCheckoutAuthHint() {
     const hint = document.getElementById('checkout-auth-hint');
-    const btn = document.getElementById('checkout-account-btn'); // Шукаємо кнопку
+    const btn = document.getElementById('checkout-account-btn');
     const bonusRow = document.getElementById('checkout-bonus-row');
     
     if (currentUser) {
         if (hint) hint.style.display = 'block';
         if (btn) {
-            // Клієнт авторизований - зелена кнопка оформлення
             btn.innerHTML = '<i class="fas fa-check"></i> ОФОРМИТИ ЗАМОВЛЕННЯ НА САЙТІ';
             btn.style.background = 'var(--mono-lime)';
             btn.style.color = '#000';
@@ -158,17 +157,19 @@ function updateCheckoutAuthHint() {
     } else {
         if (hint) hint.style.display = 'none';
         if (btn) {
-            // Клієнт НЕ авторизований
             btn.innerHTML = '<i class="fas fa-user-plus"></i> Зареєструватись (Отримати бонуси)';
             btn.style.background = 'linear-gradient(135deg, rgba(162, 210, 74, 0.2), rgba(162, 210, 74, 0.05))';
             btn.style.color = 'var(--mono-lime)';
         }
     }
 
-    if (bonusRow && currentProfile) {
-        bonusRow.style.display = currentProfile.bonus_points > 0 ? 'block' : 'none';
+    // Показуємо рядок бонусів ТІЛЬКИ якщо є профіль і на балансі більше 0
+    if (bonusRow && currentProfile && currentProfile.bonus_points > 0) {
+        bonusRow.style.display = 'block';
         const bal = document.getElementById('checkout-bonus-balance');
         if (bal) bal.textContent = currentProfile.bonus_points;
+    } else if (bonusRow) {
+        bonusRow.style.display = 'none';
     }
 }
 
@@ -417,9 +418,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateAuthUI(session.user);
     }
 });
+// === СЛІДКУЄМО ЗА АВТОРИЗАЦІЄЮ ТА ОНОВЛЮЄМО ВСЕ МИТТЄВО ===
 sb.auth.onAuthStateChange(async (_event, session) => {
-    if (session?.user) await loadUserProfile(session.user);
+    if (session?.user) {
+        await loadUserProfile(session.user); // Чекаємо завантаження профілю
+    } else {
+        currentUser = null;
+        currentProfile = null;
+    }
+    
     updateAuthUI(session?.user || null);
+    updateCheckoutAuthHint(); // Оновлюємо кнопку в кошику
+    updateCartUI(); // Перемальовуємо кошик (щоб з'явилися бонуси!)
+    
     if (document.getElementById('account-modal')?.classList.contains('active')) {
         renderAccountModal();
     }
