@@ -280,7 +280,10 @@ async function loadAccountOrders() {
 
 async function loadAccountPromos() {
     const container = document.getElementById('account-promos-list');
-    if (!container) return;
+    if (!container || !currentUser) return;
+    container.innerHTML = '<div class="account-loading"><i class="fas fa-spinner fa-spin"></i> Завантаження...</div>';
+
+    await loadUserProfile(currentUser); // Оновлюємо профіль, щоб знати статус заявок
 
     let query = sb.from('promo_codes').select('*').eq('active', true);
     const { data: globalPromos } = await query.eq('is_global', true);
@@ -294,22 +297,73 @@ async function loadAccountPromos() {
     const all = [...(globalPromos || []), ...personalPromos];
     const unique = [...new Map(all.map(p => [p.code, p])).values()];
 
-    if (unique.length === 0) {
-        container.innerHTML = '<div class="account-empty"><i class="fas fa-tag"></i><p>Немає доступних промокодів</p></div>';
-        return;
+    let socialHTML = '';
+    
+    // Блок Telegram
+    if (currentProfile.tg_status === 'none') {
+        socialHTML += `<div class="promo-card">
+            <div class="promo-discount" style="font-size: 20px;"><i class="fab fa-telegram-plane"></i> 10% ЗНИЖКА</div>
+            <p class="promo-desc">За підписку на наш закритий Telegram-канал</p>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <a href="https://t.me/+KxuldxqdC1E0MjRi" target="_blank" class="promo-use-btn" style="text-align:center; text-decoration:none; background:#2AABEE; color:#fff; border:none; padding:10px;">Підписатись</a>
+                <button class="promo-use-btn" onclick="requestSocialPromo('tg')" style="border-color:#2AABEE; color:#2AABEE; padding:10px;">Я ПІДПИСАВСЯ</button>
+            </div>
+        </div>`;
+    } else if (currentProfile.tg_status === 'pending') {
+        socialHTML += `<div class="promo-card" style="border-color:#2AABEE; background:rgba(42, 171, 238, 0.05);">
+            <p class="promo-desc" style="color:#2AABEE; font-weight:bold; margin:0; font-size:13px;">
+                <i class="fas fa-clock"></i> Перевіряємо підписку на Telegram...<br>Персональний промокод скоро з'явиться тут!
+            </p>
+        </div>`;
     }
 
-    container.innerHTML = unique.map(p => `
+    // Блок Instagram
+    if (currentProfile.inst_status === 'none') {
+        socialHTML += `<div class="promo-card">
+            <div class="promo-discount" style="font-size: 20px;"><i class="fab fa-instagram"></i> 10% ЗНИЖКА</div>
+            <p class="promo-desc">За підписку на наш Instagram</p>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <a href="https://www.instagram.com/vartagear.ua/" target="_blank" class="promo-use-btn" style="text-align:center; text-decoration:none; background:linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color:#fff; border:none; padding:10px;">Підписатись</a>
+                <button class="promo-use-btn" onclick="requestSocialPromo('inst')" style="border-color:#E1306C; color:#E1306C; padding:10px;">Я ПІДПИСАВСЯ</button>
+            </div>
+        </div>`;
+    } else if (currentProfile.inst_status === 'pending') {
+        socialHTML += `<div class="promo-card" style="border-color:#E1306C; background:rgba(225, 48, 108, 0.05);">
+            <p class="promo-desc" style="color:#E1306C; font-weight:bold; margin:0; font-size:13px;">
+                <i class="fas fa-clock"></i> Перевіряємо підписку на Instagram...<br>Персональний промокод скоро з'явиться тут!
+            </p>
+        </div>`;
+    }
+
+    let promosHTML = unique.length > 0 ? unique.map(p => `
         <div class="promo-card ${p.assigned_user_id ? 'personal' : ''}">
             <div class="promo-code-badge">${p.code}</div>
             <div class="promo-discount">-${p.discount_percent}%</div>
             <p class="promo-desc">${p.description || 'Знижка на замовлення'}</p>
             ${p.expires_at ? `<span class="promo-expires">до ${new Date(p.expires_at).toLocaleDateString('uk-UA')}</span>` : ''}
-            <button class="promo-use-btn" onclick="usePromoFromCabinet('${p.code}')">Застосувати</button>
+            <button class="promo-use-btn" onclick="usePromoFromCabinet('${p.code}')" style="padding:10px;">Застосувати у кошику</button>
         </div>
-    `).join('');
+    `).join('') : '<p class="account-empty-small" style="margin-top:20px;">Тут будуть ваші активні промокоди</p>';
+
+    container.innerHTML = socialHTML + promosHTML;
 }
 
+window.requestSocialPromo = async function(network) {
+    const updateData = {};
+    if (network === 'tg') updateData.tg_status = 'pending';
+    if (network === 'inst') updateData.inst_status = 'pending';
+    
+    // Блокуємо скрол та показуємо завантаження
+    document.getElementById('account-promos-list').innerHTML = '<div class="account-loading"><i class="fas fa-spinner fa-spin"></i> Відправляємо запит...</div>';
+    
+    const { error } = await sb.from('profiles').update(updateData).eq('id', currentUser.id);
+    if (!error) {
+        loadAccountPromos(); // Оновлюємо список
+    } else {
+        alert('Сталася помилка: ' + error.message);
+        loadAccountPromos();
+    }
+};
 function usePromoFromCabinet(code) {
     const input = document.getElementById('promo-input');
     if (input) input.value = code;
