@@ -7,7 +7,6 @@
 
     <meta name="description" content="Інтернет-магазин VARTA GEAR. Надійний тактичний одяг, взуття та спорядження. Доставка по всій Україні.">
     <link rel="canonical" id="canonical-url" href="https://vartagear.com.ua/" />
-    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#080808">
     <link rel="icon" href="favicon.png" type="image/png">
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-RCEEK505XF"></script>
@@ -602,30 +601,19 @@
         <p style="color: #ccc; font-size: 14px; margin-bottom: 0;">Візьміть свій найзручніший одяг, покладіть на рівну поверхню і поміряйте, як показано на схемі. Не міряйте по тілу!</p>
     </div>
 </div>
-    <!-- БАНЕР ВСТАНОВЛЕННЯ ДОДАТКУ (PWA) -->
-<div id="pwa-install-banner" class="pwa-banner">
-    <div class="pwa-banner-content">
-        <img src="favicon.png" alt="VARTA GEAR" class="pwa-icon">
-        <div class="pwa-text">
-            <strong>VARTA GEAR</strong>
-            <span>Встановити для швидкого доступу</span>
-        </div>
-        <button id="pwa-install-btn" class="pwa-btn">Встановити</button>
-        <button id="pwa-close-btn" class="pwa-close">✕</button>
-    </div>
-</div>
+
     <!-- Підключення Service Worker для роботи як PWA -->
-<!-- ТИМЧАСОВО ВІДКЛЮЧАЄМО КЕШУВАННЯ PWA ПІД ЧАС РОЗРОБКИ
+<!-- ПРИМУСОВЕ ВИДАЛЕННЯ SERVICE WORKER (Щоб кеш нормально чистився) -->
 <script>
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/sw.js').then(function(registration) {
-        console.log('Service Worker успішно зареєстровано!');
-      });
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      for (let registration of registrations) {
+        registration.unregister();
+        console.log('Service Worker видалено!');
+      }
     });
   }
 </script>
--->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="script.js"></script>
 </body>
