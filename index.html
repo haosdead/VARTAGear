@@ -269,7 +269,7 @@
                 <input type="text" id="promo-input" placeholder="ПРОМОКОД (якщо є)">
                 <button type="button" class="promo-btn" onclick="applyPromoCode()">ЗАСТОСУВАТИ</button>
             </div>
-            <div id="promo-message" style="text-align: center; font-size: 13px; margin-bottom: 15px;"></div>
+            <div id="promo-message-cart" style="text-align: center; font-size: 13px; margin-bottom: 15px;"></div>
             <div class="cart-sum">Разом: <span id="cart-total-price">0</span> грн</div>
             <button class="add-to-cart-btn" style="width:100%; margin-bottom: 10px;" onclick="showCheckoutForm()">ПЕРЕЙТИ ДО ОФОРМЛЕННЯ</button>
             <button class="continue-btn" onclick="toggleCart(false)">ПРОДОВЖИТИ ПОКУПКИ</button>
@@ -299,19 +299,32 @@
                 </label>
             </div>
         
-            <div id="promo-message" style="text-align: center; font-size: 13px; margin-bottom: 15px;"></div>
+            <div id="promo-message-checkout" style="text-align: center; font-size: 13px; margin-bottom: 15px;"></div>
+            <div class="checkout-bonus-row" id="checkout-bonus-row" style="display:none;">
+                <label class="bonus-checkbox-label">
+                    <input type="checkbox" id="use-bonus-checkbox" onchange="updateCartUI()">
+                    <span>Використати бонуси (<span id="checkout-bonus-balance">0</span> ₴ доступно)</span>
+                </label>
+            </div>
             <div class="checkout-actions" style="margin-top: 20px;">
                 <p class="final-sum" style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 15px;">
                     До сплати: <span id="final-total-price">0</span> грн
                 </p>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <button type="button" class="btn-tg" onclick="submitDirectOrder('tg', event)" style="width: 100%; padding: 12px; border: none; border-radius: 6px; background: #24A1DE; color: #FFF; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase;">
-                             <i class="fab fa-telegram-plane" style="font-size: 18px;"></i> Замовити в Telegram
+                <div class="checkout-messenger-btns">
+                    <button type="button" class="btn-tg checkout-btn" onclick="submitDirectOrder('tg', event)">
+                        <i class="fab fa-telegram-plane"></i> Замовити в Telegram
                     </button>
-                    <button type="button" class="btn-wa" onclick="submitDirectOrder('wa', event)" style="width: 100%; padding: 12px; border: none; border-radius: 6px; background: #25D366; color: #FFF; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase;">
-                             <i class="fab fa-whatsapp" style="font-size: 18px;"></i> Замовити у WhatsApp
+                    <button type="button" class="btn-wa checkout-btn" onclick="submitDirectOrder('wa', event)">
+                        <i class="fab fa-whatsapp"></i> Замовити у WhatsApp
                     </button>
                 </div>
+                <div class="checkout-divider"><span>або</span></div>
+                <button type="button" class="checkout-account-btn" onclick="submitAccountOrder(event)">
+                    <i class="fas fa-user-plus"></i> Створити акаунт і відстежувати замовлення + бонуси
+                </button>
+                <p class="checkout-hint" id="checkout-auth-hint" style="display:none;">
+                    <i class="fas fa-check-circle"></i> Ви увійшли — замовлення збережеться в кабінеті
+                </p>
             </div>
             </div>
     </div>
@@ -492,6 +505,91 @@
     </button>
 </div>
    
+
+<!-- ОСОБИСТИЙ КАБІНЕТ -->
+<div id="account-modal" class="account-modal-overlay" onclick="closeAccountModal(event)">
+    <div class="account-modal" onclick="event.stopPropagation()">
+        <div class="account-modal-header">
+            <div class="account-header-left">
+                <i class="fas fa-shield-alt account-header-icon"></i>
+                <div>
+                    <h2>ОСОБИСТИЙ КАБІНЕТ</h2>
+                    <p id="account-subtitle">VARTA GEAR</p>
+                </div>
+            </div>
+            <button class="account-close-btn" onclick="closeAccountModal()" aria-label="Закрити"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div id="account-auth-view" class="account-view">
+            <div class="account-tabs">
+                <button class="account-tab active" data-tab="login" onclick="switchAuthTab('login')">Вхід</button>
+                <button class="account-tab" data-tab="register" onclick="switchAuthTab('register')">Реєстрація</button>
+            </div>
+            <div id="auth-login-panel" class="auth-panel active">
+                <input type="email" id="login-email" placeholder="Email" autocomplete="email">
+                <input type="password" id="login-password" placeholder="Пароль" autocomplete="current-password">
+                <button class="account-primary-btn" onclick="loginWithEmail()"><i class="fas fa-sign-in-alt"></i> Увійти</button>
+            </div>
+            <div id="auth-register-panel" class="auth-panel">
+                <input type="text" id="register-name" placeholder="Ваше ім'я" autocomplete="name">
+                <input type="email" id="register-email" placeholder="Email" autocomplete="email">
+                <input type="password" id="register-password" placeholder="Пароль (мін. 6 символів)" autocomplete="new-password">
+                <button class="account-primary-btn" onclick="registerWithEmail()"><i class="fas fa-user-plus"></i> Створити акаунт</button>
+            </div>
+            <div class="auth-divider"><span>або</span></div>
+            <button class="account-google-btn" onclick="loginWithGoogle()">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="20" height="20">
+                Увійти через Google
+            </button>
+            <p id="auth-message" class="auth-message"></p>
+        </div>
+
+        <div id="account-dashboard-view" class="account-view" style="display:none;">
+            <div class="account-user-bar">
+                <div class="account-avatar"><i class="fas fa-user"></i></div>
+                <div class="account-user-info">
+                    <strong id="account-user-name">—</strong>
+                    <span id="account-user-email">—</span>
+                </div>
+                <button class="account-logout-btn" onclick="logout()" title="Вийти"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+
+            <div class="account-nav-tabs">
+                <button class="account-nav-tab active" data-section="orders" onclick="switchAccountSection('orders')"><i class="fas fa-box"></i> Замовлення</button>
+                <button class="account-nav-tab" data-section="bonuses" onclick="switchAccountSection('bonuses')"><i class="fas fa-gift"></i> Бонуси</button>
+                <button class="account-nav-tab" data-section="promos" onclick="switchAccountSection('promos')"><i class="fas fa-tag"></i> Промокоди</button>
+            </div>
+
+            <div id="account-section-orders" class="account-section active">
+                <div id="account-orders-list" class="account-orders-list">
+                    <div class="account-loading"><i class="fas fa-spinner fa-spin"></i> Завантаження...</div>
+                </div>
+            </div>
+
+            <div id="account-section-bonuses" class="account-section">
+                <div class="bonus-card">
+                    <div class="bonus-balance">
+                        <span class="bonus-label">Ваш баланс</span>
+                        <span class="bonus-amount" id="account-bonus-balance">0</span>
+                        <span class="bonus-unit">бонусів</span>
+                    </div>
+                    <p class="bonus-info">1 бонус = 1 грн знижки. Нараховуємо 1 бонус за кожні 100 грн після доставки.</p>
+                </div>
+                <div id="account-bonus-history" class="bonus-history"></div>
+            </div>
+
+            <div id="account-section-promos" class="account-section">
+                <div id="account-promos-list" class="account-promos-list">
+                    <div class="account-loading"><i class="fas fa-spinner fa-spin"></i> Завантаження...</div>
+                </div>
+            </div>
+
+            <a id="admin-panel-link" href="admin.html" class="admin-panel-link" style="display:none;">
+                <i class="fas fa-cog"></i> Адмін-панель
+            </a>
+        </div>
+    </div>
+</div>
 
 <div id="measure-modal" class="lightbox-overlay" onclick="closeMeasureGuide(event)">
     <div class="measure-content">

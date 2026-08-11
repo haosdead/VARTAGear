@@ -34,51 +34,315 @@ function hapticFeedback() {
     }
 }
 
+// === КОНФІГУРАЦІЯ САЙТУ (фікс localhost при Google OAuth) ===
+function getSiteUrl() {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.168.')) {
+        return 'https://vartagear.com.ua';
+    }
+    return window.location.origin;
+}
+
+// === ГЛОБАЛЬНИЙ СТАН КОРИСТУВАЧА ===
+let currentUser = null;
+let currentProfile = null;
+let appliedPromoCode = null;
+let appliedPromoDiscount = 0;
+let useBonusPoints = false;
+
 // === АВТОРИЗАЦІЯ ===
 async function loginWithGoogle() {
     const { error } = await sb.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: window.location.origin }
+        options: { redirectTo: getSiteUrl() }
     });
-    if (error) console.error('Помилка входу:', error.message);
+    if (error) showAuthMessage(error.message, true);
+}
+
+async function loginWithEmail() {
+    const email = document.getElementById('login-email')?.value.trim();
+    const password = document.getElementById('login-password')?.value;
+    if (!email || !password) return showAuthMessage('Заповніть email та пароль', true);
+
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) showAuthMessage(error.message, true);
+    else showAuthMessage('Вітаємо!', false);
+}
+
+async function registerWithEmail() {
+    const name = document.getElementById('register-name')?.value.trim();
+    const email = document.getElementById('register-email')?.value.trim();
+    const password = document.getElementById('register-password')?.value;
+    if (!email || !password) return showAuthMessage('Заповніть email та пароль', true);
+    if (password.length < 6) return showAuthMessage('Пароль мінімум 6 символів', true);
+
+    const { data, error } = await sb.auth.signUp({
+        email,
+        password,
+        options: {
+            data: { full_name: name || email.split('@')[0] },
+            emailRedirectTo: getSiteUrl()
+        }
+    });
+    if (error) return showAuthMessage(error.message, true);
+    if (data.user && !data.session) {
+        showAuthMessage('Перевірте пошту — надіслали лист для підтвердження', false);
+    } else {
+        showAuthMessage('Акаунт створено!', false);
+    }
 }
 
 async function logout() {
     await sb.auth.signOut();
+    currentUser = null;
+    currentProfile = null;
+    closeAccountModal();
+    updateAuthUI(null);
     location.reload();
 }
 
+function showAuthMessage(msg, isError) {
+    const el = document.getElementById('auth-message');
+    if (!el) return;
+    el.textContent = msg;
+    el.className = 'auth-message ' + (isError ? 'error' : 'success');
+}
+
+function switchAuthTab(tab) {
+    document.querySelectorAll('.account-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+    document.getElementById('auth-login-panel').classList.toggle('active', tab === 'login');
+    document.getElementById('auth-register-panel').classList.toggle('active', tab === 'register');
+}
+
+async function loadUserProfile(user) {
+    if (!user) { currentProfile = null; return; }
+    const { data } = await sb.from('profiles').select('*').eq('id', user.id).single();
+    currentProfile = data;
+}
+
 function updateAuthUI(user) {
+    currentUser = user;
     const btn = document.getElementById('account-btn');
     if (!btn) return;
     const icon = btn.querySelector('i');
     if (user) {
         icon.className = 'fas fa-user-check';
-        btn.title = user.email;
+        btn.title = user.email || 'Кабінет';
     } else {
         icon.className = 'fas fa-user';
-        btn.title = 'Увійти в акаунт';
+        btn.title = 'Особистий кабінет';
+    }
+    updateCheckoutAuthHint();
+}
+
+function updateCheckoutAuthHint() {
+    const hint = document.getElementById('checkout-auth-hint');
+    const bonusRow = document.getElementById('checkout-bonus-row');
+    if (hint) hint.style.display = currentUser ? 'block' : 'none';
+    if (bonusRow && currentProfile) {
+        bonusRow.style.display = currentProfile.bonus_points > 0 ? 'block' : 'none';
+        const bal = document.getElementById('checkout-bonus-balance');
+        if (bal) bal.textContent = currentProfile.bonus_points;
     }
 }
 
 async function handleAccountClick() {
-    const { data: { session } } = await sb.auth.getSession();
-    if (session?.user) {
-        if (confirm(`Ви увійшли як ${session.user.email}.\nВийти з акаунту?`)) {
-            logout();
-        }
-    } else {
-        loginWithGoogle();
+    hapticFeedback();
+    openAccountModal();
+}
+
+function openAccountModal() {
+    const modal = document.getElementById('account-modal');
+    if (!modal) return;
+    modal.classList.add('active');
+    document.getElementById('body-overlay').classList.add('active');
+    lockScroll();
+    renderAccountModal();
+}
+
+function closeAccountModal(e) {
+    if (e && e.target !== e.currentTarget) return;
+    const modal = document.getElementById('account-modal');
+    if (modal) modal.classList.remove('active');
+    if (!document.querySelector('.side-panel.active') && !document.getElementById('product-modal')?.style.display?.includes('flex')) {
+        document.getElementById('body-overlay').classList.remove('active');
+        unlockScroll();
     }
 }
 
-// Слідкуємо за станом авторизації
+async function renderAccountModal() {
+    const authView = document.getElementById('account-auth-view');
+    const dashView = document.getElementById('account-dashboard-view');
+    if (!currentUser) {
+        authView.style.display = 'block';
+        dashView.style.display = 'none';
+        return;
+    }
+    authView.style.display = 'none';
+    dashView.style.display = 'block';
+    await loadUserProfile(currentUser);
+
+    document.getElementById('account-user-name').textContent = currentProfile?.full_name || currentUser.email?.split('@')[0] || 'Клієнт';
+    document.getElementById('account-user-email').textContent = currentUser.email || '';
+    document.getElementById('account-bonus-balance').textContent = currentProfile?.bonus_points || 0;
+
+    const adminLink = document.getElementById('admin-panel-link');
+    if (adminLink) adminLink.style.display = currentProfile?.role === 'admin' ? 'flex' : 'none';
+
+    loadAccountOrders();
+    loadAccountPromos();
+    loadBonusHistory();
+    updateCheckoutAuthHint();
+}
+
+function switchAccountSection(section) {
+    document.querySelectorAll('.account-nav-tab').forEach(t => t.classList.toggle('active', t.dataset.section === section));
+    document.querySelectorAll('.account-section').forEach(s => s.classList.remove('active'));
+    document.getElementById('account-section-' + section)?.classList.add('active');
+}
+
+const ORDER_STATUS_LABELS = {
+    new: '🆕 Нове',
+    confirmed: '✅ Підтверджено',
+    processing: '⚙️ В обробці',
+    shipped: '🚚 Відправлено',
+    delivered: '📦 Доставлено',
+    cancelled: '❌ Скасовано'
+};
+
+async function loadAccountOrders() {
+    const container = document.getElementById('account-orders-list');
+    if (!container || !currentUser) return;
+    container.innerHTML = '<div class="account-loading"><i class="fas fa-spinner fa-spin"></i> Завантаження...</div>';
+
+    const { data: orders, error } = await sb.from('orders')
+        .select('*, order_items(*)')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        container.innerHTML = '<p class="account-empty">Помилка завантаження замовлень</p>';
+        return;
+    }
+    if (!orders || orders.length === 0) {
+        container.innerHTML = '<div class="account-empty"><i class="fas fa-box-open"></i><p>Замовлень поки немає</p></div>';
+        return;
+    }
+
+    container.innerHTML = orders.map(o => {
+        const date = new Date(o.created_at).toLocaleDateString('uk-UA');
+        const items = (o.order_items || []).map(i =>
+            `<div class="order-item-row">${i.product_name}${i.size ? ' (' + i.size + ')' : ''} — ${i.price} ₴</div>`
+        ).join('');
+        const ship = o.shipping_data || {};
+        return `
+        <div class="order-card">
+            <div class="order-card-header">
+                <span class="order-id">#${o.id.slice(0, 8).toUpperCase()}</span>
+                <span class="order-date">${date}</span>
+                <span class="order-status status-${o.status}">${ORDER_STATUS_LABELS[o.status] || o.status}</span>
+            </div>
+            <div class="order-items">${items}</div>
+            <div class="order-footer">
+                <span class="order-total">${o.total_amount} ₴</span>
+                ${o.promo_code ? `<span class="order-promo">Промо: ${o.promo_code}</span>` : ''}
+            </div>
+            ${ship.city ? `<div class="order-shipping"><i class="fas fa-truck"></i> ${ship.city}, ${ship.np || ''}</div>` : ''}
+        </div>`;
+    }).join('');
+}
+
+async function loadAccountPromos() {
+    const container = document.getElementById('account-promos-list');
+    if (!container) return;
+
+    let query = sb.from('promo_codes').select('*').eq('active', true);
+    const { data: globalPromos } = await query.eq('is_global', true);
+
+    let personalPromos = [];
+    if (currentUser) {
+        const { data } = await sb.from('promo_codes').select('*').eq('assigned_user_id', currentUser.id).eq('active', true);
+        personalPromos = data || [];
+    }
+
+    const all = [...(globalPromos || []), ...personalPromos];
+    const unique = [...new Map(all.map(p => [p.code, p])).values()];
+
+    if (unique.length === 0) {
+        container.innerHTML = '<div class="account-empty"><i class="fas fa-tag"></i><p>Немає доступних промокодів</p></div>';
+        return;
+    }
+
+    container.innerHTML = unique.map(p => `
+        <div class="promo-card ${p.assigned_user_id ? 'personal' : ''}">
+            <div class="promo-code-badge">${p.code}</div>
+            <div class="promo-discount">-${p.discount_percent}%</div>
+            <p class="promo-desc">${p.description || 'Знижка на замовлення'}</p>
+            ${p.expires_at ? `<span class="promo-expires">до ${new Date(p.expires_at).toLocaleDateString('uk-UA')}</span>` : ''}
+            <button class="promo-use-btn" onclick="usePromoFromCabinet('${p.code}')">Застосувати</button>
+        </div>
+    `).join('');
+}
+
+function usePromoFromCabinet(code) {
+    const input = document.getElementById('promo-input');
+    if (input) input.value = code;
+    closeAccountModal();
+    toggleCart(true);
+    applyPromoCode();
+}
+
+async function loadBonusHistory() {
+    const container = document.getElementById('account-bonus-history');
+    if (!container || !currentUser) return;
+
+    const { data } = await sb.from('bonus_transactions')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+    if (!data || data.length === 0) {
+        container.innerHTML = '<p class="account-empty-small">Історія бонусів порожня</p>';
+        return;
+    }
+
+    container.innerHTML = data.map(t => {
+        const sign = t.amount > 0 ? '+' : '';
+        const cls = t.amount > 0 ? 'earn' : 'spend';
+        return `<div class="bonus-history-row ${cls}">
+            <span>${t.description || t.type}</span>
+            <span class="bonus-history-amount">${sign}${t.amount}</span>
+            <span class="bonus-history-date">${new Date(t.created_at).toLocaleDateString('uk-UA')}</span>
+        </div>`;
+    }).join('');
+}
+
+async function submitAccountOrder(event) {
+    if (event) event.preventDefault();
+    if (!currentUser) {
+        closeAllPanels();
+        openAccountModal();
+        switchAuthTab('register');
+        showAuthMessage('Створіть акаунт для відстеження замовлення та бонусів', false);
+        return;
+    }
+    await submitDirectOrder('account', event);
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     const { data: { session } } = await sb.auth.getSession();
-    updateAuthUI(session?.user || null);
+    if (session?.user) {
+        await loadUserProfile(session.user);
+        updateAuthUI(session.user);
+    }
 });
-sb.auth.onAuthStateChange((_event, session) => {
+sb.auth.onAuthStateChange(async (_event, session) => {
+    if (session?.user) await loadUserProfile(session.user);
     updateAuthUI(session?.user || null);
+    if (document.getElementById('account-modal')?.classList.contains('active')) {
+        renderAccountModal();
+    }
 });
 // ==================================
 let allProducts = [], filteredProducts = [], cart = [], currentPage = 1;
@@ -873,33 +1137,78 @@ function changePage(page) {
 // ==========================================
 // 🎟️ СИСТЕМА ПРОМОКОДІВ
 // ==========================================
-let currentDiscount = 0; // Відсоток знижки
+let currentDiscount = 0; // Відсоток знижки (legacy compat)
 
-function applyPromoCode() {
+async function applyPromoCode() {
     const inputEl = document.getElementById('promo-input');
-    const msgEl = document.getElementById('promo-message');
-    if (!inputEl || !msgEl) return;
+    const msgEl = document.getElementById('promo-message-cart') || document.getElementById('promo-message');
+    if (!inputEl) return;
     
     const inputCode = inputEl.value.trim().toUpperCase();
     
-    const validCodes = {
-        'VARTA10': 10,
-        'ZSU15': 15,
-        'TG5': 5
-    };
-
     if (inputCode === '') {
         currentDiscount = 0;
-        msgEl.innerHTML = '';
-    } else if (validCodes[inputCode]) {
-        currentDiscount = validCodes[inputCode];
-        msgEl.innerHTML = `<span style="color: var(--mono-lime); font-weight: bold;">✅ Код прийнято! Перераховуємо...</span>`;
-    } else {
-        currentDiscount = 0;
-        msgEl.innerHTML = `<span style="color: #ff3300;">❌ Промокод не знайдено</span>`;
+        appliedPromoCode = null;
+        appliedPromoDiscount = 0;
+        if (msgEl) msgEl.innerHTML = '';
+        updateCartUI();
+        return;
     }
-    
-    updateCartUI(); 
+
+    // Спочатку перевіряємо в Supabase
+    let promo = null;
+    const { data: globalPromo } = await sb.from('promo_codes')
+        .select('*')
+        .eq('code', inputCode)
+        .eq('active', true)
+        .eq('is_global', true)
+        .maybeSingle();
+
+    if (globalPromo) promo = globalPromo;
+
+    if (!promo && currentUser) {
+        const { data: personalPromo } = await sb.from('promo_codes')
+            .select('*')
+            .eq('code', inputCode)
+            .eq('active', true)
+            .eq('assigned_user_id', currentUser.id)
+            .maybeSingle();
+        if (personalPromo) promo = personalPromo;
+    }
+
+    // Fallback на локальні коди якщо БД недоступна
+    if (!promo) {
+        const validCodes = { 'VARTA10': 10, 'ZSU15': 15, 'TG5': 5 };
+        if (validCodes[inputCode]) {
+            currentDiscount = validCodes[inputCode];
+            appliedPromoCode = inputCode;
+            appliedPromoDiscount = currentDiscount;
+            if (msgEl) msgEl.innerHTML = `<span style="color: var(--mono-lime); font-weight: bold;">✅ Код ${inputCode} прийнято!</span>`;
+            updateCartUI();
+            return;
+        }
+        currentDiscount = 0;
+        appliedPromoCode = null;
+        appliedPromoDiscount = 0;
+        if (msgEl) msgEl.innerHTML = `<span style="color: #ff3300;">❌ Промокод не знайдено</span>`;
+        updateCartUI();
+        return;
+    }
+
+    if (promo.expires_at && new Date(promo.expires_at) < new Date()) {
+        if (msgEl) msgEl.innerHTML = `<span style="color: #ff3300;">❌ Промокод прострочений</span>`;
+        return;
+    }
+    if (promo.max_uses && promo.used_count >= promo.max_uses) {
+        if (msgEl) msgEl.innerHTML = `<span style="color: #ff3300;">❌ Промокод вичерпано</span>`;
+        return;
+    }
+
+    currentDiscount = promo.discount_percent;
+    appliedPromoCode = inputCode;
+    appliedPromoDiscount = promo.discount_percent;
+    if (msgEl) msgEl.innerHTML = `<span style="color: var(--mono-lime); font-weight: bold;">✅ ${inputCode}: -${promo.discount_percent}%</span>`;
+    updateCartUI();
 }
 
 // ==========================================
@@ -954,22 +1263,21 @@ function updateCartUI() {
         
         const totalPriceEl = document.getElementById('cart-total-price');
         const finalPriceEl = document.getElementById('final-total-price');
-        const msgEl = document.getElementById('promo-message');
+        const msgEl = document.getElementById('promo-message-cart') || document.getElementById('promo-message');
         
         // 🔥 РОЗУМНЕ ЗАСТОСУВАННЯ ПРОМОКОДУ (Ігнорує SALE)
         let finalTotal = total;
         let discountAmount = 0;
+        let bonusDiscount = 0;
 
         if (currentDiscount > 0) {
             let discountableSum = 0;
-            
             cart.forEach(item => {
                 let badgeText = String(item.Badge || item.badge || '').toUpperCase();
                 if (!badgeText.includes('SALE') && !badgeText.includes('АКЦІЯ')) {
                     discountableSum += Number(item.Price) || 0;
                 }
             });
-
             discountAmount = Math.round(discountableSum * (currentDiscount / 100));
             finalTotal = total - discountAmount;
 
@@ -977,7 +1285,6 @@ function updateCartUI() {
                 let priceHTML = `<s style="color:#888; font-size:14px; margin-right:8px;">${total}</s> <span style="color:var(--mono-lime)">${finalTotal}</span>`;
                 if (totalPriceEl) totalPriceEl.innerHTML = priceHTML;
                 if (finalPriceEl) finalPriceEl.innerHTML = priceHTML;
-                if (msgEl) msgEl.innerHTML = `<span style="color: var(--mono-lime); font-weight: bold;">✅ Знижка -${discountAmount} грн!</span>`;
             } else {
                 if (totalPriceEl) totalPriceEl.innerText = total;
                 if (finalPriceEl) finalPriceEl.innerText = total;
@@ -986,6 +1293,17 @@ function updateCartUI() {
         } else {
             if (totalPriceEl) totalPriceEl.innerText = total;
             if (finalPriceEl) finalPriceEl.innerText = total;
+        }
+
+        // Бонуси (1 бонус = 1 грн)
+        const bonusCheckbox = document.getElementById('use-bonus-checkbox');
+        useBonusPoints = bonusCheckbox?.checked && currentProfile?.bonus_points > 0;
+        if (useBonusPoints && currentProfile) {
+            bonusDiscount = Math.min(currentProfile.bonus_points, finalTotal);
+            finalTotal -= bonusDiscount;
+            if (finalPriceEl) {
+                finalPriceEl.innerHTML = `<s style="color:#888;font-size:14px;margin-right:8px;">${total - discountAmount}</s> <span style="color:var(--mono-lime)">${finalTotal}</span>`;
+            }
         }
 
         // РОЗРАХУНОК ПОЛОСКИ ДОСТАВКИ
@@ -1036,6 +1354,7 @@ function removeFromCart(i) {
 function showCheckoutForm() {
     document.getElementById('cart-items-container').style.display = 'none';
     document.getElementById('checkout-form-container').style.display = 'block';
+    updateCheckoutAuthHint();
 }
 
 function hideCheckoutForm() {
@@ -1043,19 +1362,81 @@ function hideCheckoutForm() {
     document.getElementById('checkout-form-container').style.display = 'none';
 }
 
+async function saveOrderToDatabase(userId, orderDetails) {
+    const { data: orderData, error: orderError } = await sb
+        .from('orders')
+        .insert([{
+            user_id: userId,
+            total_amount: orderDetails.total,
+            discount_amount: orderDetails.discountAmount || 0,
+            bonus_used: orderDetails.bonusUsed || 0,
+            promo_code: orderDetails.promoCode || null,
+            status: 'new',
+            shipping_data: orderDetails.shipping
+        }])
+        .select()
+        .single();
+
+    if (orderError) {
+        console.error('Помилка збереження замовлення:', orderError.message);
+        return null;
+    }
+
+    const itemsToInsert = cart.map(it => ({
+        order_id: orderData.id,
+        product_name: it.Name,
+        product_sku: it.VendorCode || it.myId,
+        size: it.selectedSize,
+        quantity: it.quantity || 1,
+        price: it.Price
+    }));
+    await sb.from('order_items').insert(itemsToInsert);
+
+    // Списати бонуси
+    if (orderDetails.bonusUsed > 0) {
+        await sb.from('profiles').update({
+            bonus_points: (currentProfile.bonus_points || 0) - orderDetails.bonusUsed
+        }).eq('id', userId);
+        await sb.from('bonus_transactions').insert([{
+            user_id: userId,
+            amount: -orderDetails.bonusUsed,
+            type: 'spend',
+            description: 'Використано при замовленні',
+            order_id: orderData.id
+        }]);
+        if (currentProfile) currentProfile.bonus_points -= orderDetails.bonusUsed;
+    }
+
+    return orderData;
+}
+
+function getOrderTotals() {
+    let total = cart.reduce((s, it) => s + (parseFloat(it.Price) || 0), 0);
+    let discountAmount = 0;
+    if (currentDiscount > 0) {
+        let discountableSum = 0;
+        cart.forEach(item => {
+            let badgeText = String(item.Badge || item.badge || '').toUpperCase();
+            if (!badgeText.includes('SALE') && !badgeText.includes('АКЦІЯ')) {
+                discountableSum += Number(item.Price) || 0;
+            }
+        });
+        discountAmount = Math.round(discountableSum * (currentDiscount / 100));
+    }
+    let finalTotal = total - discountAmount;
+    let bonusUsed = 0;
+    const bonusCheckbox = document.getElementById('use-bonus-checkbox');
+    if (bonusCheckbox?.checked && currentProfile?.bonus_points > 0) {
+        bonusUsed = Math.min(currentProfile.bonus_points, finalTotal);
+        finalTotal -= bonusUsed;
+    }
+    return { total, discountAmount, bonusUsed, finalTotal };
+}
+
 async function submitDirectOrder(platform, event) {
     if (event) event.preventDefault();
 
     try {
-        // Перевірка авторизації
-        const { data: { session } } = await sb.auth.getSession();
-        if (!session?.user) {
-            alert('Будь ласка, увійдіть в акаунт для оформлення замовлення!');
-            loginWithGoogle();
-            return;
-        }
-        const user = session.user;
-
         if (cart.length === 0) {
             alert("Кошик порожній!");
             return;
@@ -1079,56 +1460,73 @@ async function submitDirectOrder(platform, event) {
             return;
         }
 
-        const totalEl = document.getElementById('final-total-price') || document.getElementById('cart-total-price');
-        const total = totalEl ? totalEl.innerText : "0";
-        const numericTotal = parseFloat(total) || 0;
+        const { total, discountAmount, bonusUsed, finalTotal } = getOrderTotals();
+        const shipping = { name, phone, city, np, paymentMethod };
 
-        // Запис замовлення в Supabase
-        // Запис замовлення в Supabase
-        const { data: orderData, error: orderError } = await sb
-            .from('orders')
-            .insert([{
-                user_id: user.id,
-                total_amount: numericTotal,
-                status: 'new',
-                shipping_data: { name, phone, city, np, paymentMethod }
-            }])
-            .select()
-            .single();
-
-        if (orderError) {
-            console.error('Помилка збереження замовлення:', orderError.message);
-        } else {
-            const itemsToInsert = cart.map(it => ({
-                order_id: orderData.id,
-                product_name: it.Name,
-                quantity: it.quantity || 1,
-                price: it.Price
-            }));
-            const { error: itemsError } = await sb.from('order_items').insert(itemsToInsert);
-            if (itemsError) console.error('Помилка збереження товарів:', itemsError.message);
+        // Зберегти в БД якщо користувач авторизований
+        const { data: { session } } = await sb.auth.getSession();
+        let savedOrder = null;
+        if (session?.user) {
+            savedOrder = await saveOrderToDatabase(session.user.id, {
+                total: finalTotal,
+                discountAmount,
+                bonusUsed,
+                promoCode: appliedPromoCode,
+                shipping
+            });
         }
 
-        // Формуємо повідомлення для месенджера (як і раніше)
+        // Формуємо повідомлення для месенджера
         let txt = "🪖 НОВЕ ЗАМОВЛЕННЯ VARTA GEAR:\n\n";
+        if (savedOrder) txt += `📋 ID: ${savedOrder.id.slice(0, 8).toUpperCase()}\n\n`;
         cart.forEach((it, i) => {
             txt += `${i+1}. ${it.Name} (Розмір: ${it.selectedSize}) - ${it.Price} грн\n`;
         });
-        txt += `\n💰 РАЗОМ: ${total} грн\n`;
-        if (numericTotal >= 3000) txt += `🎁 ДОСТАВКА: БЕЗКОШТОВНА\n`;
+        txt += `\n💰 РАЗОМ: ${finalTotal} грн\n`;
+        if (discountAmount > 0) txt += `🏷 Знижка: -${discountAmount} грн (${appliedPromoCode || ''})\n`;
+        if (bonusUsed > 0) txt += `🎁 Бонуси: -${bonusUsed} грн\n`;
+        if (finalTotal >= 3000) txt += `🎁 ДОСТАВКА: БЕЗКОШТОВНА\n`;
         txt += `\n📦 ДАНІ ДОСТАВКИ:\n`;
         txt += `👤 ПІБ: ${name}\n`;
         txt += `📞 Тел: ${phone}\n`;
         txt += `🏙 Місто: ${city}\n`;
         txt += `📮 Відділення НП: ${np}\n`;
         txt += `💳 Оплата: ${paymentMethod}\n`;
+        if (session?.user) txt += `\n👤 Акаунт: ${session.user.email}\n`;
+
+        if (platform === 'account') {
+            cart = [];
+            localStorage.removeItem('varta_cart');
+            currentDiscount = 0;
+            appliedPromoCode = null;
+            updateCartUI();
+            toggleCart(false);
+            alert('✅ Замовлення збережено! Відстежуйте статус у особистому кабінеті.');
+            openAccountModal();
+            return;
+        }
 
         const encoded = encodeURIComponent(txt);
 
         if (platform === 'tg') {
-            window.location.href = `https://t.me/vartagear?text=${encoded}`;
+            window.open(`https://t.me/vartagear?text=${encoded}`, '_blank');
         } else if (platform === 'wa') {
-            window.location.href = `https://wa.me/380933923810?text=${encoded}`;
+            window.open(`https://wa.me/380933923810?text=${encoded}`, '_blank');
+        }
+
+        // Очистити кошик після відправки
+        cart = [];
+        localStorage.removeItem('varta_cart');
+        currentDiscount = 0;
+        appliedPromoCode = null;
+        updateCartUI();
+        hideCheckoutForm();
+        toggleCart(false);
+
+        if (savedOrder) {
+            setTimeout(() => {
+                showToast('Замовлення збережено в кабінеті!');
+            }, 500);
         }
     } catch (error) {
         console.error("Помилка формування замовлення:", error);
@@ -1183,7 +1581,7 @@ function closeModal(updateUrl = true) {
         }
     }
 }
-function closeAllPanels() { toggleMobileMenu(false); toggleCart(false); closeModal(); }
+function closeAllPanels() { toggleMobileMenu(false); toggleCart(false); closeModal(); closeAccountModal(); }
 function resetFilters() { document.getElementById('search-input').value = ''; filterByBadge('all', document.querySelector('.filter-tag')); }
 function toggleModalDescription() {
     const descEl = document.getElementById('modal-desc');
