@@ -355,15 +355,27 @@ window.requestSocialPromo = async function(network) {
     if (network === 'inst') updateData.inst_status = 'pending';
     
     // Блокуємо скрол та показуємо завантаження
-    document.getElementById('account-promos-list').innerHTML = '<div class="account-loading"><i class="fas fa-spinner fa-spin"></i> Відправляємо запит...</div>';
-    
-    const { error } = await sb.from('profiles').update(updateData).eq('id', currentUser.id);
-    if (!error) {
-        loadAccountPromos(); // Оновлюємо список
-    } else {
-        alert('Сталася помилка: ' + error.message);
-        loadAccountPromos();
+    const list = document.getElementById('account-promos-list');
+    if (list) {
+        list.innerHTML = '<div class="account-loading"><i class="fas fa-spinner fa-spin"></i> Відправляємо запит...</div>';
     }
+    
+    // Відправляємо запит у базу і ДОДАЄМО .select(), щоб відловити "тиху відмову"
+    const { data, error } = await sb.from('profiles')
+        .update(updateData)
+        .eq('id', currentUser.id)
+        .select();
+        
+    if (error) {
+        alert('Помилка: ' + error.message);
+    } else if (!data || data.length === 0) {
+        alert('Помилка бази: Запит відхилено. Перевірте правила RLS у Supabase.');
+    } else {
+        alert('✅ Заявку відправлено! Персональний промокод з\'явиться тут найближчим часом.');
+    }
+    
+    // Оновлюємо інтерфейс
+    loadAccountPromos();
 };
 function usePromoFromCabinet(code) {
     const input = document.getElementById('promo-input');
@@ -412,11 +424,36 @@ async function submitAccountOrder(event) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const { data: { session } } = await sb.auth.getSession();
-    if (session?.user) {
-        await loadUserProfile(session.user);
-        updateAuthUI(session.user);
+    // 1. Спочатку відновлюємо кошик з пам'яті
+    const savedCart = localStorage.getItem('varta_cart');
+    if (savedCart) {
+        cart = JSON.parse(savedCart);
     }
+    updateCartUI();
+    
+    // 2. ЗАВЖДИ ПЕРШИМ КРОКОМ ПЕРЕВІРЯЄМО СЕСІЮ В SUPABASE
+    try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (session?.user) {
+            currentUser = session.user;
+            await loadUserProfile(session.user);
+            updateAuthUI(session.user);
+            updateCheckoutAuthHint();
+        } else {
+            currentUser = null;
+            currentProfile = null;
+            updateAuthUI(null);
+        }
+    } catch (err) {
+        console.error("Помилка відновлення сесії:", err);
+    }
+
+    // 3. Тільки після перевірки акаунта малюємо скелети і завантажуємо каталог
+    renderSkeletons(); 
+    loadCSV();
+
+    updateWishlistUI();        
+    renderRecentlyViewedUI();
 });
 // === СЛІДКУЄМО ЗА АВТОРИЗАЦІЄЮ ТА ОНОВЛЮЄМО ВСЕ МИТТЄВО ===
 sb.auth.onAuthStateChange(async (_event, session) => {
