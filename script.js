@@ -583,10 +583,20 @@ function loadCSV() {
                     localStorage.setItem(CACHE_KEY, JSON.stringify(res.data));
                     localStorage.setItem(TIME_KEY, Date.now());
                 } catch (e) {
-                    console.warn("🧹 Кеш переповнено, робимо повну очистку...", e);
-                    localStorage.clear(); // Звільняємо всю пам'ять
-                    try { localStorage.setItem(CACHE_KEY, JSON.stringify(res.data)); } catch(err) {}
-                }
+    console.warn("🧹 Кеш переповнено, видаляємо лише старий каталог...", e);
+    // Видаляємо ТІЛЬКИ старий кеш каталогу, не чіпаючи кошик (varta_cart) та токени Supabase
+    localStorage.removeItem(CACHE_KEY);
+    localStorage.removeItem(TIME_KEY);
+    
+    // Якщо навіть без старого кешу не вистачає місця, просто не кешуємо дані на цей раз
+    try { 
+        localStorage.setItem(CACHE_KEY, JSON.stringify(res.data)); 
+        localStorage.setItem(TIME_KEY, Date.now());
+    } catch(err) {
+        console.error("Не вдалося зберегти каталог у кеш. Працюємо без кешування.");
+    }
+}
+
                 processProducts(res.data);
             },
             error: function(err) { 
