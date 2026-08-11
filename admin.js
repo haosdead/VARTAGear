@@ -183,13 +183,25 @@ function renderClientsTable(clients) {
 
     container.innerHTML = `<table class="admin-table">
         <thead><tr>
-            <th>Ім'я</th><th>Email</th><th>Бонуси</th><th>Роль</th><th>Дата</th><th>Дії</th>
+            <th>Ім'я</th><th>Email</th><th>Заявки на Промо</th><th>Бонуси</th><th>Роль</th><th>Дата</th><th>Дії</th>
         </tr></thead>
         <tbody>${clients.map(c => {
             const date = new Date(c.created_at).toLocaleDateString('uk-UA');
+            
+            // Формуємо кнопки заявок (Якщо статус pending - показуємо)
+            let requestsHTML = '';
+            if (c.tg_status === 'pending') {
+                requestsHTML += `<button class="admin-btn-sm" style="background:#2AABEE; color:#fff; border:none; padding: 5px 12px; margin-right: 5px;" onclick="approveSocialPromo('${c.id}', '${c.email}', 'tg')" title="Схвалити Telegram"><i class="fab fa-telegram-plane"></i> Дати код</button>`;
+            }
+            if (c.inst_status === 'pending') {
+                requestsHTML += `<button class="admin-btn-sm" style="background:linear-gradient(45deg, #f09433, #dc2743); color:#fff; border:none; padding: 5px 12px;" onclick="approveSocialPromo('${c.id}', '${c.email}', 'inst')" title="Схвалити Instagram"><i class="fab fa-instagram"></i> Дати код</button>`;
+            }
+            if (requestsHTML === '') requestsHTML = '<span style="color:#555;">—</span>';
+
             return `<tr>
                 <td data-label="Ім'я">${c.full_name || '—'}</td>
                 <td data-label="Email">${c.email || '—'}</td>
+                <td data-label="Заявки" class="td-actions">${requestsHTML}</td>
                 <td data-label="Бонуси"><span class="bonus-badge">${c.bonus_points || 0}</span></td>
                 <td data-label="Роль"><span class="role-badge role-${c.role}">${c.role}</span></td>
                 <td data-label="Дата">${date}</td>
@@ -197,7 +209,7 @@ function renderClientsTable(clients) {
                     <button class="admin-btn-sm" onclick="grantBonus('${c.id}', '${c.email}')" title="Нарахувати бонуси">
                         <i class="fas fa-gift"></i>
                     </button>
-                    <button class="admin-btn-sm" onclick="assignPersonalPromo('${c.id}', '${c.email}')" title="Персональний промокод">
+                    <button class="admin-btn-sm" onclick="assignPersonalPromo('${c.id}', '${c.email}')" title="Створити ручний промокод">
                         <i class="fas fa-tag"></i>
                     </button>
                     <select class="role-select" onchange="changeUserRole('${c.id}', this.value)">
@@ -209,6 +221,40 @@ function renderClientsTable(clients) {
         }).join('')}</tbody>
     </table>`;
 }
+
+// Функція-генератор, яка одним кліком схвалює заявку і робить код
+window.approveSocialPromo = async function(userId, email, network) {
+    if (!confirm(`Підтвердити підписку та видати промокод 10% для ${email}?`)) return;
+    
+    // Генеруємо випадковий код, наприклад TG-4821 або INST-9214
+    const codePrefix = network === 'tg' ? 'TG-' : 'INST-';
+    const code = codePrefix + Math.floor(Math.random() * 9000 + 1000);
+    
+    // 1. Створюємо персональний промокод у базі
+    const { error: promoError } = await sb.from('promo_codes').insert([{
+        code: code,
+        discount_percent: 10,
+        is_global: false,
+        assigned_user_id: userId,
+        description: `Бонус за підписку на ${network === 'tg' ? 'Telegram' : 'Instagram'}`
+    }]);
+    
+    if (promoError) {
+        alert('Помилка створення промокоду: ' + promoError.message);
+        return;
+    }
+    
+    // 2. Міняємо статус заявки в профілі на 'approved', щоб кнопка зникла
+    const updateData = {};
+    if (network === 'tg') updateData.tg_status = 'approved';
+    if (network === 'inst') updateData.inst_status = 'approved';
+    
+    await sb.from('profiles').update(updateData).eq('id', userId);
+    
+    alert(`✅ Клієнту успішно видано персональний промокод: ${code}`);
+    loadAdminClients(); // Оновлюємо таблицю, кнопка заявки зникне
+    loadAdminPromos(); // Оновлюємо сусідню вкладку промокодів
+};
 
 async function grantBonus(userId, email) {
     const amount = prompt(`Скільки бонусів нарахувати для ${email}?`, '100');
