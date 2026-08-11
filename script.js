@@ -27,10 +27,14 @@ function unlockScroll() {
 // Функція легкої тактильної вібрації (50 мілісекунд)
 // Нативна вібрація для Telegram + запасний варіант
 function hapticFeedback() {
-    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
-        window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
-    } else if (navigator.vibrate) {
-        navigator.vibrate(50); 
+    try {
+        if (window.Telegram?.WebApp?.isVersionAtLeast?.('6.1')) {
+            window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+        } else if (navigator.vibrate) {
+            navigator.vibrate(50); 
+        }
+    } catch (e) {
+        // Ігноруємо, якщо пристрій не підтримує
     }
 }
 
@@ -140,8 +144,27 @@ function updateAuthUI(user) {
 
 function updateCheckoutAuthHint() {
     const hint = document.getElementById('checkout-auth-hint');
+    const btn = document.getElementById('checkout-account-btn'); // Шукаємо кнопку
     const bonusRow = document.getElementById('checkout-bonus-row');
-    if (hint) hint.style.display = currentUser ? 'block' : 'none';
+    
+    if (currentUser) {
+        if (hint) hint.style.display = 'block';
+        if (btn) {
+            // Клієнт авторизований - зелена кнопка оформлення
+            btn.innerHTML = '<i class="fas fa-check"></i> ОФОРМИТИ ЗАМОВЛЕННЯ НА САЙТІ';
+            btn.style.background = 'var(--mono-lime)';
+            btn.style.color = '#000';
+        }
+    } else {
+        if (hint) hint.style.display = 'none';
+        if (btn) {
+            // Клієнт НЕ авторизований
+            btn.innerHTML = '<i class="fas fa-user-plus"></i> Створити акаунт і відстежувати замовлення + бонуси';
+            btn.style.background = 'linear-gradient(135deg, rgba(162, 210, 74, 0.2), rgba(162, 210, 74, 0.05))';
+            btn.style.color = 'var(--mono-lime)';
+        }
+    }
+
     if (bonusRow && currentProfile) {
         bonusRow.style.display = currentProfile.bonus_points > 0 ? 'block' : 'none';
         const bal = document.getElementById('checkout-bonus-balance');
