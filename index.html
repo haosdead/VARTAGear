@@ -615,17 +615,17 @@
     </div>
 </div>
     <!-- Підключення Service Worker для роботи як PWA -->
+<!-- ТИМЧАСОВО ВІДКЛЮЧАЄМО КЕШУВАННЯ PWA ПІД ЧАС РОЗРОБКИ
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
       navigator.serviceWorker.register('/sw.js').then(function(registration) {
-        console.log('Service Worker успішно зареєстровано! Scope:', registration.scope);
-      }, function(err) {
-        console.log('Помилка реєстрації Service Worker:', err);
+        console.log('Service Worker успішно зареєстровано!');
       });
     });
   }
 </script>
+-->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="script.js"></script>
 </body>
