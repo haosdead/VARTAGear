@@ -331,8 +331,12 @@ async function loadAccountPromos() {
 
     let socialHTML = '';
     
-    // Блок Telegram
-    if (currentProfile && currentProfile.tg_status === 'none') {
+    // Перевіряємо статус Telegram (якщо немає поля, вважаємо що 'none')
+    const tgStatus = currentProfile?.tg_status || 'none';
+    const instStatus = currentProfile?.inst_status || 'none';
+
+    // Блок Telegram (завжди показуємо, але міняємо стан кнопок)
+    if (tgStatus === 'none') {
         socialHTML += `<div class="promo-card">
             <div class="promo-discount" style="font-size: 20px;"><i class="fab fa-telegram-plane"></i> 10% ЗНИЖКА</div>
             <p class="promo-desc">За підписку на наш закритий Telegram-канал</p>
@@ -341,16 +345,16 @@ async function loadAccountPromos() {
                 <button class="promo-use-btn" onclick="requestSocialPromo('tg')" style="border-color:#2AABEE; color:#2AABEE; padding:10px;">Я ПІДПИСАВСЯ</button>
             </div>
         </div>`;
-    } else if (currentProfile && currentProfile.tg_status === 'pending') {
+    } else {
         socialHTML += `<div class="promo-card" style="border-color:#2AABEE; background:rgba(42, 171, 238, 0.05);">
             <p class="promo-desc" style="color:#2AABEE; font-weight:bold; margin:0; font-size:13px;">
-                <i class="fas fa-clock"></i> Перевіряємо підписку на Telegram...<br>Персональний промокод скоро з'явиться тут!
+                <i class="fas fa-check-circle"></i> Заявка на Telegram прийнята! Промокод надійде у цей розділ після перевірки.
             </p>
         </div>`;
     }
 
-    // Блок Instagram
-    if (currentProfile && currentProfile.inst_status === 'none') {
+    // Блок Instagram (завжди показуємо)
+    if (instStatus === 'none') {
         socialHTML += `<div class="promo-card">
             <div class="promo-discount" style="font-size: 20px;"><i class="fab fa-instagram"></i> 10% ЗНИЖКА</div>
             <p class="promo-desc">За підписку на наш Instagram</p>
@@ -359,10 +363,10 @@ async function loadAccountPromos() {
                 <button class="promo-use-btn" onclick="requestSocialPromo('inst')" style="border-color:#E1306C; color:#E1306C; padding:10px;">Я ПІДПИСАВСЯ</button>
             </div>
         </div>`;
-    } else if (currentProfile && currentProfile.inst_status === 'pending') {
+    } else {
         socialHTML += `<div class="promo-card" style="border-color:#E1306C; background:rgba(225, 48, 108, 0.05);">
             <p class="promo-desc" style="color:#E1306C; font-weight:bold; margin:0; font-size:13px;">
-                <i class="fas fa-clock"></i> Перевіряємо підписку на Instagram...<br>Персональний промокод скоро з'явиться тут!
+                <i class="fas fa-check-circle"></i> Заявка на Instagram прийнята! Промокод надійде у цей розділ після перевірки.
             </p>
         </div>`;
     }
@@ -456,30 +460,36 @@ async function submitAccountOrder(event) {
 
 // === ЄДИНА ТОЧКА ВХОДУ ТА ПЕРЕВІРКИ СЕСІЇ ===
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Відновлюємо кошик з пам'яті
+    // 1. НАЙПЕРШЕ: Відновлюємо кошик з localStorage, щоб він ніколи не зникав
     const savedCart = localStorage.getItem('varta_cart');
     if (savedCart) {
-        cart = JSON.parse(savedCart);
+        try {
+            cart = JSON.parse(savedCart);
+        } catch (e) {
+            cart = [];
+        }
     }
     updateCartUI();
     
-    // 2. ПЕРЕВІРЯЄМО СЕСІЮ ОДРАЗУ ПРИ ЗАВАНТАЖЕННІ
+    // 2. ЧЕКАЄМО ВІДПОВІДІ ВІД SUPABASE ПЕРЕД МАЛЮВАННЯМ ІНТЕРФЕЙСУ
     try {
-        const { data: { session } } = await sb.auth.getSession();
-        if (session?.user) {
+        const { data: { session }, error } = await sb.auth.getSession();
+        if (session && session.user) {
             currentUser = session.user;
-            await loadUserProfile(session.user);
-            updateAuthUI(session.user);
+            await loadUserProfile(currentUser);
+            updateAuthUI(currentUser);
         } else {
             currentUser = null;
             currentProfile = null;
             updateAuthUI(null);
         }
     } catch (err) {
-        console.error("Помилка сесії:", err);
+        console.error("Помилка відновлення сесії:", err);
     }
 
     updateCheckoutAuthHint();
+    
+    // 3. Завантажуємо каталог і все інше
     renderSkeletons(); 
     loadCSV();
     updateWishlistUI();        
