@@ -3878,3 +3878,23 @@ input:focus, textarea:focus, select:focus {
     .account-nav-tab { font-size: 11px; padding: 8px 4px; }
     .account-nav-tab i { display: block; margin: 0 0 2px; }
 }
+
+/* =================== МОБІЛЬНИЙ КАБІНЕТ (BOTTOM SHEET) =================== */
+@media (max-width: 480px) {
+    .account-modal-overlay {
+        align-items: flex-end; /* Притискаємо до самого низу екрана */
+        padding: 0;
+    }
+    .account-modal {
+        max-height: 90vh;
+        width: 100%;
+        border-radius: 20px 20px 0 0; /* Округлі тільки верхні кути */
+        border-bottom: none;
+        padding-bottom: 25px; /* Запас місця для свайпу на iPhone */
+        animation: accountSlideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes accountSlideUp {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+    }
+}
