@@ -200,14 +200,20 @@ function closeAccountModal(e) {
 async function renderAccountModal() {
     const authView = document.getElementById('account-auth-view');
     const dashView = document.getElementById('account-dashboard-view');
+    
     if (!currentUser) {
         authView.style.display = 'block';
         dashView.style.display = 'none';
         return;
     }
+    
     authView.style.display = 'none';
     dashView.style.display = 'block';
-    await loadUserProfile(currentUser);
+    
+    // Якщо профіль чомусь не підтягнувся раніше — завантажуємо
+    if (!currentProfile) {
+        await loadUserProfile(currentUser);
+    }
 
     document.getElementById('account-user-name').textContent = currentProfile?.full_name || currentUser.email?.split('@')[0] || 'Клієнт';
     document.getElementById('account-user-email').textContent = currentUser.email || '';
@@ -216,6 +222,7 @@ async function renderAccountModal() {
     const adminLink = document.getElementById('admin-panel-link');
     if (adminLink) adminLink.style.display = currentProfile?.role === 'admin' ? 'flex' : 'none';
 
+    // Паралельно завантажуємо дані, щоб не було затримок
     loadAccountOrders();
     loadAccountPromos();
     loadBonusHistory();
@@ -423,37 +430,57 @@ async function submitAccountOrder(event) {
     await submitDirectOrder('account', event);
 }
 
+// === ЄДИНА ТОЧКА ВХОДУ ТА ПЕРЕВІРКИ СЕСІЇ ===
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Спочатку відновлюємо кошик з пам'яті
+    // 1. Відновлюємо кошик з пам'яті
     const savedCart = localStorage.getItem('varta_cart');
     if (savedCart) {
         cart = JSON.parse(savedCart);
     }
     updateCartUI();
     
-    // 2. ЗАВЖДИ ПЕРШИМ КРОКОМ ПЕРЕВІРЯЄМО СЕСІЮ В SUPABASE
+    // 2. ПЕРЕВІРЯЄМО СЕСІЮ ОДРАЗУ ПРИ ЗАВАНТАЖЕННІ
     try {
         const { data: { session } } = await sb.auth.getSession();
         if (session?.user) {
             currentUser = session.user;
             await loadUserProfile(session.user);
             updateAuthUI(session.user);
-            updateCheckoutAuthHint();
         } else {
             currentUser = null;
             currentProfile = null;
             updateAuthUI(null);
         }
     } catch (err) {
-        console.error("Помилка відновлення сесії:", err);
+        console.error("Помилка сесії:", err);
     }
 
-    // 3. Тільки після перевірки акаунта малюємо скелети і завантажуємо каталог
+    updateCheckoutAuthHint();
     renderSkeletons(); 
     loadCSV();
-
     updateWishlistUI();        
     renderRecentlyViewedUI();
+});
+
+// === СЛІДКУЄМО ЗА ЗМІНАМИ АКАУНТА (БЕЗ КОНФЛІКТІВ) ===
+sb.auth.onAuthStateChange(async (_event, session) => {
+    if (session?.user) {
+        currentUser = session.user;
+        await loadUserProfile(session.user);
+    } else {
+        currentUser = null;
+        currentProfile = null;
+    }
+    
+    updateAuthUI(currentUser);
+    updateCheckoutAuthHint();
+    updateCartUI();
+    
+    // Якщо модалка кабінету відкрита — оновлюємо її вміст без "вічного завантаження"
+    const modal = document.getElementById('account-modal');
+    if (modal && modal.classList.contains('active')) {
+        renderAccountModal();
+    }
 });
 // === СЛІДКУЄМО ЗА АВТОРИЗАЦІЄЮ ТА ОНОВЛЮЄМО ВСЕ МИТТЄВО ===
 sb.auth.onAuthStateChange(async (_event, session) => {
