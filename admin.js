@@ -107,19 +107,19 @@ async function loadAdminOrders() {
             const client = prof?.email || o.shipping_data?.name || 'Гість';
             const date = new Date(o.created_at).toLocaleDateString('uk-UA');
             return `<tr>
-                <td><code>${o.id.slice(0, 8)}</code></td>
-                <td>${client}</td>
-                <td class="td-items" title="${items}">${items.slice(0, 40)}${items.length > 40 ? '...' : ''}</td>
-                <td><strong>${o.total_amount} ₴</strong></td>
-                <td>
+                <td data-label="ID"><code>${o.id.slice(0, 8)}</code></td>
+                <td data-label="Клієнт">${client}</td>
+                <td data-label="Товари" class="td-items" title="${items}">${items.slice(0, 40)}${items.length > 40 ? '...' : ''}</td>
+                <td data-label="Сума"><strong>${o.total_amount} ₴</strong></td>
+                <td data-label="Статус">
                     <select class="status-select status-${o.status}" onchange="updateOrderStatus('${o.id}', this.value)">
                         ${Object.entries(STATUS_LABELS).map(([k, v]) =>
                             `<option value="${k}" ${o.status === k ? 'selected' : ''}>${v}</option>`
                         ).join('')}
                     </select>
                 </td>
-                <td>${date}</td>
-                <td>
+                <td data-label="Дата">${date}</td>
+                <td data-label="Дії">
                     <button class="admin-btn-icon" onclick="viewOrderDetails('${o.id}')" title="Деталі"><i class="fas fa-eye"></i></button>
                 </td>
             </tr>`;
@@ -188,12 +188,12 @@ function renderClientsTable(clients) {
         <tbody>${clients.map(c => {
             const date = new Date(c.created_at).toLocaleDateString('uk-UA');
             return `<tr>
-                <td>${c.full_name || '—'}</td>
-                <td>${c.email || '—'}</td>
-                <td><span class="bonus-badge">${c.bonus_points || 0}</span></td>
-                <td><span class="role-badge role-${c.role}">${c.role}</span></td>
-                <td>${date}</td>
-                <td class="td-actions">
+                <td data-label="Ім'я">${c.full_name || '—'}</td>
+                <td data-label="Email">${c.email || '—'}</td>
+                <td data-label="Бонуси"><span class="bonus-badge">${c.bonus_points || 0}</span></td>
+                <td data-label="Роль"><span class="role-badge role-${c.role}">${c.role}</span></td>
+                <td data-label="Дата">${date}</td>
+                <td data-label="Дії" class="td-actions">
                     <button class="admin-btn-sm" onclick="grantBonus('${c.id}', '${c.email}')" title="Нарахувати бонуси">
                         <i class="fas fa-gift"></i>
                     </button>
@@ -265,13 +265,13 @@ async function loadAdminPromos() {
             <th>Код</th><th>Знижка</th><th>Тип</th><th>Використань</th><th>Клієнт</th><th>Активний</th><th>Дії</th>
         </tr></thead>
         <tbody>${data.map(p => `<tr>
-            <td><code>${p.code}</code></td>
-            <td>-${p.discount_percent}%</td>
-            <td>${p.is_global ? 'Глобальний' : 'Персональний'}</td>
-            <td>${p.used_count || 0}${p.max_uses ? '/' + p.max_uses : ''}</td>
-            <td>${emailMap[p.assigned_user_id] || '—'}</td>
-            <td>${p.active ? '✅' : '❌'}</td>
-            <td>
+            <td data-label="Код"><code>${p.code}</code></td>
+            <td data-label="Знижка">-${p.discount_percent}%</td>
+            <td data-label="Тип">${p.is_global ? 'Глобальний' : 'Персональний'}</td>
+            <td data-label="Використано">${p.used_count || 0}${p.max_uses ? '/' + p.max_uses : ''}</td>
+            <td data-label="Клієнт">${emailMap[p.assigned_user_id] || '—'}</td>
+            <td data-label="Активний">${p.active ? '✅' : '❌'}</td>
+            <td data-label="Дії">
                 <button class="admin-btn-icon" onclick="togglePromo('${p.id}', ${!p.active})" title="Вкл/Викл">
                     <i class="fas fa-power-off"></i>
                 </button>
