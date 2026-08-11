@@ -1,3 +1,8 @@
+// Ініціалізація клієнта Supabase
+const SUPABASE_URL = 'https://tfzkcejlbasehjmtiwpw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmemtjZWpsYmFzZWhqbXRpd3B3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0NDA4OTIsImV4cCI6MjEwMjAxNjg5Mn0.yC2uQ4-KGErtVgUlgiGmSukwBi3zc7PpVs4WlqLEtJc';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTNJEvmAeBRHDj3yMxPLIN9RHWFmVJCvMdUqiwDCajVPdicnaEmnV9tk66uTgMVanY0kqIgfyU0twSw/pub?gid=0&single=true&output=csv';
 const ITEMS_PER_PAGE = 21;
 // === РОЗУМНЕ БЛОКУВАННЯ СКРОЛУ ===
@@ -28,6 +33,53 @@ function hapticFeedback() {
         navigator.vibrate(50); 
     }
 }
+
+// === АВТОРИЗАЦІЯ ===
+async function loginWithGoogle() {
+    const { error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin }
+    });
+    if (error) console.error('Помилка входу:', error.message);
+}
+
+async function logout() {
+    await sb.auth.signOut();
+    location.reload();
+}
+
+function updateAuthUI(user) {
+    const btn = document.getElementById('account-btn');
+    if (!btn) return;
+    const icon = btn.querySelector('i');
+    if (user) {
+        icon.className = 'fas fa-user-check';
+        btn.title = user.email;
+    } else {
+        icon.className = 'fas fa-user';
+        btn.title = 'Увійти в акаунт';
+    }
+}
+
+async function handleAccountClick() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session?.user) {
+        if (confirm(`Ви увійшли як ${session.user.email}.\nВийти з акаунту?`)) {
+            logout();
+        }
+    } else {
+        loginWithGoogle();
+    }
+}
+
+// Слідкуємо за станом авторизації
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    updateAuthUI(session?.user || null);
+});
+sb.auth.onAuthStateChange((_event, session) => {
+    updateAuthUI(session?.user || null);
+});
 // ==================================
 let allProducts = [], filteredProducts = [], cart = [], currentPage = 1;
 let currentModalPics = [], currentModalPicIndex = 0;
@@ -991,16 +1043,24 @@ function hideCheckoutForm() {
     document.getElementById('checkout-form-container').style.display = 'none';
 }
 
-function submitDirectOrder(platform, event) {
-    if (event) event.preventDefault(); 
+async function submitDirectOrder(platform, event) {
+    if (event) event.preventDefault();
 
     try {
+        // Перевірка авторизації
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session?.user) {
+            alert('Будь ласка, увійдіть в акаунт для оформлення замовлення!');
+            loginWithGoogle();
+            return;
+        }
+        const user = session.user;
+
         if (cart.length === 0) {
             alert("Кошик порожній!");
             return;
         }
-        
-        // Збираємо дані
+
         const nameEl = document.getElementById('order-name');
         const phoneEl = document.getElementById('order-phone');
         const cityEl = document.getElementById('order-city');
@@ -1010,7 +1070,7 @@ function submitDirectOrder(platform, event) {
         const phone = phoneEl ? phoneEl.value.trim() : "";
         const city = cityEl ? cityEl.value.trim() : "";
         const np = npEl ? npEl.value.trim() : "";
-        
+
         const paymentRadio = document.querySelector('input[name="payment-method"]:checked');
         const paymentMethod = paymentRadio ? paymentRadio.value : "Не вказано";
 
@@ -1018,24 +1078,44 @@ function submitDirectOrder(platform, event) {
             alert('Будь ласка, заповніть всі поля для доставки!');
             return;
         }
-        
+
         const totalEl = document.getElementById('final-total-price') || document.getElementById('cart-total-price');
         const total = totalEl ? totalEl.innerText : "0";
         const numericTotal = parseFloat(total) || 0;
 
-        // Формуємо красиве повідомлення
-        let txt = "🪖 НОВЕ ЗАМОВЛЕННЯ VARTA GEAR:\n\n";
-        cart.forEach((it, i) => { 
-            txt += `${i+1}. ${it.Name} (Розмір: ${it.selectedSize}) - ${it.Price} грн\n`; 
-        });
-        
-        txt += `\n💰 РАЗОМ: ${total} грн\n`;
-        
-        // Виправлено помилку з numericTotal
-        if (numericTotal >= 3000) {
-            txt += `🎁 ДОСТАВКА: БЕЗКОШТОВНА\n`;
+        // Запис замовлення в Supabase
+        // Запис замовлення в Supabase
+        const { data: orderData, error: orderError } = await sb
+            .from('orders')
+            .insert([{
+                user_id: user.id,
+                total_amount: numericTotal,
+                status: 'new',
+                shipping_data: { name, phone, city, np, paymentMethod }
+            }])
+            .select()
+            .single();
+
+        if (orderError) {
+            console.error('Помилка збереження замовлення:', orderError.message);
+        } else {
+            const itemsToInsert = cart.map(it => ({
+                order_id: orderData.id,
+                product_name: it.Name,
+                quantity: it.quantity || 1,
+                price: it.Price
+            }));
+            const { error: itemsError } = await sb.from('order_items').insert(itemsToInsert);
+            if (itemsError) console.error('Помилка збереження товарів:', itemsError.message);
         }
-        
+
+        // Формуємо повідомлення для месенджера (як і раніше)
+        let txt = "🪖 НОВЕ ЗАМОВЛЕННЯ VARTA GEAR:\n\n";
+        cart.forEach((it, i) => {
+            txt += `${i+1}. ${it.Name} (Розмір: ${it.selectedSize}) - ${it.Price} грн\n`;
+        });
+        txt += `\n💰 РАЗОМ: ${total} грн\n`;
+        if (numericTotal >= 3000) txt += `🎁 ДОСТАВКА: БЕЗКОШТОВНА\n`;
         txt += `\n📦 ДАНІ ДОСТАВКИ:\n`;
         txt += `👤 ПІБ: ${name}\n`;
         txt += `📞 Тел: ${phone}\n`;
@@ -1043,14 +1123,11 @@ function submitDirectOrder(platform, event) {
         txt += `📮 Відділення НП: ${np}\n`;
         txt += `💳 Оплата: ${paymentMethod}\n`;
 
-        // Кодуємо текст для посилання
         const encoded = encodeURIComponent(txt);
-        
-        // Перенаправляємо в потрібний месенджер
+
         if (platform === 'tg') {
             window.location.href = `https://t.me/vartagear?text=${encoded}`;
         } else if (platform === 'wa') {
-            // Для WhatsApp номер має бути без плюса на початку
             window.location.href = `https://wa.me/380933923810?text=${encoded}`;
         }
     } catch (error) {
