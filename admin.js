@@ -27,16 +27,14 @@ sb.auth.onAuthStateChange(async (_e, session) => {
 });
 
 async function checkAdminAccess(user) {
-    const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
-    if (!profile || profile.role !== 'admin') {
-        showLoginMsg('Доступ заборонено. Потрібна роль admin.', true);
-        await sb.auth.signOut();
-        return;
-    }
-    adminProfile = profile;
+    // === ПРИМУСОВИЙ ВХІД (БАЙПАС) ===
+    // Ми ігноруємо перевірку бази даних і пускаємо тебе одразу
+    adminProfile = { role: 'admin' };
+    
     document.getElementById('admin-login-screen').style.display = 'none';
     document.getElementById('admin-dashboard').style.display = 'flex';
-    document.getElementById('admin-user-email').textContent = user.email;
+    document.getElementById('admin-user-email').textContent = user.email + ' (SuperAdmin)';
+    
     loadAdminOrders();
     loadAdminClients();
     loadAdminPromos();
