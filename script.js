@@ -458,9 +458,9 @@ async function submitAccountOrder(event) {
     await submitDirectOrder('account', event);
 }
 
-// === ЄДИНА ТОЧКА ВХОДУ ТА ПЕРЕВІРКИ СЕСІЇ ===
-document.addEventListener('DOMContentLoaded', async () => {
-    // 1. НАЙПЕРШЕ: Відновлюємо кошик з localStorage, щоб він ніколи не зникав
+// === 1. ЗАВАНТАЖЕННЯ СТОРІНКИ (БЕЗ КОНФЛІКТНИХ ЗАПИТІВ СЕСІЇ) ===
+document.addEventListener('DOMContentLoaded', () => {
+    // Відновлюємо кошик з пам'яті
     const savedCart = localStorage.getItem('varta_cart');
     if (savedCart) {
         try {
@@ -471,94 +471,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     updateCartUI();
     
-    // 2. ЧЕКАЄМО ВІДПОВІДІ ВІД SUPABASE ПЕРЕД МАЛЮВАННЯМ ІНТЕРФЕЙСУ
-    try {
-        const { data: { session }, error } = await sb.auth.getSession();
-        if (session && session.user) {
-            currentUser = session.user;
-            await loadUserProfile(currentUser);
-            updateAuthUI(currentUser);
-        } else {
-            currentUser = null;
-            currentProfile = null;
-            updateAuthUI(null);
-        }
-    } catch (err) {
-        console.error("Помилка відновлення сесії:", err);
-    }
-
-    updateCheckoutAuthHint();
-    
-    // 3. Завантажуємо каталог і все інше
+    // Малюємо скелети і завантажуємо каталог
     renderSkeletons(); 
     loadCSV();
     updateWishlistUI();        
     renderRecentlyViewedUI();
 });
 
-// === СЛІДКУЄМО ЗА ЗМІНАМИ АКАУНТА (БЕЗ КОНФЛІКТІВ) ===
-sb.auth.onAuthStateChange(async (_event, session) => {
-    if (session?.user) {
+// === 2. ЄДИНИЙ КОНТРОЛЕР АКАУНТА (SUPABASE BEST PRACTICE) ===
+// Цей слухач сам автоматично зловить сесію з пам'яті при завантаженні (INITIAL_SESSION)
+sb.auth.onAuthStateChange(async (event, session) => {
+    console.log("Auth Event:", event); // Можеш подивитися в консолі F12
+
+    if (session && session.user) {
         currentUser = session.user;
-        await loadUserProfile(session.user);
+        await loadUserProfile(currentUser);
+        updateAuthUI(currentUser);
     } else {
-        currentUser = null;
-        currentProfile = null;
+        // Викидаємо з акаунта ТІЛЬКИ якщо користувач сам натиснув "Вийти"
+        if (event === 'SIGNED_OUT') {
+            currentUser = null;
+            currentProfile = null;
+            updateAuthUI(null);
+        }
     }
     
-    updateAuthUI(currentUser);
     updateCheckoutAuthHint();
     updateCartUI();
     
-    // Якщо модалка кабінету відкрита — оновлюємо її вміст без "вічного завантаження"
+    // Якщо відкритий особистий кабінет — оновлюємо його
     const modal = document.getElementById('account-modal');
     if (modal && modal.classList.contains('active')) {
         renderAccountModal();
     }
 });
-// === СЛІДКУЄМО ЗА АВТОРИЗАЦІЄЮ ТА ОНОВЛЮЄМО ВСЕ МИТТЄВО ===
-sb.auth.onAuthStateChange(async (_event, session) => {
-    if (session?.user) {
-        await loadUserProfile(session.user); // Чекаємо завантаження профілю
-    } else {
-        currentUser = null;
-        currentProfile = null;
-    }
-    
-    updateAuthUI(session?.user || null);
-    updateCheckoutAuthHint(); // Оновлюємо кнопку в кошику
-    updateCartUI(); // Перемальовуємо кошик (щоб з'явилися бонуси!)
-    
-    if (document.getElementById('account-modal')?.classList.contains('active')) {
-        renderAccountModal();
-    }
-});
+
 // ==================================
 let allProducts = [], filteredProducts = [], cart = [], currentPage = 1;
 let currentModalPics = [], currentModalPicIndex = 0;
 let wishlist = JSON.parse(localStorage.getItem('varta_wishlist')) || [];
 let recentlyViewed = JSON.parse(localStorage.getItem('varta_recent')) || [];
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Спочатку дістаємо дані з пам'яті браузера
-    const savedCart = localStorage.getItem('varta_cart');
-    if (savedCart) {
-        cart = JSON.parse(savedCart);
-    }
-    
-    // Оновлюємо інтерфейс (лічильник та список)
-    updateCartUI();
-    
-    // Завантажуємо товари
-    loadCSV();
-
-    updateWishlistUI();        // <--- ДОДАЄМО ТУТ (відновлює сердечка)
-    renderRecentlyViewedUI();
-});
-
-// ========================================================
-// 2. ДОДАВАННЯ: Оновлена функція з записом у пам'ять
-// ========================================================
 
 function setupAddToCart(p, sel) {
     const addButton = document.getElementById('modal-add-btn');
