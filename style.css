@@ -3877,7 +3877,17 @@ input:focus, textarea:focus, select:focus {
 .bonus-checkbox-label input { width: 18px; height: 18px; accent-color: var(--mono-lime); }
 
 @media (max-width: 480px) {
-    .account-modal { max-height: 95vh; border-radius: 16px 16px 0 0; align-self: flex-end; }
+    .account-modal { 
+        max-height: 85vh !important; /* Робимо вікно трохи нижчим, щоб клавіатурі було місце */
+        border-radius: 16px 16px 0 0; 
+        align-self: flex-end; 
+    }
+    
+    .account-view {
+        overflow-y: auto;
+        padding-bottom: 80px !important; /* Великий відступ знизу, щоб кнопка точно влізла */
+    }
+
     .account-nav-tab { font-size: 11px; padding: 8px 4px; }
     .account-nav-tab i { display: block; margin: 0 0 2px; }
 }
