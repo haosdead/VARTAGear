@@ -88,16 +88,29 @@ async function registerWithEmail() {
             emailRedirectTo: getSiteUrl()
         }
     });
+    
     if (error) return showAuthMessage(error.message, true);
+    
     if (data.user && !data.session) {
         showAuthMessage('Перевірте пошту — надіслали лист для підтвердження', false);
     } else if (data.session) {
-        showAuthMessage('Ви успішно зареєстровані!', false);
+        
+        // 🔥 НОВЕ: Красиве повідомлення про успішну реєстрацію
+        closeAccountModal(); // Закриваємо реєстраційне вікно
+        
+        // Викликаємо твій існуючий зелений Toast знизу екрана
+        const toast = document.getElementById('toast-notification');
+        const msg = document.getElementById('toast-message');
+        if (toast && msg) {
+            msg.innerHTML = `<strong>Вітаємо!</strong> Ви успішно зареєстровані! 100 бонусів нараховано 🎁`;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000); // Сховається через 4 сек
+        }
+        
         await loadUserProfile(data.user);
         updateAuthUI(data.user);
-        switchAuthTab('login');
     }
-} 
+}
 
 async function logout() {
     await sb.auth.signOut();
@@ -130,16 +143,24 @@ async function loadUserProfile(user) {
 function updateAuthUI(user) {
     currentUser = user;
     const btn = document.getElementById('account-btn');
-    if (!btn) return;
-    const icon = btn.querySelector('i');
-    if (user) {
-        icon.className = 'fas fa-user-check';
-        btn.title = user.email || 'Кабінет';
-    } else {
-        icon.className = 'fas fa-user';
-        btn.title = 'Особистий кабінет';
+    if (btn) {
+        const icon = btn.querySelector('i');
+        if (user) {
+            icon.className = 'fas fa-user-check';
+            btn.title = user.email || 'Кабінет';
+        } else {
+            icon.className = 'fas fa-user';
+            btn.title = 'Особистий кабінет';
+        }
     }
     updateCheckoutAuthHint();
+    
+    // 🔥 НОВЕ: Ховаємо банер 100 бонусів, якщо клієнт вже увійшов у систему
+    const bonusBanner = document.getElementById('register-bonus-banner');
+    if (bonusBanner) {
+        if (user) bonusBanner.classList.add('hidden');
+        else bonusBanner.classList.remove('hidden');
+    }
 }
 
 function updateCheckoutAuthHint() {
