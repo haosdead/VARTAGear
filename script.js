@@ -5,6 +5,14 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTNJEvmAeBRHDj3yMxPLIN9RHWFmVJCvMdUqiwDCajVPdicnaEmnV9tk66uTgMVanY0kqIgfyU0twSw/pub?gid=0&single=true&output=csv';
 const ITEMS_PER_PAGE = 21;
+// =================== РОЗУМНИЙ ПОШУК (ДЕБАУНС) ===================
+let searchTimeout;
+function debouncedSearch() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        resetPageAndFilter();
+    }, 400); // Чекаємо 400 мілісекунд після останнього натискання клавіші
+}
 // === РОЗУМНЕ БЛОКУВАННЯ СКРОЛУ ===
 let savedScrollY = 0;
 
