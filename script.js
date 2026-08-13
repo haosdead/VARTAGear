@@ -143,6 +143,8 @@ async function loadUserProfile(user) {
 function updateAuthUI(user) {
     currentUser = user;
     const btn = document.getElementById('account-btn');
+    const bottomBtn = document.getElementById('bottom-account-btn'); // 🔥 Знаходимо нижню кнопку
+    
     if (btn) {
         const icon = btn.querySelector('i');
         if (user) {
@@ -153,16 +155,28 @@ function updateAuthUI(user) {
             btn.title = 'Особистий кабінет';
         }
     }
+    
+    // 🔥 НОВЕ: Неонове синє підсвічування для мобільного меню
+    if (bottomBtn) {
+        const bottomIcon = bottomBtn.querySelector('i');
+        if (user) {
+            bottomIcon.className = 'fas fa-user-check';
+            bottomBtn.classList.add('neon-blue-active'); // Вмикаємо неон
+        } else {
+            bottomIcon.className = 'fas fa-user';
+            bottomBtn.classList.remove('neon-blue-active'); // Вимикаємо неон
+        }
+    }
+    
     updateCheckoutAuthHint();
     
-    // 🔥 НОВЕ: Ховаємо банер 100 бонусів, якщо клієнт вже увійшов у систему
+    // Ховаємо банер 100 бонусів, якщо він є
     const bonusBanner = document.getElementById('register-bonus-banner');
     if (bonusBanner) {
         if (user) bonusBanner.classList.add('hidden');
         else bonusBanner.classList.remove('hidden');
     }
 }
-
 function updateCheckoutAuthHint() {
     const hint = document.getElementById('checkout-auth-hint');
     const btn = document.getElementById('checkout-account-btn');
@@ -1386,6 +1400,12 @@ function updateCartUI() {
     const cartCount = document.getElementById('cart-count');
     if (cartCount) cartCount.innerText = cart.length;
 
+    // 🔥 НОВЕ: Оновлюємо цифру в нижньому мобільному меню
+    const bottomCartCount = document.getElementById('bottom-cart-count');
+    if (bottomCartCount) {
+        bottomCartCount.innerText = cart.length;
+        bottomCartCount.style.display = cart.length > 0 ? 'flex' : 'none';
+    }
     const content = document.getElementById('cart-content');
     const footer = document.getElementById('cart-footer');
     
@@ -2202,11 +2222,21 @@ function renderRecentlyViewedUI() {
 // --- 3. АНІМАЦІЯ КОШИКА ---
 // Додай цей виклик всередині функції updateCartUI()
 function animateCartIcon() {
-    const btn = document.getElementById('cart-icon-btn');
-    btn.classList.add('cart-bounce');
-    setTimeout(() => btn.classList.remove('cart-bounce'), 600);
+    const btn = document.getElementById('cart-icon-btn'); // Верхня кнопка
+    const bottomBtn = document.getElementById('bottom-cart-btn'); // Нижня кнопка
+    
+    if (btn) {
+        btn.classList.add('cart-bounce');
+        setTimeout(() => btn.classList.remove('cart-bounce'), 600);
+    }
+    
+    // 🔥 НОВЕ: Стрибок нижнього меню + тактильна віддача
+    if (bottomBtn) {
+        if (typeof hapticFeedback === 'function') hapticFeedback(); 
+        bottomBtn.classList.add('cart-bounce');
+        setTimeout(() => bottomBtn.classList.remove('cart-bounce'), 600);
+    }
 }
-
 
 // РОЗУМНИЙ ФІЛЬТР ЗА КОЛЬОРАМИ (З УРАХУВАННЯМ КАТЕГОРІЇ)
 // ========================================================
