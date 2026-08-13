@@ -4024,3 +4024,18 @@ input:focus, textarea:focus, select:focus {
 }
 .bonus-banner-btn:active { transform: scale(0.95); }
 .register-bonus-banner.hidden { display: none !important; }
+/* =================== НЕОНОВИЙ СИНІЙ ДЛЯ АВТОРИЗОВАНОГО КАБІНЕТУ =================== */
+.neon-blue-active {
+    color: #2AABEE !important;
+    text-shadow: 0 0 15px rgba(42, 171, 238, 0.6);
+}
+.neon-blue-active i {
+    color: #2AABEE !important;
+    filter: drop-shadow(0 0 12px rgba(42, 171, 238, 0.8));
+    animation: neonPulseBlue 2s infinite alternate;
+}
+
+@keyframes neonPulseBlue {
+    0% { filter: drop-shadow(0 0 5px rgba(42, 171, 238, 0.5)); }
+    100% { filter: drop-shadow(0 0 15px rgba(42, 171, 238, 1)); }
+}
