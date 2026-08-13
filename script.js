@@ -102,17 +102,24 @@ async function registerWithEmail() {
     if (data.user && !data.session) {
         showAuthMessage('Перевірте пошту — надіслали лист для підтвердження', false);
     } else if (data.session) {
+        closeAccountModal();
         
-        // 🔥 НОВЕ: Красиве повідомлення про успішну реєстрацію
-        closeAccountModal(); // Закриваємо реєстраційне вікно
-        
-        // Викликаємо твій існуючий зелений Toast знизу екрана
         const toast = document.getElementById('toast-notification');
         const msg = document.getElementById('toast-message');
         if (toast && msg) {
             msg.innerHTML = `<strong>Вітаємо!</strong> Ви успішно зареєстровані! 100 бонусів нараховано 🎁`;
             toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 4000); // Сховається через 4 сек
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+        
+        // 🔥 ЗАПУСК КОНФЕТТІ (твої фірмові кольори)
+        if (typeof confetti === 'function') {
+            confetti({
+                particleCount: 150,
+                spread: 80,
+                origin: { y: 0.6 },
+                colors: ['#A2D24A', '#ffffff', '#2AABEE']
+            });
         }
         
         await loadUserProfile(data.user);
@@ -1381,10 +1388,15 @@ async function applyPromoCode() {
             updateCartUI();
             return;
         }
-        currentDiscount = 0;
+       currentDiscount = 0;
         appliedPromoCode = null;
         appliedPromoDiscount = 0;
         if (msgEl) msgEl.innerHTML = `<span style="color: #ff3300;">❌ Промокод не знайдено</span>`;
+        
+        // Трясемо поле вводу
+        inputEl.classList.add('shake-animation');
+        setTimeout(() => inputEl.classList.remove('shake-animation'), 400);
+        
         updateCartUI();
         return;
     }
@@ -2612,4 +2624,37 @@ function submitFastOrder() {
     
     // Відкриваємо Telegram із заповненим повідомленням
     window.open(`https://t.me/vartagear?text=${encoded}`, '_blank');
+}
+// =================== ДИНАМІЧНИЙ ЗАГОЛОВОК ВКЛАДКИ ===================
+let originalTitle = document.title;
+
+window.addEventListener("blur", () => {
+    // Якщо в кошику є товари
+    if (cart && cart.length > 0) {
+        document.title = "🪖 Ти забув своє спорядження!";
+    } else {
+        document.title = "👀 Повертайся за екіпом!";
+    }
+});
+
+window.addEventListener("focus", () => {
+    document.title = originalTitle;
+});
+
+// =================== ПОДІЛИТИСЯ КОШИКОМ ===================
+function shareCart() {
+    if (cart.length === 0) {
+        showToast("Кошик порожній!");
+        return;
+    }
+    
+    let textToShare = "Привіт! Дивись, що я планую замовити на VARTA GEAR:\n\n";
+    cart.forEach((item, index) => {
+        textToShare += `${index + 1}. ${item.Name} (Розмір: ${item.selectedSize}) — ${item.Price} грн\n`;
+    });
+    
+    let total = cart.reduce((s, it) => s + (parseFloat(it.Price) || 0), 0);
+    textToShare += `\nСума: ${total} грн.\nДавай замовляти разом?`;
+    
+    copyToClipboard(textToShare, 'Список товарів');
 }
