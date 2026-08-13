@@ -2594,3 +2594,22 @@ window.addEventListener('scroll', () => {
         searchInput.blur(); // Забираємо фокус = ховаємо клавіатуру
     }
 }, { passive: true });
+function submitFastOrder() {
+    const phoneInput = document.getElementById('fast-phone-input');
+    const phone = phoneInput ? phoneInput.value.trim() : '';
+    
+    if (!phone || phone.length < 10) {
+        alert('Введіть коректний номер телефону!');
+        return;
+    }
+    
+    // Формуємо список товарів у кошику
+    let cartSummary = cart.map(it => `${it.Name} (${it.selectedSize})`).join(', ');
+    let total = cart.reduce((s, it) => s + (parseFloat(it.Price) || 0), 0);
+    
+    let txt = `⚡ ШВИДКЕ ЗАМОВЛЕННЯ В 1 КЛІК:\n📞 Телефон: ${phone}\n🛒 Товари: ${cartSummary}\n💰 Сума: ${total} грн`;
+    let encoded = encodeURIComponent(txt);
+    
+    // Відкриваємо Telegram із заповненим повідомленням
+    window.open(`https://t.me/vartagear?text=${encoded}`, '_blank');
+}
