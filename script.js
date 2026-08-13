@@ -2459,10 +2459,14 @@ function updateProductMicrodata(p) {
 // ==========================================
 // СВАЙПИ ДЛЯ ФОТО У МОДАЛЬНОМУ ВІКНІ
 // ==========================================
+// ==========================================
+// СВАЙПИ ДЛЯ ФОТО У МОДАЛЬНОМУ ВІКНІ (З ФІКСОМ ГІПЕРЧУТЛИВОСТІ)
+// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     const modalImg = document.getElementById('modal-main-img');
     let swipeStartX = 0;
     let swipeEndX = 0;
+    let lastSwipeTime = 0; // 🔥 Додаємо таймер-запобіжник
 
     if (modalImg) {
         modalImg.addEventListener('touchstart', (e) => {
@@ -2476,14 +2480,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleModalPhotoSwipe() {
-        const minSwipeDistance = 40; // Чутливість свайпу (в пікселях)
+        const minSwipeDistance = 45; // Чутливість свайпу (в пікселях)
+        const now = Date.now();
+        
+        // 🔥 Захист від множинних спрацьовувань: мінімум 300мс між свайпами
+        if (now - lastSwipeTime < 300) return; 
         
         if (swipeStartX - swipeEndX > minSwipeDistance) {
             // Свайп вліво -> Наступне фото
             changeModalPic(1); 
+            lastSwipeTime = now;
         } else if (swipeEndX - swipeStartX > minSwipeDistance) {
             // Свайп вправо -> Попереднє фото
             changeModalPic(-1); 
+            lastSwipeTime = now;
         }
     }
 });
