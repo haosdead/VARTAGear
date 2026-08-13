@@ -555,10 +555,9 @@ function setupAddToCart(p, sel) {
         if (typeof toggleCart === 'function') toggleCart(true);
     };
 }
+
+// РОЗУМНЕ ЗАВАНТАЖЕННЯ З КЕШУВАННЯМ (Оптимізація + Фікс Safari)
 // ========================================================
-// РОЗУМНЕ ЗАВАНТАЖЕННЯ З КЕШУВАННЯМ (Оптимізація)
-// ========================================================
-// РОЗУМНЕ ЗАВАНТАЖЕННЯ З КЕШУВАННЯМ (Оптимізація)
 function loadCSV() {
     const CACHE_KEY = 'varta_catalog_data';
     const TIME_KEY = 'varta_catalog_time';
@@ -572,30 +571,26 @@ function loadCSV() {
         processProducts(JSON.parse(cachedData));
     } else {
         console.log("🔄 Оновлення бази з Google Sheets...");
-        Papa.parse(CSV_URL, {
+        
+        // 🔥 ФІКС ДЛЯ SAFARI: Додаємо унікальний маркер часу, щоб пробити жорсткий кеш браузера
+        const bypassCacheUrl = CSV_URL + '&_t=' + Date.now();
+        
+        Papa.parse(bypassCacheUrl, {
             download: true, 
             header: true, 
             skipEmptyLines: true,
             complete: function(res) {
                 try {
-                    // Очищаємо перед записом, щоб точно вистачило місця
+                    // Очищаємо перед записом
                     localStorage.removeItem(CACHE_KEY);
                     localStorage.setItem(CACHE_KEY, JSON.stringify(res.data));
                     localStorage.setItem(TIME_KEY, Date.now());
                 } catch (e) {
-    console.warn("🧹 Кеш переповнено, видаляємо лише старий каталог...", e);
-    // Видаляємо ТІЛЬКИ старий кеш каталогу, не чіпаючи кошик (varta_cart) та токени Supabase
-    localStorage.removeItem(CACHE_KEY);
-    localStorage.removeItem(TIME_KEY);
-    
-    // Якщо навіть без старого кешу не вистачає місця, просто не кешуємо дані на цей раз
-    try { 
-        localStorage.setItem(CACHE_KEY, JSON.stringify(res.data)); 
-        localStorage.setItem(TIME_KEY, Date.now());
-    } catch(err) {
-        console.error("Не вдалося зберегти каталог у кеш. Працюємо без кешування.");
-    }
-}
+                    console.warn("🧹 Кеш переповнено або Safari в режимі Інкогніто. Працюємо напряму без кешування.");
+                    // Якщо пам'яті немає, просто видаляємо старе і працюємо без помилок
+                    localStorage.removeItem(CACHE_KEY);
+                    localStorage.removeItem(TIME_KEY);
+                }
 
                 processProducts(res.data);
             },
