@@ -319,6 +319,13 @@
                 <p class="final-sum" style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 15px;">
                     До сплати: <span id="final-total-price">0</span> грн
                 </p>
+                <div class="quick-order-box" style="margin-top: 15px; background: #111; padding: 15px; border-radius: 10px; border: 1px dashed #333; text-align: center;">
+                    <p style="font-size: 12px; color: #aaa; margin-bottom: 10px;">Швидке замовлення (передзвонимо за 5 хв):</p>
+                    <div style="display: flex; gap: 8px;">
+                    <input type="tel" id="fast-phone-input" placeholder="+380..." style="flex-grow:1; background:#1a1a1a; border:1px solid #333; color:#fff; padding:10px; border-radius:6px; font-size:13px;">
+                        <button type="button" onclick="submitFastOrder()" style="background:var(--mono-lime); color:#000; border:none; padding:0 15px; border-radius:6px; font-weight:800; cursor:pointer; font-size:12px;">ГОТОВО</button>
+                        </div>
+                </div>
                 <div class="checkout-messenger-btns">
                     <button type="button" class="btn-tg checkout-btn" onclick="submitDirectOrder('tg', event)">
                         <i class="fab fa-telegram-plane"></i> Замовити в Telegram
