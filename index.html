@@ -22,6 +22,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   
 </head>
      <body>
@@ -280,6 +281,9 @@
             </div>
             <div id="promo-message-cart" style="text-align: center; font-size: 13px; margin-bottom: 15px;"></div>
             <div class="cart-sum">Разом: <span id="cart-total-price">0</span> грн</div>
+            <button onclick="shareCart()" style="background: transparent; border: 1px dashed #666; color: #aaa; width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px;">
+            <i class="fas fa-share-alt"></i> Cкопіювати та поділитися кошиком
+            </button>
             <button class="add-to-cart-btn" style="width:100%; margin-bottom: 10px;" onclick="showCheckoutForm()">ПЕРЕЙТИ ДО ОФОРМЛЕННЯ</button>
             <button class="continue-btn" onclick="toggleCart(false)">ПРОДОВЖИТИ ПОКУПКИ</button>
         </div>
