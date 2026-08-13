@@ -31,7 +31,7 @@
         <span>Каталог</span>
     </button>
     <!-- Замінили пошук на Кабінет -->
-    <button class="bottom-nav-item" onclick="hapticFeedback(); handleAccountClick()">
+   <button id="bottom-account-btn" class="bottom-nav-item" onclick="hapticFeedback(); handleAccountClick()">
         <i class="fas fa-user"></i>
         <span>Кабінет</span>
     </button>
@@ -39,8 +39,11 @@
         <i class="far fa-heart"></i>
         <span>Обране</span>
     </button>
-    <button class="bottom-nav-item" onclick="hapticFeedback(); toggleCart(true)">
-        <i class="fas fa-shopping-bag"></i>
+    <button id="bottom-cart-btn" class="bottom-nav-item" onclick="hapticFeedback(); toggleCart(true)">
+        <div style="position: relative; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-shopping-bag"></i>
+            <span id="bottom-cart-count" class="badge-count" style="display:none; position: absolute; top:-6px; right:-12px; border: 1px solid #111;">0</span>
+        </div>
         <span>Кошик</span>
     </button>
 </nav>
@@ -86,7 +89,7 @@
    <div class="header-inner">
    <button class="nav-icon" aria-label="Відкрити меню" onclick="toggleMobileMenu(true)"><i class="fas fa-bars"></i></button>
     
-    <a href="#" onclick="goHome(event)" class="brand-wrapper">
+   <a href="javascript:void(0);" onclick="goHome(event)" class="brand-wrapper">
         <span class="flag-ua">🇺🇦</span>
         <div class="brand-text">
             <h1 class="logo-main" style="margin: 0; padding: 0;">VARTA <span class="accent">GEAR</span></h1>
@@ -159,7 +162,7 @@
         <button class="close-btn" aria-label="Закрити меню" onclick="toggleMobileMenu(false)">✕</button>
     </div>
     
-    <a href="#" onclick="goHome(event)" class="home-link-sidebar">
+    <a href="javascript:void(0);" onclick="goHome(event)" class="home-link-sidebar">
         <i class="fas fa-home"></i> НА ГОЛОВНУ
     </a>
     
