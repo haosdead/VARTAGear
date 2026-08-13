@@ -1773,102 +1773,6 @@ window.addEventListener('popstate', () => {
 });
 
 
-function renderSaleCarousel() {
-    const track = document.getElementById('sale-carousel-track');
-    if (!track) return;
-
-    carouselItemsData = allProducts.filter(p => p.Badge === 'SALE');
-    if (carouselItemsData.length === 0) {
-        document.getElementById('main-sale-carousel').style.display = 'none';
-        return;
-    }
-
-    track.innerHTML = carouselItemsData.map((p, i) => {
-        const mainPic = p.Pictures ? p.Pictures.split(',')[0].trim() : '';
-        return `
-        <div class="carousel-3d-item" onclick="openModal('${p.myId}')">
-            <div class="badge-sale" style="top:10px; left:10px;">🔥 SALE</div>
-            <img src="${mainPic}" class="carousel-img" alt="${p.Name}" loading="lazy">
-            <div class="carousel-info">
-                <h4>${p.Name.toUpperCase()}</h4>
-                <div class="price-box-sale">
-                    <span class="old-price" style="font-size:12px;">${p.OldPrice ? p.OldPrice + ' грн' : ''}</span>
-                    <span class="current-price" style="font-size:18px; text-shadow:none;">${p.Price} грн</span>
-                </div>
-                <button class="btn-buy-carousel"><i class="fas fa-shopping-cart"></i> КУПИТИ</button>
-            </div>
-        </div>`;
-    }).join('');
-
-    current3DIndex = 0; 
-    update3DCarousel();
-}
-
-function moveCarousel3D(direction) {
-    if (carouselItemsData.length === 0) return;
-    current3DIndex += direction;
-    
-    // Зациклення: якщо дійшли до кінця - йдемо на початок і навпаки
-    if (current3DIndex < 0) current3DIndex = carouselItemsData.length - 1;
-    if (current3DIndex >= carouselItemsData.length) current3DIndex = 0;
-    
-    update3DCarousel();
-}
-
-function update3DCarousel() {
-    const items = document.querySelectorAll('.carousel-3d-item');
-    if (items.length === 0) return;
-
-    const isMobile = window.innerWidth <= 767;
-    const offsetBase = isMobile ? 120 : 250; 
-    // Зменшуємо кут для Android, щоб легше було малювати 3D
-    const rotateBase = isMobile ? 25 : 45;   
-
-    items.forEach((item, index) => {
-        let offset = index - current3DIndex;
-        if (offset > Math.floor(items.length / 2)) offset -= items.length;
-        if (offset < -Math.floor(items.length / 2)) offset += items.length;
-
-        // Залізно вимикаємо blur всюди, щоб не вантажити телефон
-        item.style.filter = 'none';
-
-        if (offset === 0) {
-            // АКТИВНА КАРТКА
-            // Використовуємо translate3d для GPU-прискорення
-            item.style.transform = `translate3d(0px, 0px, 50px) rotateY(0deg) scale(1)`;
-            item.style.zIndex = 10;
-            item.style.opacity = 1;
-            item.style.pointerEvents = 'auto'; 
-            item.classList.add('active-3d');
-        } else {
-            // БОКОВІ КАРТКИ
-            const sign = Math.sign(offset);     
-            const absOffset = Math.abs(offset); 
-            
-            const translateZ = absOffset === 1 ? -150 : -300;
-            const scale = absOffset === 1 ? 0.85 : 0.65;
-            const opacity = absOffset === 1 ? 0.6 : 0; 
-            
-            // GPU-прискорений запис через translate3d
-            item.style.transform = `translate3d(${sign * offsetBase * absOffset}px, 0px, ${translateZ}px) rotateY(${-sign * rotateBase}deg) scale(${scale})`;
-            item.style.zIndex = 10 - absOffset;
-            item.style.opacity = opacity;
-            item.style.pointerEvents = 'none'; 
-            item.classList.remove('active-3d');
-        }
-    });
-}
-
-// Якщо повертають екран телефону - перемальовуємо
-window.addEventListener('resize', update3DCarousel);
-
-
-// ==========================================
-// 3. УПРАВЛІННЯ КАРУСЕЛЛЮ: СВАЙП (ТАЧ) + СТРІЛКИ
-// ==========================================
-let touchStartX = 0;
-let touchEndX = 0;
-
 // Чекаємо завантаження сторінки
 document.addEventListener('DOMContentLoaded', () => {
     if (window.Telegram && window.Telegram.WebApp) {
@@ -1917,49 +1821,6 @@ function renderSkeletons() {
     catalog.innerHTML = skeletonsHTML;
 }
 
-// Перевіряємо напрямок свайпу і крутимо карусель
-function handleCarouselSwipe() {
-    const swipeThreshold = 45; // Чутливість свайпу (мінімальна відстань у пікселях)
-    
-    if (touchEndX < touchStartX - swipeThreshold) {
-        moveCarousel3D(1); // Свайпнули вліво -> Наступний товар
-    }
-    
-    if (touchEndX > touchStartX + swipeThreshold) {
-        moveCarousel3D(-1); // Свайпнули вправо -> Попередній товар
-    }
-}
-
-// Додаємо змінні для автоплею десь біля current3DIndex
-let autoplayTimer;
-
-// Функція запуску
-function startAutoplay() {
-    stopAutoplay(); // Очищаємо старий таймер, щоб вони не накладалися
-    autoplayTimer = setInterval(() => {
-        moveCarousel3D(1); // Карусель робить крок вправо кожні 4 секунди
-    }, 4000); // 4000 мілісекунд = 4 секунди
-}
-
-// Функція зупинки
-function stopAutoplay() {
-    clearInterval(autoplayTimer);
-}
-
-// Додаємо "розумну" зупинку, коли клієнт взаємодіє з каруселлю
-document.addEventListener('DOMContentLoaded', () => {
-    const carouselViewport = document.querySelector('.carousel-3d-viewport');
-    
-    if (carouselViewport) {
-        // ЗУПИНЯЄМО, коли клієнт наводить мишку або торкається пальцем
-        carouselViewport.addEventListener('mouseenter', stopAutoplay);
-        carouselViewport.addEventListener('touchstart', stopAutoplay, { passive: true });
-        
-        // ЗАПУСКАЄМО ЗНОВУ, коли клієнт забирає мишку/палець
-        carouselViewport.addEventListener('mouseleave', startAutoplay);
-        carouselViewport.addEventListener('touchend', startAutoplay, { passive: true });
-    }
-});
 
 // ==========================================
 // 5. СПЛИВАЮЧЕ ПОВІДОМЛЕННЯ (TOAST)
@@ -2066,7 +1927,7 @@ function goHome(e) {
     // 1. Очищаємо URL
     window.history.pushState({}, '', window.location.pathname); 
     
-    // 2. Скидаємо ВСІ фільтри
+    // 2. Скидаємо всі фільтри
     window.currentCategory = 'all';
     window.currentSearchQuery = '';
     window.currentBadgeFilter = 'all';
@@ -2076,32 +1937,22 @@ function goHome(e) {
     const searchInput = document.getElementById('search-input');
     if (searchInput) searchInput.value = '';
     
-    // 4. ПРАВИЛЬНЕ ПЕРЕМИКАННЯ КНОПОК
-    // Знімаємо active з усіх тегів і кнопок кольорів
+    // 4. Скидаємо класи активності кнопок
     document.querySelectorAll('.filter-tag, .color-btn').forEach(b => b.classList.remove('active'));
     
-    // Робимо активною саме кнопку "Всі"
     const allBtn = document.getElementById('all-products-btn') || document.querySelector('.filter-tag');
     if (allBtn) allBtn.classList.add('active');
     
-    // Робимо активною кнопку "Всі кольори"
     const allColorsBtn = document.querySelector('.color-btn[onclick*="all"]');
     if (allColorsBtn) allColorsBtn.classList.add('active');
 
-    // 5. Повертаємо всі товари
+    // 5. Показуємо банер знижок
+    const saleBanner = document.getElementById('main-sale-banner');
+    if (saleBanner) saleBanner.style.display = 'block';
+
+    // 6. Оновлюємо каталог
     filteredProducts = [...allProducts];
     currentPage = 1;
-    
-    // 6. Повертаємо карусель
-    const carouselSection = document.getElementById('main-sale-carousel');
-    if (carouselSection) {
-        carouselSection.style.display = 'block';
-        setTimeout(() => {
-            if (typeof update3DCarousel === 'function') update3DCarousel();
-        }, 10);
-    }
-    
-    // 7. Оновлюємо каталог і скролимо наверх
     renderCatalog(); 
     closeAllPanels(); 
     window.scrollTo({ top: 0, behavior: 'smooth' }); 
@@ -2520,7 +2371,9 @@ function closeMeasureGuide(e) {
 // ==========================================
 function filterBySale(btnElement) {
     document.querySelectorAll('.filter-tag, .color-btn').forEach(btn => btn.classList.remove('active'));
-    if (btnElement) btnElement.classList.add('active');
+    
+    const saleBtn = document.querySelector('.sale-tag-btn');
+    if (saleBtn) saleBtn.classList.add('active');
 
     window.currentBadgeFilter = 'SALE'; 
     window.currentCategory = 'all'; 
@@ -2539,8 +2392,13 @@ function filterBySale(btnElement) {
     applySorting();
     currentPage = 1;
     renderCatalog();
-}
 
+    // Плавний скролл до сітки товарів після натискання на банер
+    const catalogEl = document.getElementById('catalog');
+    if (catalogEl) {
+        window.scrollTo({ top: catalogEl.offsetTop - 80, behavior: 'smooth' });
+    }
+}
 // ==========================================
 // 📋 ФУНКЦІЯ КОПІЮВАННЯ В БУФЕР ОБМІНУ
 // ==========================================
