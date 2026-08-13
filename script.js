@@ -776,7 +776,11 @@ function renderCatalog(page = 1) {
         }
 
         const isWish = wishlist.some(x => String(x.myId) === String(p.myId));
-
+        let qty = parseInt(p.Quantity) || 10; // Беремо з таблиці, або ставимо 10 за замовчуванням
+        if (qty > 0 && qty <= 3) {
+            // Перезаписуємо бейдж, щоб привернути увагу
+            badgeHTML += `<div class="badge-sale" style="background: #ffaa00; top: 40px;">⚠️ ОСТАННІ ${qty} ШТ</div>`;
+        }
         let priceHTML = '';
         if (p.OldPrice) {
             priceHTML = `
@@ -2583,3 +2587,10 @@ document.addEventListener('DOMContentLoaded', () => {
         lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
     }, { passive: true });
 });
+// Автоматично ховаємо клавіатуру при скролі, якщо відкрито пошук
+window.addEventListener('scroll', () => {
+    const searchInput = document.getElementById('search-input');
+    if (document.activeElement === searchInput && window.scrollY > 50) {
+        searchInput.blur(); // Забираємо фокус = ховаємо клавіатуру
+    }
+}, { passive: true });
