@@ -168,6 +168,14 @@
 </aside>
 
 <main class="main-container">
+    <div id="register-bonus-banner" class="register-bonus-banner">
+        <div class="bonus-banner-icon">🎁</div>
+        <div class="bonus-banner-text">
+            <strong>Даруємо 100 грн!</strong>
+            <span>Створи акаунт та отримай бонуси на перше замовлення</span>
+        </div>
+        <button class="bonus-banner-btn" onclick="openAccountModal(); switchAuthTab('register');">ЗАРЕЄСТРУВАТИСЯ</button>
+    </div>
     <div class="quick-filters">
       <button class="filter-tag active" id="all-products-btn" onclick="goHome(event)">Всі</button>
       <button class="filter-tag new-tag-btn" onclick="filterByBadge('NEW', this)">✨ НОВИНКИ</button>
