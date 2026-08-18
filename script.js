@@ -510,6 +510,13 @@ async function submitAccountOrder(event) {
 
 // === 1. ЗАВАНТАЖЕННЯ СТОРІНКИ (БЕЗ КОНФЛІКТНИХ ЗАПИТІВ СЕСІЇ) ===
 document.addEventListener('DOMContentLoaded', () => {
+    // Ініціалізація Telegram
+    if (window.Telegram && window.Telegram.WebApp) {
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand(); // Автоматично розгортає магазин на весь екран телефону
+    }
+
     // Відновлюємо кошик з пам'яті
     const savedCart = localStorage.getItem('varta_cart');
     if (savedCart) {
@@ -526,6 +533,15 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCSV();
     updateWishlistUI();        
     renderRecentlyViewedUI();
+
+    // ЗАПОБІЖНИК: якщо через 10 секунд прелоадер ще висить — примусово ховаємо
+    setTimeout(() => {
+        const loader = document.getElementById('varta-preloader');
+        if (loader && loader.style.display !== 'none') {
+            console.warn("Спрацював запобіжник прелоадера");
+            hidePreloader();
+        }
+    }, 10000);
 });
 
 // === 2. ЄДИНИЙ КОНТРОЛЕР АКАУНТА (SUPABASE BEST PRACTICE) ===
@@ -1839,42 +1855,6 @@ window.addEventListener('popstate', () => {
 });
 
 
-// Чекаємо завантаження сторінки
-// === 1. ЗАВАНТАЖЕННЯ СТОРІНКИ (БЕЗ КОНФЛІКТНИХ ЗАПИТІВ СЕСІЇ) ===
-document.addEventListener('DOMContentLoaded', () => {
-    // Ініціалізація Telegram
-    if (window.Telegram && window.Telegram.WebApp) {
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand(); // Автоматично розгортає магазин на весь екран телефону
-    }
-
-    // Відновлюємо кошик з пам'яті
-    const savedCart = localStorage.getItem('varta_cart');
-    if (savedCart) {
-        try {
-            cart = JSON.parse(savedCart);
-        } catch (e) {
-            cart = [];
-        }
-    }
-    updateCartUI();
-    
-    // Малюємо скелети і завантажуємо каталог
-    renderSkeletons(); 
-    loadCSV();
-    updateWishlistUI();        
-    renderRecentlyViewedUI();
-
-    // ЗАПОБІЖНИК: якщо через 10 секунд прелоадер ще висить — примусово ховаємо
-    setTimeout(() => {
-        const loader = document.getElementById('varta-preloader');
-        if (loader && loader.style.display !== 'none') {
-            console.warn("Спрацював запобіжник прелоадера");
-            hidePreloader();
-        }
-    }, 10000);
-});
 
 // НОВЕ: ФУНКЦІЯ СКЕЛЕТНОГО ЗАВАНТАЖЕННЯ (Адаптивна)
 function renderSkeletons() {
