@@ -1834,29 +1834,40 @@ window.addEventListener('popstate', () => {
 
 
 // Чекаємо завантаження сторінки
+// === 1. ЗАВАНТАЖЕННЯ СТОРІНКИ (БЕЗ КОНФЛІКТНИХ ЗАПИТІВ СЕСІЇ) ===
 document.addEventListener('DOMContentLoaded', () => {
+    // Ініціалізація Telegram
     if (window.Telegram && window.Telegram.WebApp) {
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand(); // Автоматично розгортає магазин на весь екран телефону
     }
-    // Спочатку дістаємо дані з пам'яті браузера
+
+    // Відновлюємо кошик з пам'яті
     const savedCart = localStorage.getItem('varta_cart');
     if (savedCart) {
-        cart = JSON.parse(savedCart);
+        try {
+            cart = JSON.parse(savedCart);
+        } catch (e) {
+            cart = [];
+        }
     }
-    
-    // Оновлюємо інтерфейс кошика
     updateCartUI();
     
-    // НОВЕ: Показуємо преміальні скелети, поки вантажиться база
+    // Малюємо скелети і завантажуємо каталог
     renderSkeletons(); 
-    
-    // Завантажуємо товари
     loadCSV();
-
     updateWishlistUI();        
     renderRecentlyViewedUI();
+
+    // ЗАПОБІЖНИК: якщо через 10 секунд прелоадер ще висить — примусово ховаємо
+    setTimeout(() => {
+        const loader = document.getElementById('varta-preloader');
+        if (loader && loader.style.display !== 'none') {
+            console.warn("Спрацював запобіжник прелоадера");
+            hidePreloader();
+        }
+    }, 10000);
 });
 
 // НОВЕ: ФУНКЦІЯ СКЕЛЕТНОГО ЗАВАНТАЖЕННЯ (Адаптивна)
