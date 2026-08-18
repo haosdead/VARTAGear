@@ -27,19 +27,31 @@ sb.auth.onAuthStateChange(async (_e, session) => {
 });
 
 async function checkAdminAccess(user) {
-    // === ПРИМУСОВИЙ ВХІД (БАЙПАС) ===
-    // Ми ігноруємо перевірку бази даних і пускаємо тебе одразу
-    adminProfile = { role: 'admin' };
+    // Робимо запит до таблиці profiles, щоб дізнатися роль користувача
+    const { data: profile, error } = await sb.from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+    // Якщо сталася помилка, профілю немає, або роль не admin
+    if (error || !profile || profile.role !== 'admin') {
+        await sb.auth.signOut();
+        showLoginMsg('Відмова доступу: Ви не є адміністратором', true);
+        showLoginScreen();
+        return;
+    }
+
+    // Якщо все добре — пускаємо в адмінку
+    adminProfile = profile;
     
     document.getElementById('admin-login-screen').style.display = 'none';
     document.getElementById('admin-dashboard').style.display = 'flex';
-    document.getElementById('admin-user-email').textContent = user.email + ' (SuperAdmin)';
+    document.getElementById('admin-user-email').textContent = user.email + ' (Admin)';
     
     loadAdminOrders();
     loadAdminClients();
     loadAdminPromos();
 }
-
 function showLoginScreen() {
     document.getElementById('admin-login-screen').style.display = 'flex';
     document.getElementById('admin-dashboard').style.display = 'none';
