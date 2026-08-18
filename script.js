@@ -652,47 +652,53 @@ function loadCSV() {
     }
 }
 // Допоміжна функція, яка обробляє дані (щоб не дублювати код)
+// Допоміжна функція, яка обробляє дані (щоб не дублювати код)
 function processProducts(rawData) {
-    // 1. Парсинг даних
-    allProducts = rawData.filter(p => p.Name).map((p, i) => ({
-        ...p,
-        myId: p.VendorCode ? p.VendorCode.toString().trim() : (p.ID ? p.ID.toString().trim() : (p.SKU ? p.SKU.toString().trim() : i.toString())),
-        Price: parseFloat(p.Price) || 0,
-        OldPrice: p.OldPrice ? parseFloat(p.OldPrice) || null : null,
-        Badge: p.Badge ? p.Badge.trim().toUpperCase() : "",
-        Priority: parseInt(p.Priority) || 999
-    }));
+    try {
+        // 1. Парсинг даних
+        allProducts = rawData.filter(p => p.Name).map((p, i) => ({
+            ...p,
+            myId: p.VendorCode ? p.VendorCode.toString().trim() : (p.ID ? p.ID.toString().trim() : (p.SKU ? p.SKU.toString().trim() : i.toString())),
+            Price: parseFloat(p.Price) || 0,
+            OldPrice: p.OldPrice ? parseFloat(p.OldPrice) || null : null,
+            Badge: p.Badge ? p.Badge.trim().toUpperCase() : "",
+            Priority: parseInt(p.Priority) || 999
+        }));
 
-    // 2. Перемішування (Алгоритм Фішера-Єйтса)
-    for (let i = allProducts.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [allProducts[i], allProducts[j]] = [allProducts[j], allProducts[i]];
+        // 2. Перемішування (Алгоритм Фішера-Єйтса)
+        for (let i = allProducts.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [allProducts[i], allProducts[j]] = [allProducts[j], allProducts[i]];
+        }
+
+        // 3. Сортування (SALE і TOP нагору)
+        allProducts.sort((a, b) => {
+            if (a.Badge === 'SALE' && b.Badge !== 'SALE') return -1;
+            if (b.Badge === 'SALE' && a.Badge !== 'SALE') return 1;
+            if (a.Badge === 'TOP' && b.Badge !== 'TOP') return -1;
+            if (b.Badge === 'TOP' && a.Badge !== 'TOP') return 1;
+            return a.Priority - b.Priority;
+        });
+        
+        filteredProducts = [...allProducts];
+
+        // 4. Оновлюємо інтерфейс
+        renderCatalog();       
+        buildCategoryTree();   
+        if (typeof renderSaleCarousel === 'function') renderSaleCarousel();  
+
+        // 5. Відкриття товару за посиланням
+        const params = new URLSearchParams(window.location.search);
+        const prodId = params.get('product');
+        if (prodId !== null) {
+            setTimeout(() => openModal(prodId, false), 300); 
+        }
+    } catch (e) {
+        console.error("Помилка обробки товарів:", e);
+    } finally {
+        // Гарантовано ховаємо прелоадер навіть при помилці
+        hidePreloader();
     }
-
-    // 3. Сортування (SALE і TOP нагору)
-    allProducts.sort((a, b) => {
-        if (a.Badge === 'SALE' && b.Badge !== 'SALE') return -1;
-        if (b.Badge === 'SALE' && a.Badge !== 'SALE') return 1;
-        if (a.Badge === 'TOP' && b.Badge !== 'TOP') return -1;
-        if (b.Badge === 'TOP' && a.Badge !== 'TOP') return 1;
-        return a.Priority - b.Priority;
-    });
-    
-    filteredProducts = [...allProducts];
-
-    // 4. Оновлюємо інтерфейс
-    renderCatalog();       
-    buildCategoryTree();   
-    renderSaleCarousel();  
-
-    // 5. Відкриття товару за посиланням
-    const params = new URLSearchParams(window.location.search);
-    const prodId = params.get('product');
-    if (prodId !== null) {
-        setTimeout(() => openModal(prodId, false), 300); 
-    }
-
-    hidePreloader();
 }
 
 // Функція для приховування прелоадера
